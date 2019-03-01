@@ -1,0 +1,594 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>world &#8212; Opportunistic Robotics Network Simulator 1.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opportunistic Robotics Network Simulator 1.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for world</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;The world module provides the interface of the simulation world. In the simulation world</span>
+<span class="sd">all the data of the particles, tiles, and locations are stored.</span>
+<span class="sd">It also have the the coordination system and stated the maximum of the x and y coordinate.</span>
+
+<span class="sd"> .. todo:: What happens if the maximum y or x axis is passed? Either the start from the other side or turns back.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">importlib</span>
+
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="c1">#from lib import csv_generator, particle, tile, location</span>
+
+<span class="n">x_offset</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span>  <span class="mf">0.5</span><span class="p">,</span>   <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span>   <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+<span class="n">y_offset</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>   <span class="o">-</span><span class="mi">1</span><span class="p">,</span>    <span class="mi">0</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="n">E</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">SE</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">SW</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">W</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">NW</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">NE</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">S</span> <span class="o">=</span> <span class="mi">6</span> <span class="c1"># S for stop and not south</span>
+
+<span class="n">direction</span> <span class="o">=</span> <span class="p">[</span><span class="n">E</span><span class="p">,</span> <span class="n">SE</span><span class="p">,</span> <span class="n">SW</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">NW</span><span class="p">,</span> <span class="n">NE</span><span class="p">]</span>
+
+<span class="n">read</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">write</span><span class="o">=</span><span class="mi">1</span>
+
+<span class="n">black</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">gray</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">red</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">green</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">blue</span> <span class="o">=</span> <span class="mi">5</span>
+
+<div class="viewcode-block" id="World"><a class="viewcode-back" href="../world.html#world.World">[docs]</a><span class="k">class</span> <span class="nc">World</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">size_x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">size_y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="n">world_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="n">sim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_particles</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                 <span class="n">mm_limitation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">particle_mm_size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tile_mm_size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">location_mm_size</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializing the World constructor</span>
+
+<span class="sd">        :param size_x: the maximal size of the x axes</span>
+<span class="sd">        :param size_y: the maximal size of the y axes</span>
+<span class="sd">        :param world_name: the name of the world file that is used to build up the world</span>
+<span class="sd">        :param solution_name: the name of the solution file that is only used for the csv file</span>
+<span class="sd">        :param seed: the seed number it is only used here for the csv file</span>
+<span class="sd">        :param max_particles: the maximal number of particles that are allowed to be or created in this world</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mm_limitation</span><span class="o">=</span><span class="n">mm_limitation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_particles</span><span class="o">=</span><span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particle_num</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particles_created</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particle_rm</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particle_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particle_id_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particle_mm_size</span><span class="o">=</span><span class="n">particle_mm_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__particle_deleted</span><span class="o">=</span><span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tiles_num</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tiles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tiles_created</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tiles_rm</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tile_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tile_id_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__tile_deleted</span><span class="o">=</span><span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_tile_flag</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tile_mm_size</span><span class="o">=</span><span class="n">tile_mm_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locations_num</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locations_created</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">location_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">location_id_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locations_rm</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">location_mm_size</span><span class="o">=</span><span class="n">location_mm_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__location_deleted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span> <span class="o">=</span> <span class="n">sim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__size_x</span> <span class="o">=</span> <span class="n">size_x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__size_y</span> <span class="o">=</span> <span class="n">size_y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_particles</span> <span class="o">=</span> <span class="n">max_particles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="o">=</span><span class="n">sim</span><span class="o">.</span><span class="n">directory</span>
+
+        <span class="c1">#csv attributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">csv_round_writer</span>
+
+        <span class="n">mod</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;lib.worlds.&#39;</span> <span class="o">+</span> <span class="n">world_name</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">mod</span><span class="o">.</span><span class="n">create_world</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="World.get_particles_num"><a class="viewcode-back" href="../world.html#world.World.get_particles_num">[docs]</a>    <span class="k">def</span> <span class="nf">get_particles_num</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the actual number of particles in the world</span>
+
+<span class="sd">        :return: The actual number of Particles</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tiles_num</span></div>
+
+<div class="viewcode-block" id="World.get_particle_list"><a class="viewcode-back" href="../world.html#world.World.get_particle_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the actual number of particles in the world</span>
+
+<span class="sd">        :return: The actual number of Particles</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">particles</span></div>
+
+<div class="viewcode-block" id="World.get_particle_map_coords"><a class="viewcode-back" href="../world.html#world.World.get_particle_map_coords">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_map_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a dictionary with all particles mapped with their actual coordinates</span>
+
+<span class="sd">        :return: a dictionary with particles and their coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_map</span></div>
+
+<div class="viewcode-block" id="World.get_particle_map_id"><a class="viewcode-back" href="../world.html#world.World.get_particle_map_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_map_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a dictionary with all particles mapped with their own ids</span>
+
+<span class="sd">        :return: a dictionary with particles and their own ids</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_id_map</span></div>
+
+
+<div class="viewcode-block" id="World.get_tiles_num"><a class="viewcode-back" href="../world.html#world.World.get_tiles_num">[docs]</a>    <span class="k">def</span> <span class="nf">get_tiles_num</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the actual number of particles in the world</span>
+
+<span class="sd">        :return: The actual number of Particles</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tiles_num</span></div>
+
+<div class="viewcode-block" id="World.get_tiles_list"><a class="viewcode-back" href="../world.html#world.World.get_tiles_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_tiles_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the actual number of tiles in the world</span>
+
+<span class="sd">        :return: a list of all the tiles in the world</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tiles</span></div>
+
+<div class="viewcode-block" id="World.get_tile_map_coords"><a class="viewcode-back" href="../world.html#world.World.get_tile_map_coords">[docs]</a>    <span class="k">def</span> <span class="nf">get_tile_map_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a dictionary with all tiles mapped with their actual coordinates</span>
+
+<span class="sd">        :return: a dictionary with particles and their coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_map</span></div>
+
+<div class="viewcode-block" id="World.get_tile_map_id"><a class="viewcode-back" href="../world.html#world.World.get_tile_map_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_tile_map_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a dictionary with all particles mapped with their own ids</span>
+
+<span class="sd">        :return: a dictionary with particles and their own ids</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_id_map</span></div>
+
+<div class="viewcode-block" id="World.get_location_num"><a class="viewcode-back" href="../world.html#world.World.get_location_num">[docs]</a>    <span class="k">def</span> <span class="nf">get_location_num</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the actual number of locations in the world</span>
+
+<span class="sd">        :return: The actual number of locations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">locations_num</span></div>
+
+<div class="viewcode-block" id="World.get_location_list"><a class="viewcode-back" href="../world.html#world.World.get_location_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_location_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the actual number of locations in the world</span>
+
+<span class="sd">        :return: The actual number of locations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">locations</span></div>
+
+<div class="viewcode-block" id="World.get_location_map_coords"><a class="viewcode-back" href="../world.html#world.World.get_location_map_coords">[docs]</a>    <span class="k">def</span> <span class="nf">get_location_map_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a dictionary with all locations mapped with their actual coordinates</span>
+
+<span class="sd">        :return: a dictionary with locations and their coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">location_map</span></div>
+
+<div class="viewcode-block" id="World.get_location_map_id"><a class="viewcode-back" href="../world.html#world.World.get_location_map_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_location_map_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a dictionary with all locations mapped with their own ids</span>
+
+<span class="sd">        :return: a dictionary with locations and their own ids</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">location_id_map</span></div>
+
+
+<div class="viewcode-block" id="World.get_coords_in_dir"><a class="viewcode-back" href="../world.html#world.World.get_coords_in_dir">[docs]</a>    <span class="k">def</span> <span class="nf">get_coords_in_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="nb">dir</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the coordination data of the pointed directions</span>
+
+<span class="sd">        :param coords: particles actual staying coordination</span>
+<span class="sd">        :param dir: The direction. Options:  E, SE, SW, W, NW, or NE</span>
+<span class="sd">        :return: The coordinaiton of the pointed directions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x_offset</span><span class="p">[</span><span class="nb">dir</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">y_offset</span><span class="p">[</span><span class="nb">dir</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="World.get_world_x_size"><a class="viewcode-back" href="../world.html#world.World.get_world_x_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_world_x_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: Returns the maximal x size of the world</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__size_x</span></div>
+
+<div class="viewcode-block" id="World.get_world_y_size"><a class="viewcode-back" href="../world.html#world.World.get_world_y_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_world_y_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: Returns the maximal y size of the world</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__size_y</span></div>
+
+<div class="viewcode-block" id="World.get_tile_deleted"><a class="viewcode-back" href="../world.html#world.World.get_tile_deleted">[docs]</a>    <span class="k">def</span> <span class="nf">get_tile_deleted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tile_deleted</span></div>
+
+<div class="viewcode-block" id="World.get_particle_deleted"><a class="viewcode-back" href="../world.html#world.World.get_particle_deleted">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_deleted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__particle_deleted</span></div>
+
+<div class="viewcode-block" id="World.get_location_deleted"><a class="viewcode-back" href="../world.html#world.World.get_location_deleted">[docs]</a>    <span class="k">def</span> <span class="nf">get_location_deleted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__location_deleted</span></div>
+
+<div class="viewcode-block" id="World.set_tile_deleted"><a class="viewcode-back" href="../world.html#world.World.set_tile_deleted">[docs]</a>    <span class="k">def</span> <span class="nf">set_tile_deleted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__tile_deleted</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="World.set_particle_deleted"><a class="viewcode-back" href="../world.html#world.World.set_particle_deleted">[docs]</a>    <span class="k">def</span> <span class="nf">set_particle_deleted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__particle_deleted</span><span class="o">=</span><span class="kc">False</span></div>
+
+<div class="viewcode-block" id="World.set_location_deleted"><a class="viewcode-back" href="../world.html#world.World.set_location_deleted">[docs]</a>    <span class="k">def</span> <span class="nf">set_location_deleted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__location_deleted</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="World.check_coords"><a class="viewcode-back" href="../world.html#world.World.check_coords">[docs]</a>    <span class="k">def</span> <span class="nf">check_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords_x</span><span class="p">,</span> <span class="n">coords_y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the given coordinates are matching the</span>
+<span class="sd">        hexagon coordinates</span>
+
+<span class="sd">        :param coords_x: proposed x coordinate</span>
+<span class="sd">        :param coords_y: proposed y coordinate</span>
+<span class="sd">        :return: True: Correct x and y coordinates; False: Incorrect coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">coords_x</span> <span class="o">/</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">coords_y</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">coords_y</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="World.add_particle"><a class="viewcode-back" href="../world.html#world.World.add_particle">[docs]</a>    <span class="k">def</span> <span class="nf">add_particle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">black</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a particle to the world database</span>
+
+<span class="sd">        :param x: The x coordinate of the particle</span>
+<span class="sd">        :param y: The y coordinate of the particle</span>
+<span class="sd">        :param state: The state of the particle. Default: S for for Stopped or Not Moving. Other options</span>
+<span class="sd">                      are the moving directions: E, SE, SW, W, NW, NE</span>
+<span class="sd">        :param color: The color of the particle. Coloroptions: black, gray, red, green, or blue</span>
+<span class="sd">        :return: True: Successful added; False: Unsuccsessful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">alpha</span> <span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_particles</span><span class="p">:</span>
+            <span class="k">if</span>  <span class="bp">self</span><span class="o">.</span><span class="n">check_coords</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">new_particle</span><span class="o">=</span> <span class="n">particle</span><span class="o">.</span><span class="n">Particle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm_limitation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_mm_size</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">particles_created</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_particle</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">particle_map</span><span class="p">[</span><span class="n">new_particle</span><span class="o">.</span><span class="n">coords</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_particle</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">particle_id_map</span><span class="p">[</span><span class="n">new_particle</span><span class="o">.</span><span class="n">get_id</span><span class="p">()]</span> <span class="o">=</span> <span class="n">new_particle</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_particle</span><span class="p">)</span>
+                <span class="n">new_particle</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">update_particle_num</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">init_particles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_particle</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created particle at </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">new_particle</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                 <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;for x </span><span class="si">%f</span><span class="s2"> and y </span><span class="si">%f</span><span class="s2"> not possible to draw &quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                 <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Max of particles reached and no more particles can be created&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="World.remove_particle"><a class="viewcode-back" href="../world.html#world.World.remove_particle">[docs]</a>    <span class="k">def</span> <span class="nf">remove_particle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="nb">id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Removes a particle with a given particle id from the world database</span>
+
+
+<span class="sd">        :param particle_id: particle id</span>
+<span class="sd">        :return: True: Successful removed; False: Unsuccessful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rm_particle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_id_map</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">rm_particle</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">rm_particle</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_map</span><span class="p">[</span><span class="n">rm_particle</span><span class="o">.</span><span class="n">coords</span><span class="p">]</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_id_map</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">particle_rm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rm_particle</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">update_particle_num</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">update_metrics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">get_actual_round</span><span class="p">(),</span><span class="n">particle_deleted</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__particle_deleted</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="World.remove_particle_on"><a class="viewcode-back" href="../world.html#world.World.remove_particle_on">[docs]</a>    <span class="k">def</span> <span class="nf">remove_particle_on</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes a particle on a give coordinat from to the worlds database</span>
+
+<span class="sd">        :param coords: A tupel that includes the x and y coorindates</span>
+<span class="sd">        :return: True: Successful removed; False: Unsuccessful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">coords</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_map</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particle_map</span><span class="p">[</span><span class="n">coords</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">particle_rm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particle_map</span><span class="p">[</span><span class="n">coords</span><span class="p">])</span>
+           <span class="c1"># del self.tile_map[rm_tile.coords]</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_id_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">particle_map</span><span class="p">[</span><span class="n">coords</span><span class="p">]</span><span class="o">.</span><span class="n">get_id</span><span class="p">()]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">update_particle_num</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">update_metrics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">get_actual_round</span><span class="p">(),</span> <span class="n">particle_deleted</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__particle_deleted</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="World.add_tile"><a class="viewcode-back" href="../world.html#world.World.add_tile">[docs]</a>    <span class="k">def</span> <span class="nf">add_tile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">gray</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a tile to the worlds database</span>
+
+<span class="sd">        :param color:</span>
+<span class="sd">        :param x: the x coordinates on which the tile should be added</span>
+<span class="sd">        :param y: the y coordinates on which the tile should be added</span>
+<span class="sd">        :return: True: Successful added; False: Unsuccsessful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">alpha</span> <span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span>  <span class="bp">self</span><span class="o">.</span><span class="n">check_coords</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_map</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span><span class="o">=</span><span class="n">tile</span><span class="o">.</span><span class="n">Tile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm_limitation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_mm_size</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Before adding &quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tiles</span><span class="p">)</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">update_tiles_num</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tiles</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tile_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span><span class="o">.</span><span class="n">coords</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tile_id_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span><span class="o">.</span><span class="n">get_id</span><span class="p">()]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Afer adding &quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tiles</span><span class="p">)</span> <span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created tile with tile id </span><span class="si">%s</span><span class="s2"> on coords </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span><span class="o">.</span><span class="n">get_id</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span><span class="o">.</span><span class="n">coords</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span> <span class="p">(</span><span class="s2">&quot;on x </span><span class="si">%f</span><span class="s2"> and y </span><span class="si">%f</span><span class="s2"> coordinates is a tile already&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+             <span class="n">logging</span><span class="o">.</span><span class="n">info</span> <span class="p">(</span><span class="s2">&quot;for x </span><span class="si">%f</span><span class="s2"> and y </span><span class="si">%f</span><span class="s2"> not possible to draw &quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+             <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="World.add_tile_vis"><a class="viewcode-back" href="../world.html#world.World.add_tile_vis">[docs]</a>    <span class="k">def</span> <span class="nf">add_tile_vis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">gray</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a tile to the worlds database</span>
+
+<span class="sd">        :param color:</span>
+<span class="sd">        :param x: the x coordinates on which the tile should be added</span>
+<span class="sd">        :param y: the y coordinates on which the tile should be added</span>
+<span class="sd">        :return: True: Successful added; False: Unsuccsessful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_coords</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_map</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span> <span class="o">=</span> <span class="n">tile</span><span class="o">.</span><span class="n">Tile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm_limitation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_mm_size</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Before adding &quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tiles</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">tile_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span><span class="o">.</span><span class="n">coords</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tile_id_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span><span class="o">.</span><span class="n">get_id</span><span class="p">()]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Afer adding &quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tiles</span><span class="p">))</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created tile with tile id </span><span class="si">%s</span><span class="s2"> on coords </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span><span class="o">.</span><span class="n">get_id</span><span class="p">()),</span>
+                             <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_tile</span><span class="o">.</span><span class="n">coords</span><span class="p">))</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;on x </span><span class="si">%f</span><span class="s2"> and y </span><span class="si">%f</span><span class="s2"> coordinates is a tile already&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="World.remove_tile"><a class="viewcode-back" href="../world.html#world.World.remove_tile">[docs]</a>    <span class="k">def</span> <span class="nf">remove_tile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="nb">id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes a tile with a given tile_id from to the world database</span>
+
+<span class="sd">        :param tile_id: The tiles id that should be removec</span>
+<span class="sd">        :return:  True: Successful removed; False: Unsuccessful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_id_map</span><span class="p">:</span>
+            <span class="n">rm_tile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_id_map</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
+            <span class="n">rm_tile</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tiles</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">rm_tile</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tiles_rm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rm_tile</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Deleted tile with tile id </span><span class="si">%s</span><span class="s2"> on </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">rm_tile</span><span class="o">.</span><span class="n">get_id</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="n">rm_tile</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="p">)</span>
+           <span class="c1"># del self.tile_map[rm_tile.coords]</span>
+            <span class="k">try</span><span class="p">:</span>  <span class="c1"># cher: added so the program does not crashed if it does not find any entries in the map</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_id_map</span><span class="p">[</span><span class="n">rm_tile</span><span class="o">.</span><span class="n">get_id</span><span class="p">()]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>  <span class="c1"># cher: added so the program does not crashed if it does not find any entries in the map</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_map</span><span class="p">[</span><span class="n">rm_tile</span><span class="o">.</span><span class="n">coords</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">update_tiles_num</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tiles</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">update_metrics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">get_actual_round</span><span class="p">(),</span><span class="n">tile_deleted</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__tile_deleted</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="World.remove_tile_on"><a class="viewcode-back" href="../world.html#world.World.remove_tile_on">[docs]</a>    <span class="k">def</span> <span class="nf">remove_tile_on</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes a tile on a give coordinat from to the world database</span>
+
+<span class="sd">        :param coords: A tupel that includes the x and y coorindates</span>
+<span class="sd">        :return: True: Successful removed; False: Unsuccessful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">coords</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_map</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tiles</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tile_map</span><span class="p">[</span><span class="n">coords</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tiles_rm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tile_map</span><span class="p">[</span><span class="n">coords</span><span class="p">])</span>
+           <span class="c1"># del self.tile_map[rm_tile.coords]</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_id_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tile_map</span><span class="p">[</span><span class="n">coords</span><span class="p">]</span><span class="o">.</span><span class="n">get_id</span><span class="p">()]</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_map</span><span class="p">[</span><span class="n">coords</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">update_tiles_num</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tiles</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">update_metrics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">get_actual_round</span><span class="p">(),</span> <span class="n">tile_deleted</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__tile_deleted</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="World.add_location"><a class="viewcode-back" href="../world.html#world.World.add_location">[docs]</a>    <span class="k">def</span> <span class="nf">add_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">black</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a tile to the world database</span>
+
+<span class="sd">        :param color:</span>
+<span class="sd">        :param x: the x coordinates on which the tile should be added</span>
+<span class="sd">        :param y: the y coordinates on which the tile should be added</span>
+<span class="sd">        :return: True: Successful added; False: Unsuccsessful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">alpha</span> <span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_coords</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">location_map</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">new_location</span> <span class="o">=</span> <span class="n">location</span><span class="o">.</span><span class="n">Location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">mm_limitation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">location_mm_size</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_location</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">location_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">new_location</span><span class="o">.</span><span class="n">coords</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_location</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">location_id_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">new_location</span><span class="o">.</span><span class="n">get_id</span><span class="p">()]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_location</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">update_locations_num</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">))</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created location with id </span><span class="si">%s</span><span class="s2"> on coords </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_location</span><span class="o">.</span><span class="n">get_id</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_location</span><span class="o">.</span><span class="n">coords</span><span class="p">))</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">new_location</span><span class="o">.</span><span class="n">created</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">new_location</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_location</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;on x </span><span class="si">%f</span><span class="s2"> and y </span><span class="si">%f</span><span class="s2"> coordinates is a location already&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;for x </span><span class="si">%f</span><span class="s2"> and y </span><span class="si">%f</span><span class="s2"> not possible to draw &quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="World.remove_location"><a class="viewcode-back" href="../world.html#world.World.remove_location">[docs]</a>    <span class="k">def</span> <span class="nf">remove_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes a tile with a given tile_id from to the world database</span>
+
+<span class="sd">        :param id: The locations id that should be removec</span>
+<span class="sd">        :return:  True: Successful removed; False: Unsuccessful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">location_id_map</span><span class="p">:</span>
+            <span class="n">rm_location</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">location_id_map</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
+            <span class="n">rm_location</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">rm_location</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">rm_location</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">locations_rm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rm_location</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Deleted location with location id </span><span class="si">%s</span><span class="s2"> on </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">rm_location</span><span class="o">.</span><span class="n">coords</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">location_map</span><span class="p">[</span><span class="n">rm_location</span><span class="o">.</span><span class="n">coords</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">location_id_map</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">update_locations_num</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">update_metrics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">get_actual_round</span><span class="p">(),</span> <span class="n">location_deleted</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__location_deleted</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="World.remove_location_on"><a class="viewcode-back" href="../world.html#world.World.remove_location_on">[docs]</a>    <span class="k">def</span> <span class="nf">remove_location_on</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes a location on a give coordinat from to the world database</span>
+
+<span class="sd">        :param coords: A tupel that includes the x and y coorindates</span>
+<span class="sd">        :return: True: Successful removed; False: Unsuccessful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">coords</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">location_map</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">location_map</span><span class="p">[</span><span class="n">coords</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">locations_rm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">location_map</span><span class="p">[</span><span class="n">coords</span><span class="p">])</span>
+            <span class="k">try</span><span class="p">:</span>  <span class="c1"># cher: added so the program does not crashed if it does not find any entries in the map</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">location_id_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">location_map</span><span class="p">[</span><span class="n">coords</span><span class="p">]</span><span class="o">.</span><span class="n">get_id</span><span class="p">()]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>  <span class="c1"># cher: added so the program does not crashed if it does not find any entries in the map</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">location_map</span><span class="p">[</span><span class="n">coords</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">update_locations_num</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">update_metrics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">get_actual_round</span><span class="p">(),</span> <span class="n">location_deleted</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__location_deleted</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Opportunistic Robotics Network Simulator 1.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Ahmad Reza Cheraghi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+    </div>
+  </body>
+</html>

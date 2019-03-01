@@ -1,0 +1,26 @@
+For running the Opportunistic Robotics Network (ORN) Simulator python 3.6 has to be installed.
+
+For Linux following commands can be run on the terminal:
+
+Step 1:
+   sudo apt-get install build-essential checkinstall
+   sudo apt-get install libreadline-gplv2-dev  libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev
+
+Step 2 -Download the python 3.6 (e.g. 3.6.4) source code:
+
+  cd /usr/src
+  sudo wget https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tgz
+  sudo tar xzf Python-3.6.4.tgz
+
+Step 3 -Compile Python Source:
+   cd Python-3.6.4 
+   sudo ./configure --enable-optimizations
+   sudo make altinstall
+
+Step 4 -Check the Python Version:
+   python3.6 -V
+
+
+Step 5 -Running the ORN Simulator:
+   cd ORN/ 
+   python3.6 main.py 
