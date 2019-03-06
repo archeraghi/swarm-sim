@@ -28,12 +28,12 @@ def core(argv):
     try:
         world_file = config.get ("File", "scenario")
     except (configparser.NoOptionError) as noe:
-        world_file = "init_world.py"
+        world_file = "lonely_particle.py"
 
     try:
         solution_file = config.get("File", "solution")
     except (configparser.NoOptionError) as noe:
-        solution_file = "solution.py"
+        solution_file = "random_walk.py"
     size_x = config.getint("World", "size_x")
     size_y = config.getint("World", "size_y")
     window_size_x = config.getint("World", "window_size_x")
@@ -43,7 +43,6 @@ def core(argv):
     mm_particle = config.getint("matter", "particle_mm_size")
     mm_tile= config.getint("matter", "tile_mm_size")
     mm_location=config.getint("matter", "location_mm_size")
-    tile_color_map = config.getboolean("matter", "tile_color_map")
 
     multiple_sim=0
 
