@@ -107,7 +107,30 @@ class Sim:
         if random_order:
             random.shuffle(self.particles)
 
-    #csv attributes
+
+    def run(self):
+        """
+        Runs the simulator either with or without visualization
+        At the end it aggregate the data and generate a gnuplot
+        :return:
+        """
+        if self.visualization:
+            window = vis.VisWindow(self.window_size_x, self.window_size_y, self)
+            window.run()
+
+        while self.get_actual_round() <= self.get_max_round() and self.__end == False:
+            self.solution_mod.solution(self)
+            self.csv_round_writer.next_line(self.get_actual_round())
+            self.__round_counter = self.__round_counter + 1
+
+        #creating gnu plots
+        self.csv_round_writer.aggregate_metrics()
+        particleFile = csv_generator.CsvParticleFile(self.directory)
+        for particle in self.init_particles:
+            particleFile.write_particle(particle)
+        particleFile.csv_file.close()
+        generate_gnuplot(self.directory)
+        return
 
 
     def get_max_round(self):
@@ -155,32 +178,6 @@ class Sim:
         :return: actual solution name
         """
         return self.__solution
-
-
-    def run(self):
-        """
-        :param sim: The sim object
-        :param solution: The name of the solution file
-        :return:
-        """
-        if self.visualization:
-            window = vis.VisWindow(self.window_size_x, self.window_size_y, self)
-            window.run()
-
-        while self.get_actual_round() <= self.get_max_round() and self.__end == False:
-            self.solution_mod.solution(self)
-            self.csv_round_writer.next_line(self.get_actual_round())
-            self.__round_counter = self.__round_counter + 1
-
-        #creating gnu plots
-        self.csv_round_writer.aggregate_metrics()
-        particleFile = csv_generator.CsvParticleFile(self.directory)
-        for particle in self.init_particles:
-            particleFile.write_particle(particle)
-        particleFile.csv_file.close()
-        generate_gnuplot(self.directory)
-        return
-
 
 
     def get_particles_num(self):
