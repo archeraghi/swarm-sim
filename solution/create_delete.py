@@ -16,40 +16,40 @@ NW = 5
 
 direction = [NE, E, SE, SW, W, NW]
 
-def solution(sim, world):
+def solution(sim):
     if sim.get_actual_round() == 1:
-        for particle in world.get_particle_list():
+        for particle in sim.get_particle_list():
             print("Sim started")
             particle.create_tile_in(E)
             particle.create_location_in(W)
     if sim.get_actual_round() == 2:
-       if len(world.get_particle_list()) > 0:
-          # world.get_particle_list()[0].delete_location_in(W)
-           world.get_particle_list()[0].create_particle_in(W)
-           world.get_particle_list()[0].create_particle_in(W)
+       if len(sim.get_particle_list()) > 0:
+          # sim.get_particle_list()[0].delete_location_in(W)
+           sim.get_particle_list()[0].create_particle_in(W)
+           sim.get_particle_list()[0].create_particle_in(W)
     if sim.get_actual_round() == 3:
-        if len(world.get_particle_list()) > 0:
-            world.get_particle_list()[0].take_particle_in(W)
-            world.get_particle_list()[0].delete_particle_in(W)
-            world.get_particle_list()[0].delete_tile_in(E)
+        if len(sim.get_particle_list()) > 0:
+            sim.get_particle_list()[0].take_particle_in(W)
+            sim.get_particle_list()[0].delete_particle_in(W)
+            sim.get_particle_list()[0].delete_tile_in(E)
     if sim.get_actual_round() == 4:
-        world.get_particle_list()[0].create_tile_on(1,0)
-        world.get_particle_list()[0].create_location_on(1, 0)
+        sim.get_particle_list()[0].create_tile_on(1,0)
+        sim.get_particle_list()[0].create_location_on(1, 0)
     if sim.get_actual_round() == 5:
-        world.get_particle_list()[0].delete_tile_on(1,0)
+        sim.get_particle_list()[0].delete_tile_on(1,0)
     if sim.get_actual_round() == 6:
-        world.get_particle_list()[0].create_particle_on(-1, 0)
-        world.get_particle_list()[0].delete_location_on(1, 0)
+        sim.get_particle_list()[0].create_particle_on(-1, 0)
+        sim.get_particle_list()[0].delete_location_on(1, 0)
     if sim.get_actual_round() == 7:
-        world.get_particle_list()[0].delete_particle_on(-1, 0)
+        sim.get_particle_list()[0].delete_particle_on(-1, 0)
     if sim.get_actual_round() == 8:
-        world.get_particle_list()[0].create_tile()
-        world.get_particle_list()[0].create_location()
+        sim.get_particle_list()[0].create_tile()
+        sim.get_particle_list()[0].create_location()
 
     if sim.get_actual_round() == 9:
-        world.get_particle_list()[0].delete_tile()
+        sim.get_particle_list()[0].delete_tile()
     if sim.get_actual_round() == 12:
-        world.get_particle_list()[0].create_particle()
+        sim.get_particle_list()[0].create_particle()
     if sim.get_actual_round() == 15:
-        world.get_particle_list()[0].delete_particle()
-        world.get_particle_list()[0].delete_location()
+        sim.get_particle_list()[0].delete_particle()
+        sim.get_particle_list()[0].delete_location()

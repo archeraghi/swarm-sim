@@ -18,9 +18,9 @@ max = 0
 
 
 
-def solution(sim, world):
+def solution(sim):
 
-    for particle in world.get_particle_list():
+    for particle in sim.get_particle_list():
         global ttl
         global max
         global dir

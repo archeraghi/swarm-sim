@@ -12,8 +12,8 @@ NW = 5
 direction = [NE, E, SE, SW, W, NW]
 
 
-def solution(sim, world):
+def solution(sim):
 
     if sim.get_actual_round() % 2 == 0:
-        for particle in world.get_particle_list():
+        for particle in sim.get_particle_list():
             particle.move_to(random.choice(direction))

@@ -12,11 +12,11 @@ Contents:
    :maxdepth: 2
    
    installation
-   addingWorld
+   addingsim
    addingSolutions
    main
    sim
-   world
+   sim
    matter
    location
    tile  

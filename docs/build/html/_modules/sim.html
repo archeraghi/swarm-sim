@@ -84,21 +84,21 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__round_counter</span> <span class="o">+=</span>  <span class="mi">1</span></div>
 
-<div class="viewcode-block" id="Sim.run"><a class="viewcode-back" href="../sim.html#sim.Sim.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">world</span><span class="p">,</span> <span class="n">solution</span><span class="p">):</span>
+<div class="viewcode-block" id="Sim.run"><a class="viewcode-back" href="../sim.html#sim.Sim.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">solution</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">        :param world: The worlds object</span>
+<span class="sd">        :param sim: The sims object</span>
 <span class="sd">        :param solution: The name of the solution file</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">solution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">mod</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;lib.solutions.&#39;</span><span class="o">+</span><span class="n">solution</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">))</span>
             <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_actual_round</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_max_round</span><span class="p">():</span>
-                <span class="n">mod</span><span class="o">.</span><span class="n">solution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">world</span><span class="p">)</span>
-                <span class="n">world</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">next_line</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_actual_round</span><span class="p">())</span>
+                <span class="n">mod</span><span class="o">.</span><span class="n">solution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">)</span>
+                <span class="n">sim</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">next_line</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_actual_round</span><span class="p">())</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__round_counter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__round_counter</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="n">world</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">aggregate_metrics</span><span class="p">()</span>  <span class="c1"># After simulation is finished, aggregate everything</span>
-            <span class="k">for</span> <span class="n">particle</span> <span class="ow">in</span> <span class="n">world</span><span class="o">.</span><span class="n">particles</span><span class="p">:</span>
+            <span class="n">sim</span><span class="o">.</span><span class="n">csv_round_writer</span><span class="o">.</span><span class="n">aggregate_metrics</span><span class="p">()</span>  <span class="c1"># After simulation is finished, aggregate everything</span>
+            <span class="k">for</span> <span class="n">particle</span> <span class="ow">in</span> <span class="n">sim</span><span class="o">.</span><span class="n">particles</span><span class="p">:</span>
                 <span class="n">particle</span><span class="o">.</span><span class="n">csv_particle_writer</span><span class="o">.</span><span class="n">close_particle</span><span class="p">()</span>
 
         <span class="k">else</span><span class="p">:</span>

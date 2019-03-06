@@ -1,13 +1,13 @@
-How to add a World
+How to add a sim
 ===============
 
-Before the ORN Simulator can be started, its simulation world has to be created.
-At lease one particle should be created that takse the action of the world.
-For creating a particle just create a python file e.g. one_particle_world.py
-in the folder robtotsOnTiles/worlds/ and insert the  following code:
+Before the ORN Simulator can be started, its simulation sim has to be created.
+At lease one particle should be created that takse the action of the sim.
+For creating a particle just create a python file e.g. one_particle_sim.py
+in the folder robtotsOnTiles/sims/ and insert the  following code:
 
 
-def create_world(self):
+def create_sim(self):
 
 	self.add_particle(0,0)
 
@@ -16,10 +16,10 @@ That is all and you created a particle.
 
 
 The same thing you can do it with creating locations and tiles. E.g creating two particles, tiles, and locations.
-You have to create a python file e.g. two_particles_tiles_locations.py in robtotsOnTiles/worlds/ and insert the  following code:
+You have to create a python file e.g. two_particles_tiles_locations.py in robtotsOnTiles/sims/ and insert the  following code:
 
 
-def create_world(self):
+def create_sim(self):
     self.add_particle(0, 0)
     self.add_particle(1, 0)
     self.add_location(2, 0)

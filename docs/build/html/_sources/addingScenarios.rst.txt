@@ -23,12 +23,12 @@ and instert the following code inside:
 
 	direction = [E, SE, SW, W, NW, NE]  #direction list
 
-	def solution(self, world):
+	def solution(self, sim):
     	"""
     	All the magic starts from here
     
     	:param self: The object instance of the sim.py 
-    	:param world: The object instance of the created world
+    	:param sim: The object instance of the created sim
     	"""
 
 

@@ -42,15 +42,15 @@ location_alpha = 1
 
 
 
-def coords_to_world(coords):
+def coords_to_sim(coords):
     return coords[0], coords[1] * math.sqrt(3/4)
 
 
-def world_to_coords(x, y):
+def sim_to_coords(x, y):
     return x, round(y / math.sqrt(3/4), 0)
 
 
-def window_to_world(x, y, view):
+def window_to_sim(x, y, view):
     x_coord = view.left + (view.right - view.left) * (x / view.width)  # correct
     y_coord = view.bottom + (view.top - view.bottom) * (y / view.height)  # not correct
     return x_coord, y_coord
@@ -108,14 +108,13 @@ class View:
 
 
 class VisWindow(pyglet.window.Window):
-    def __init__(self, window_size_x, window_size_y, world, sim):
-        #super().__init__(world.get_world_x_size(), world.get_world_y_size(), resizable=window_resizable, vsync=False, caption="Simulator")
+    def __init__(self, window_size_x, window_size_y, sim):
+        #super().__init__(sim.get_sim_x_size(), sim.get_sim_y_size(), resizable=window_resizable, vsync=False, caption="Simulator")
         super().__init__(window_size_x, window_size_y , resizable=window_resizable, vsync=False, caption="Simulator")
         self.window_active = True
         glClearColor(0.0, 0.0, 0.0, 0.0)
         glClearDepth(1.0)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        self.world = world
         self.sim = sim
         self.init_tile_vertex_list()
         self.init_particle_vertex_list()
@@ -156,26 +155,26 @@ class VisWindow(pyglet.window.Window):
     def on_mouse_press(self, x, y, button, modifiers):
         if modifiers & key.MOD_CTRL:
             # get correct coordinates
-            world_coords = window_to_world(x, y, self.view)
-            coords_coords = world_to_coords(world_coords[0], world_coords[1])
+            sim_coords = window_to_sim(x, y, self.view)
+            coords_coords = sim_to_coords(sim_coords[0], sim_coords[1])
             rounded_coords=0
             if coords_coords[1]%2!=0:
                 rounded_coords = round(coords_coords[0],0) + 0.5
             else:
                 rounded_coords =round(coords_coords[0], 0)
-            if (rounded_coords,coords_coords[1]) not in self.world.tile_map_coords:
+            if (rounded_coords,coords_coords[1]) not in self.sim.tile_map_coords:
                 # add tile and vertices
-                if self.world.add_tile_vis(rounded_coords, coords_coords[1]):
-                    self.tile_vertex_list.resize(4 * len(self.world.tiles), 4 * len(self.world.tiles))
-                    #self.tile_vertex_list.resize(4 * len(self.world.tiles), 8 * len(self.world.tiles))
-                    self.tile_vertex_list.indices[4 * (len(self.world.tiles) - 1) : 4 * (len(self.world.tiles) - 1) + 4] = range(4 * (len(self.world.tiles) - 1), 4 * (len(self.world.tiles) - 1) + 4)
-                   # self.tile_vertex_list.indices = list(range(0, 8 * len(self.world.tiles)))
-                   # self.update_tile(len(self.world.tiles) - 1, tile)
+                if self.sim.add_tile_vis(rounded_coords, coords_coords[1]):
+                    self.tile_vertex_list.resize(4 * len(self.sim.tiles), 4 * len(self.sim.tiles))
+                    #self.tile_vertex_list.resize(4 * len(self.sim.tiles), 8 * len(self.sim.tiles))
+                    self.tile_vertex_list.indices[4 * (len(self.sim.tiles) - 1) : 4 * (len(self.sim.tiles) - 1) + 4] = range(4 * (len(self.sim.tiles) - 1), 4 * (len(self.sim.tiles) - 1) + 4)
+                   # self.tile_vertex_list.indices = list(range(0, 8 * len(self.sim.tiles)))
+                   # self.update_tile(len(self.sim.tiles) - 1, tile)
                     self.update_tiles(True)
             else:
                 # delete tile
-                self.world.remove_tile_on((rounded_coords,coords_coords[1]))
-                self.tile_vertex_list.resize(4 * len(self.world.tiles), 4 * len(self.world.tiles))
+                self.sim.remove_tile_on((rounded_coords,coords_coords[1]))
+                self.tile_vertex_list.resize(4 * len(self.sim.tiles), 4 * len(self.sim.tiles))
                 self.update_tiles(True)
 
     def on_resize(self, width, height):
@@ -220,7 +219,7 @@ class VisWindow(pyglet.window.Window):
 
         glBindTexture(self.particleTexture.target, self.particleTexture.id)
 
-        if len(self.world.tiles) != 0:
+        if len(self.sim.tiles) != 0:
             self.tile_vertex_list.draw(GL_QUADS)
         self.particle_vertex_list.draw(GL_QUADS)
         self.location_vertex_list.draw(GL_QUADS)
@@ -258,13 +257,13 @@ class VisWindow(pyglet.window.Window):
         self.simulation_running = not self.simulation_running
 
     def round(self):
-        if self.world.run_world():
+        if self.sim.run_sim():
             return True
 
     def init_tile_vertex_list(self):
-        self.tile_vertex_list = pyglet.graphics.vertex_list_indexed(4 * len(self.world.tiles),
-                                                                    list(range(0, 4 * len(self.world.tiles))),
-                                                                    #list(range(0,8 * len(self.world.tiles))),
+        self.tile_vertex_list = pyglet.graphics.vertex_list_indexed(4 * len(self.sim.tiles),
+                                                                    list(range(0, 4 * len(self.sim.tiles))),
+                                                                    #list(range(0,8 * len(self.sim.tiles))),
                                                                     'v2f', 't2f', 'c4f')
         self.update_tiles(True)
 
@@ -273,17 +272,17 @@ class VisWindow(pyglet.window.Window):
         foreground = []
         background = []
 
-        if (len(self.world.tiles) != 0):
-            if self.world.get_tile_deleted():
-                self.tile_vertex_list.resize(4 * len(self.world.tiles), 4 * len(self.world.tiles))
+        if (len(self.sim.tiles) != 0):
+            if self.sim.get_tile_deleted():
+                self.tile_vertex_list.resize(4 * len(self.sim.tiles), 4 * len(self.sim.tiles))
                 update_all=True
-                self.world.set_tile_deleted()
-            for i, tile in enumerate(self.world.tiles):
+                self.sim.set_tile_deleted()
+            for i, tile in enumerate(self.sim.tiles):
                 if tile.created:
-                    self.tile_vertex_list.resize(4 * len(self.world.tiles), 4 * len(self.world.tiles))
+                    self.tile_vertex_list.resize(4 * len(self.sim.tiles), 4 * len(self.sim.tiles))
                     self.tile_vertex_list.indices[
-                    4 * (len(self.world.tiles) - 1): 4 * (len(self.world.tiles) - 1) + 4] = range(
-                        4 * (len(self.world.tiles) - 1), 4 * (len(self.world.tiles) - 1) + 4)
+                    4 * (len(self.sim.tiles) - 1): 4 * (len(self.sim.tiles) - 1) + 4] = range(
+                        4 * (len(self.sim.tiles) - 1), 4 * (len(self.sim.tiles) - 1) + 4)
                     tile.created =  False
                 if update_all or tile.modified:
                     self.update_tile(i, tile)
@@ -301,7 +300,7 @@ class VisWindow(pyglet.window.Window):
 
     def update_tile(self, i, tile):
         weird = 256 / 220
-        pos = coords_to_world(tile.coords)
+        pos = coords_to_sim(tile.coords)
         x = pos[0]
         y = pos[1]
 
@@ -328,19 +327,19 @@ class VisWindow(pyglet.window.Window):
 
     def init_particle_vertex_list(self):
         self.particle_vertex_list = self.particle_vertex_list = pyglet.graphics.vertex_list \
-            (4 * len(self.world.particles), 'v2f', 't2f', 'c4f')
+            (4 * len(self.sim.particles), 'v2f', 't2f', 'c4f')
         self.update_particles(True)
 
     def update_particles(self, update_all = False):
-        if (len(self.world.particles) != 0):
-            if self.world.get_particle_deleted():
-                self.particle_vertex_list.resize(4 * len(self.world.particles))
-                self.world.set_particle_deleted()
+        if (len(self.sim.particles) != 0):
+            if self.sim.get_particle_deleted():
+                self.particle_vertex_list.resize(4 * len(self.sim.particles))
+                self.sim.set_particle_deleted()
                 update_all = True
-            for i, particle in enumerate(self.world.particles):
+            for i, particle in enumerate(self.sim.particles):
                 if particle.created:
-                    self.particle_vertex_list.resize(4 * len(self.world.particles))
-                    # self.tile_vertex_list.resize(4 * len(self.world.tiles), 8 * len(self.world.tiles))
+                    self.particle_vertex_list.resize(4 * len(self.sim.particles))
+                    # self.tile_vertex_list.resize(4 * len(self.sim.tiles), 8 * len(self.sim.tiles))
                     particle.created=False
                 if update_all or particle.modified:
                     self.update_particle(i, particle)
@@ -351,7 +350,7 @@ class VisWindow(pyglet.window.Window):
 
     def update_particle(self, i, particle):
         weird = 256 / 220
-        pos = coords_to_world(particle.coords)
+        pos = coords_to_sim(particle.coords)
         x = pos[0]
         y = pos[1]
 
@@ -378,19 +377,19 @@ class VisWindow(pyglet.window.Window):
 
     def init_location_vertex_list(self):
         self.location_vertex_list = self.location_vertex_list = pyglet.graphics.vertex_list \
-            (4 * len(self.world.locations), 'v2f', 't2f', 'c4f')
+            (4 * len(self.sim.locations), 'v2f', 't2f', 'c4f')
         self.update_locations(True)
 
     def update_locations(self, update_all=True):
-        if (len(self.world.locations) != 0):
-            if self.world.get_location_deleted():
-                self.location_vertex_list.resize(4 * len(self.world.locations))
-                self.world.set_location_deleted()
+        if (len(self.sim.locations) != 0):
+            if self.sim.get_location_deleted():
+                self.location_vertex_list.resize(4 * len(self.sim.locations))
+                self.sim.set_location_deleted()
                 update_all = True
-            for i, location in enumerate(self.world.locations):
+            for i, location in enumerate(self.sim.locations):
                 if location.created:
-                    self.location_vertex_list.resize(4 * len(self.world.locations))
-                    # self.tile_vertex_list.resize(4 * len(self.world.tiles), 8 * len(self.world.tiles))
+                    self.location_vertex_list.resize(4 * len(self.sim.locations))
+                    # self.tile_vertex_list.resize(4 * len(self.sim.tiles), 8 * len(self.sim.tiles))
                     location.created = False
                 if update_all or location.modified:
                     self.update_location(i, location)
@@ -401,7 +400,7 @@ class VisWindow(pyglet.window.Window):
 
     def update_location(self, i, location):
         weird = 256 / 220
-        pos = coords_to_world(location.coords)
+        pos = coords_to_sim(location.coords)
         x = pos[0]
         y = pos[1]
 
@@ -427,10 +426,10 @@ class VisWindow(pyglet.window.Window):
             #while actual simulation round is below max round
             last_time = time.perf_counter()
             while self.elapsed_frame_time >= round_time:
-                mod.solution(self.sim, self.world)
+                mod.solution(self.sim)
                 self.elapsed_frame_time -= round_time
                 if self.elapsed_frame_time <= round_time:
-                    self.world.csv_round_writer.next_line(self.sim.get_actual_round())
+                    self.sim.csv_round_writer.next_line(self.sim.get_actual_round())
                     self.sim.inc_round_cnter()  # increase simulation round counter by one.
             self.dispatch_events()
             self.draw()

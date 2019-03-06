@@ -1,5 +1,5 @@
 """The location module provides the interface to the locations. A location is any point on
- the coordinate system of the simulators world"""
+ the coordinate system of the simulators sim"""
 
 
 import uuid
@@ -33,7 +33,7 @@ color_map = {
 class matter():
     """In the classe location all the methods for the characterstic of a location is included"""
 
-    def __init__(self, world, x, y, color=black, alpha=1, type=None, mm_limit=False, mm_size=0):
+    def __init__(self, sim, x, y, color=black, alpha=1, type=None, mm_limit=False, mm_size=0):
         """Initializing the location constructor"""
         self.coords = (x, y)
         self.color = color_map[color]
@@ -42,7 +42,7 @@ class matter():
         self.memory_delay=True
         self.memory_buffer=[]
         self._tmp_memory=[]
-        self.world = world
+        self.sim = sim
         self._memory={}
         self.__modified=False
         self.__alpha=alpha
@@ -88,7 +88,7 @@ class matter():
         #         if key ==
         if  key in self._memory:
             tmp_memory = self._memory[key]
-            self.world.csv_round_writer.update_metrics( memory_read=1)
+            self.sim.csv_round_writer.update_metrics( memory_read=1)
         if isinstance(tmp_memory, list) and len(str(tmp_memory)) == 0:
             return None
         if isinstance(tmp_memory, str) and len(str(tmp_memory)) == 0:
@@ -118,11 +118,11 @@ class matter():
 
         if (self.mm_limit == True and len( self._memory) < self.mm_size) or not self.mm_limit:
             self._memory[key] = data
-            self.world.csv_round_writer.update_metrics(memory_write=1)
+            self.sim.csv_round_writer.update_metrics(memory_write=1)
                 # if self.memory_delay == True:
                 #     self._tmp_memory[key] = data
-                #     print("Wrote data at ", self.world.sim.get_actual_round())
-                #     self.memory_buffer[self.world.sim.get_actual_round()+self.memory_delay_time] = self._tmp_memory.copy()
+                #     print("Wrote data at ", self.sim.sim.get_actual_round())
+                #     self.memory_buffer[self.sim.sim.get_actual_round()+self.memory_delay_time] = self._tmp_memory.copy()
                 #     self._tmp_memory.clear()
                 # else:
                 #     self._memory[key] = data
@@ -143,7 +143,7 @@ class matter():
 
         if (self.mm_limit == True and len( self._memory) < self.mm_size) or not self.mm_limit:
                 self._memory[datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-1]] = data
-                self.world.csv_round_writer.update_metrics(memory_write=1)
+                self.sim.csv_round_writer.update_metrics(memory_write=1)
                 return True
         else:
             return False

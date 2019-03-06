@@ -17,9 +17,9 @@ write=1
 class Tile(matter.matter):
     """In the classe location all the methods for the characterstic of a location is included"""
 
-    def __init__(self, world, x, y, color=gray, alpha=1, mm_limit=0, mm_size=0):
+    def __init__(self, sim, x, y, color=gray, alpha=1, mm_limit=0, mm_size=0):
         """Initializing the location constructor"""
-        super().__init__( world, x, y, color, alpha=1,  type="tile", mm_limit=mm_limit, mm_size=mm_size)
+        super().__init__( sim, x, y, color, alpha=1,  type="tile", mm_limit=mm_limit, mm_size=mm_size)
         self.__isCarried = False
         self.created = False
 
@@ -51,8 +51,8 @@ class Tile(matter.matter):
         """
         if coords==0:
             if self.__isCarried == False:
-                if self.coords in self.world.tile_map:
-                    del self.world.tile_map_coords[self.coords]
+                if self.coords in self.sim.tile_map:
+                    del self.sim.tile_map_coords[self.coords]
                 self.__isCarried = True
                 self.touch()
                 return True
@@ -60,8 +60,8 @@ class Tile(matter.matter):
                 return False
         else:
             if self.__isCarried == False:
-                if self.coords in self.world.tile_map_coords:
-                    del self.world.tile_map_coords[self.coords]
+                if self.coords in self.sim.tile_map_coords:
+                    del self.sim.tile_map_coords[self.coords]
                 self.__isCarried = True
                 self.coords = coords
                 self.touch()
@@ -78,7 +78,7 @@ class Tile(matter.matter):
         :param coords: the given position
         :return: None
         """
-        self.world.tile_map_coords[coords] = self
+        self.sim.tile_map_coords[coords] = self
         self.coords = coords
         self.__isCarried = False
         self.touch()

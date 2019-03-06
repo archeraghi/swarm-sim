@@ -1,7 +1,7 @@
-world module
+sim module
 ============
 
-.. automodule:: world
+.. automodule:: sim
     :members:
     :undoc-members:
     :show-inheritance:

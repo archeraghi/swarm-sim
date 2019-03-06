@@ -9,18 +9,18 @@ def main(argv):
     seedvalue = 5
     nTime = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')[:-1]
     try:
-        opts, args = getopt.getopt(argv, "hs:w:r:n:v:", ["solution=", "world="])
+        opts, args = getopt.getopt(argv, "hs:w:r:n:v:", ["scenaro=", "solution="])
     except getopt.GetoptError:
-        print('Error: multiple.py -r <randomeSeed> -s <solution> -w <world> -n <maxRounds>')
+        print('Error: multiple.py -r <randomeSeed> -w <scenario> -s <solution> -n <maxRounds>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('multiple.py -r <randomeSeed> -s <solution> -w <world> -n <maxRounds>')
+            print('multiple.py -r <randomeSeed> -w <scenario> -s <solution>  -n <maxRounds>')
             sys.exit()
         elif opt in ("-s", "--solution"):
             solution_file = arg
-        elif opt in ("-w", "--world"):
-            world_file = arg
+        elif opt in ("-w", "--scenario"):
+            sim_file = arg
         elif opt in ("-r", "--seed"):
             seedvalue = int(arg)
         elif opt in ("-n", "--maxrounds"):

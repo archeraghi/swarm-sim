@@ -15,11 +15,11 @@ NW = 5
 
 direction = [NE, E, SE, SW, W, NW]
 
-def solution(self, world):
+def solution(self, sim):
 
     all_matters_list=[]
     if self.get_actual_round() == 1:
-        all_matters_list=world.get_particle_map_coords()[(0,0)].scan_for_matter_within(hop=5)
+        all_matters_list=sim.get_particle_map_coords()[(0,0)].scan_for_matter_within(hop=5)
         for list in all_matters_list:
             if list.type=='particle':
                 print ("particle at", list.coords)

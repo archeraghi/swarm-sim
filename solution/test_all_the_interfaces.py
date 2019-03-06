@@ -16,12 +16,12 @@ NW = 5
 
 direction = [NE, E, SE, SW, W, NW]
 
-def solution(sim, world):
+def solution(sim):
 
     if sim.get_actual_round() == 1:
         print ("Scanning for locations, tiles and particles")
         logging.info("Scanning for locations, tiles and particles")
-        all_matters_list = world.get_particle_map_coords()[(0, 0)].scan_for_matter_within()
+        all_matters_list = sim.get_particle_map_coords()[(0, 0)].scan_for_matter_within()
         for list in all_matters_list:
             if list.type == 'particle':
                 print("particle at", list.coords)
@@ -33,42 +33,42 @@ def solution(sim, world):
         logging.info("Testing Interface: Take Drop Tiles and Particles")
 
     elif sim.get_actual_round() == 2 :
-        world.get_particle_list()[0].take_tile_in(E)
+        sim.get_particle_list()[0].take_tile_in(E)
     elif sim.get_actual_round() == 3 :
-        world.get_particle_list()[0].take_particle_in(E)
+        sim.get_particle_list()[0].take_particle_in(E)
     elif sim.get_actual_round() == 4 :
-        world.get_particle_list()[0].drop_tile_in(E)
-        print("Tiles coords ", world.get_tiles_list()[0].coords[0], world.get_tiles_list()[0].coords[1])
+        sim.get_particle_list()[0].drop_tile_in(E)
+        print("Tiles coords ", sim.get_tiles_list()[0].coords[0], sim.get_tiles_list()[0].coords[1])
     elif sim.get_actual_round() == 5:
-        print("Tiles coords ", world.get_tiles_list()[0].coords[0], world.get_tiles_list()[0].coords[1])
-        world.get_particle_list()[0].take_particle_in(W)
+        print("Tiles coords ", sim.get_tiles_list()[0].coords[0], sim.get_tiles_list()[0].coords[1])
+        sim.get_particle_list()[0].take_particle_in(W)
     elif sim.get_actual_round() == 6:
-        world.get_particle_list()[0].drop_particle_in(W)
-        world.get_particle_list()[0].take_tile_in(E)
+        sim.get_particle_list()[0].drop_particle_in(W)
+        sim.get_particle_list()[0].take_tile_in(E)
     elif sim.get_actual_round() == 7:
-        world.get_particle_list()[0].drop_tile()
-        world.get_particle_list()[0].take_tile()
+        sim.get_particle_list()[0].drop_tile()
+        sim.get_particle_list()[0].take_tile()
     elif sim.get_actual_round() == 8:
-        world.get_particle_list()[0].drop_particle_in(W)
-        world.get_particle_list()[0].take_particle_in(W)
+        sim.get_particle_list()[0].drop_particle_in(W)
+        sim.get_particle_list()[0].take_particle_in(W)
     elif sim.get_actual_round() == 9:
-        world.get_particle_list()[0].drop_particle()
+        sim.get_particle_list()[0].drop_particle()
     elif sim.get_actual_round() == 10:
-        if len(world.get_particle_list()) > 1:
-            world.get_particle_list()[0].take_particle_with(world.get_particle_list()[1].get_id())
+        if len(sim.get_particle_list()) > 1:
+            sim.get_particle_list()[0].take_particle_with(sim.get_particle_list()[1].get_id())
     elif sim.get_actual_round() == 11:
-        world.get_particle_list()[0].drop_particle()
-        if len(world.get_tiles_list()) > 0:
-            world.get_particle_list()[0].take_tile_with(world.get_tiles_list()[0].get_id())
+        sim.get_particle_list()[0].drop_particle()
+        if len(sim.get_tiles_list()) > 0:
+            sim.get_particle_list()[0].take_tile_with(sim.get_tiles_list()[0].get_id())
     elif sim.get_actual_round() == 12:
-        world.get_particle_list()[0].drop_tile()
-        world.get_particle_list()[0].take_tile_on(0,0)
+        sim.get_particle_list()[0].drop_tile()
+        sim.get_particle_list()[0].take_tile_on(0,0)
     elif sim.get_actual_round() == 13:
-        world.get_particle_list()[0].drop_tile_on(7,0)
+        sim.get_particle_list()[0].drop_tile_on(7,0)
     elif sim.get_actual_round() == 14:
-        world.get_particle_list()[0].take_particle()
+        sim.get_particle_list()[0].take_particle()
     elif sim.get_actual_round() == 15:
-        world.get_particle_list()[0].drop_particle_on(-7, 0)
+        sim.get_particle_list()[0].drop_particle_on(-7, 0)
 
     elif sim.get_actual_round() == 16:
         logging.info("Testing Read and Write")
@@ -76,15 +76,15 @@ def solution(sim, world):
         logging.info("Start Writing ")
         print("Start Writing")
 
-        world.get_particle_list()[0].write_to_with(world.locations[0], "K1", "Location Data")
-        world.get_particle_list()[0].write_to_with(world.tiles[0], "K1", "Tile Data")
-        world.get_particle_list()[0].write_to_with(world.get_particle_list()[1], "K1", "Particle Data")
+        sim.get_particle_list()[0].write_to_with(sim.locations[0], "K1", "Location Data")
+        sim.get_particle_list()[0].write_to_with(sim.tiles[0], "K1", "Tile Data")
+        sim.get_particle_list()[0].write_to_with(sim.get_particle_list()[1], "K1", "Particle Data")
     elif sim.get_actual_round() == 17:
         logging.info("Start Reading")
         print("Start Reading")
-        loc_data = world.get_particle_list()[0].read_from_with(world.locations[0], "K1")
-        tile_data = world.get_particle_list()[0].read_from_with(world.tiles[0], "K1")
-        part_data = world.get_particle_list()[0].read_from_with(world.get_particle_list()[1], "K1")
+        loc_data = sim.get_particle_list()[0].read_from_with(sim.locations[0], "K1")
+        tile_data = sim.get_particle_list()[0].read_from_with(sim.tiles[0], "K1")
+        part_data = sim.get_particle_list()[0].read_from_with(sim.get_particle_list()[1], "K1")
 
         if loc_data != 0:
             print(loc_data)
@@ -94,28 +94,28 @@ def solution(sim, world):
             print(part_data)
 
     elif sim.get_actual_round() > 20:
-        for particle in world.get_particle_list():
+        for particle in sim.get_particle_list():
             particle.move_to(random.choice(direction))
-            if particle.coords in world.get_tile_map_coords():
+            if particle.coords in sim.get_tile_map_coords():
                 print("Found Tile")
                 particle.take_tile()
                 particle.carried_tile.set_color(3)
-                world.csv_round_writer.success()
+                sim.csv_round_writer.success()
     if sim.get_actual_round() == 24:
-        world.get_particle_list()[1].create_tile()
-        world.get_particle_list()[2].create_location()
-        world.get_particle_list()[3].create_particle()
+        sim.get_particle_list()[1].create_tile()
+        sim.get_particle_list()[2].create_location()
+        sim.get_particle_list()[3].create_particle()
 
     if sim.get_actual_round() == 40:
-        world.get_particle_list()[4].create_tile()
-        world.get_particle_list()[5].create_location()
-        world.get_particle_list()[6].create_particle()
+        sim.get_particle_list()[4].create_tile()
+        sim.get_particle_list()[5].create_location()
+        sim.get_particle_list()[6].create_particle()
 
 
 
-        #world.get_particle_list()[0].take_tile_in(E)
-    #    world.get_particle_list()[0].drop_particle_in(W)
-    #   world.get_particle_list()[0].drop_particle_in(E)
+        #sim.get_particle_list()[0].take_tile_in(E)
+    #    sim.get_particle_list()[0].drop_particle_in(W)
+    #   sim.get_particle_list()[0].drop_particle_in(E)
 
     #elif sim.get_actual_round() == 5 :
 
