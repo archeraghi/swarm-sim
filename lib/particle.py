@@ -1225,7 +1225,7 @@ class Particle(matter.matter):
             logging.info("Could not delet tile with tile id %s", str(id))
             return False
 
-    def delete_tile_in(self, dir=E):
+    def delete_tile_in(self, dir=None):
         """
         Deletes a tile either in a given direction
 
@@ -1234,7 +1234,7 @@ class Particle(matter.matter):
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
         coords = ()
-        if -1<dir<7:
+        if dir is not None:
             coords = self.sim.get_coords_in_dir(self.coords, dir)
             logging.info("Deleting tile in %s direction", str(dir))
             if coords is not None:
@@ -1565,14 +1565,14 @@ class Particle(matter.matter):
         :param dir: The direction on which the particle should be deleted. Options: E, SE, SW, W, NW, NE,
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-        if dir:
+        if dir is not None:
             coords = self.sim.get_coords_in_dir(self.coords, dir)
             logging.info("Deleting tile in %s direction", str(dir))
-        if self.sim.remove_particle_on(coords):
-            logging.info("Deleted particle with particle on coords %s", str(coords))
-            self.csv_particle_writer.write_particle(particle_deleted=1)
-        else:
-            logging.info("Could not delet particle on coords %s", str(coords))
+            if self.sim.remove_particle_on(coords):
+                logging.info("Deleted particle with particle on coords %s", str(coords))
+                self.csv_particle_writer.write_particle(particle_deleted=1)
+            else:
+                logging.info("Could not delet particle on coords %s", str(coords))
 
     def delete_particle_on(self, x=None, y=None):
         """
@@ -1900,7 +1900,7 @@ class Particle(matter.matter):
         else:
             logging.info("Could not delet location with location id %s", str(location_id))
 
-    def delete_location_in(self, dir=None, x=None, y=None):
+    def delete_location_in(self, dir=None):
         """
         Deletes a location either in a given direction or on a given x,y coordinates
 
@@ -1910,16 +1910,14 @@ class Particle(matter.matter):
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
 
-        if dir:
+        if dir is not None:
             coords = self.sim.get_coords_in_dir(self.coords, dir)
             logging.info("Deleting tile in %s direction", str(dir))
-        elif x is not None and y is not None:
-            coords = (x, y)
-        if self.sim.remove_location_on(coords):
-            logging.info("Deleted location with location on coords %s", str(coords))
-            self.csv_particle_writer.write_particle(location_deleted=1)
-        else:
-            logging.info("Could not delet location on coords %s", str(coords))
+            if self.sim.remove_location_on(coords):
+                logging.info("Deleted location with location on coords %s", str(coords))
+                self.csv_particle_writer.write_particle(location_deleted=1)
+            else:
+                logging.info("Could not delet location on coords %s", str(coords))
 
     def delete_location_on(self, x=None, y=None):
         """
