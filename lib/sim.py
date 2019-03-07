@@ -103,7 +103,7 @@ class Sim:
                                                            steps=0, directory=dir)
 
         mod = importlib.import_module('scenario.' + scenario_name.rsplit('.',1)[0])
-        mod.create_scenario(self)
+        mod.scenario(self)
         if random_order:
             random.shuffle(self.particles)
 
