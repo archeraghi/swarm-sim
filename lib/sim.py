@@ -117,11 +117,11 @@ class Sim:
         if self.visualization:
             window = vis.VisWindow(self.window_size_x, self.window_size_y, self)
             window.run()
-
-        while self.get_actual_round() <= self.get_max_round() and self.__end == False:
-            self.solution_mod.solution(self)
-            self.csv_round_writer.next_line(self.get_actual_round())
-            self.__round_counter = self.__round_counter + 1
+        else:
+            while self.get_actual_round() <= self.get_max_round() and self.__end == False:
+                self.solution_mod.solution(self)
+                self.csv_round_writer.next_line(self.get_actual_round())
+                self.__round_counter = self.__round_counter + 1
 
         #creating gnu plots
         self.csv_round_writer.aggregate_metrics()
