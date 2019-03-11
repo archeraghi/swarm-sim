@@ -1,4 +1,4 @@
-def create_scenario(sim):
+def scenario(sim):
     sim.add_particle(0, 0)
 
     #sim.add_tile(0, 0)
