@@ -4,7 +4,7 @@ A sim is created that has particles formated in a ring structure that is up to 5
 
 
 
-def create_scenario(sim):
+def scenario(sim):
     sim.add_particle(0, 0, color=3)
     # 1st ring
     sim.add_particle(1.000000, 0.000000, color=1)
