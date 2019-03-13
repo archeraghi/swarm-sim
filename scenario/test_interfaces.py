@@ -1,7 +1,7 @@
 """
 A sim is created that has particles formated in a ring structure that is up to 5 hops big
 """
-def create_scenario(sim):
+def scenario(sim):
     sim.add_particle(0, 0, color=3)
     sim.add_tile(1.0, 0.0)
     sim.add_location(3.0, 2.0)

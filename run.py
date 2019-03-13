@@ -1,4 +1,4 @@
-"""This is the main module of the Opportunistic Robotics Network Simulator"""
+"""This is the main module of the Swarm-Sim"""
 
 
 import configparser
@@ -11,9 +11,7 @@ from datetime import datetime
 from lib import  sim
 
 
-#visualization=True
-
-def core(argv):
+def swarm_sim(argv):
     """In the main function first the config is getting parsed and than
     the simulator and the sim object is created. Afterwards the run method of the simulator
     is called in which the simlator is going to start to run"""
@@ -100,5 +98,5 @@ def core(argv):
 
 
 if __name__ == "__main__":
-    core(sys.argv[1:])
+    swarm_sim(sys.argv[1:])
 
