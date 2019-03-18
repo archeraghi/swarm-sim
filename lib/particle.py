@@ -120,6 +120,10 @@ class Particle(matter.matter):
         dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
         #sim = self.sim_to_coords(dir_coord[0], dir_coord[1])
         #print ("sim actual coord "+ str(sim))
+        if self.sim.border==1:
+            if abs(dir_coord[0]) > self.sim.get_sim_x_size() or  abs(dir_coord[1]) > self.sim.get_sim_y_size() :
+                dir = dir - 3 if dir > 2 else dir + 3
+                dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
         if self.sim.check_coords(dir_coord[0], dir_coord[1]):
 
             try:  # cher: added so the program does not crashed if it does not find any entries in the map
@@ -140,10 +144,7 @@ class Particle(matter.matter):
                     self.carried_particle.coords = self.coords
                     self.carried_particle.touch()
                 return True
-            else:
-                return False
-        else:
-            return False
+        return False
 
     def move_to_in_bounds(self, dir):
         """
@@ -1629,7 +1630,7 @@ class Particle(matter.matter):
         :return: True: successful taken; False: unsuccessful taken
         """
         if self.carried_tile is None and self.carried_particle is None:
-            if id in self.sim.get_particle_map_coords_id():
+            if id in self.sim.get_particle_map_id():
                 logging.info("particle with particle id %s is in the sim", str(id))
                 self.carried_particle = self.sim.particle_map_id[id]
                 if self.carried_particle.take_me(self.coords):
