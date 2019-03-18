@@ -1,4 +1,4 @@
-"""This is the main module of the Swarm-Sim"""
+"""This is the main module of the Opportunistic Robotics Network Simulator"""
 
 
 import configparser
@@ -9,7 +9,6 @@ import sys
 from datetime import datetime
 
 from lib import  sim
-
 
 def swarm_sim(argv):
     """In the main function first the config is getting parsed and than
@@ -35,11 +34,13 @@ def swarm_sim(argv):
     size_y = config.getint("Simulator", "size_y")
     window_size_x = config.getint("Simulator", "window_size_x")
     window_size_y = config.getint("Simulator", "window_size_y")
+    border = config.getint("Simulator", "border")
     max_particles = config.getint("Simulator", "max_particles")
-    mm_limitation = config.getboolean("Matter", "mm_limitation")
-    mm_particle = config.getint("Matter", "particle_mm_size")
-    mm_tile= config.getint("Matter", "tile_mm_size")
-    mm_location=config.getint("Matter", "location_mm_size")
+    mm_limitation = config.getboolean("matter", "mm_limitation")
+    mm_particle = config.getint("matter", "particle_mm_size")
+    mm_tile= config.getint("matter", "tile_mm_size")
+    mm_location=config.getint("matter", "location_mm_size")
+    tile_color_map = config.getboolean("matter", "tile_color_map")
 
     multiple_sim=0
 
@@ -91,7 +92,7 @@ def swarm_sim(argv):
                            max_particles=max_particles, mm_limitation=mm_limitation,
                            particle_mm_size=mm_particle, tile_mm_size=mm_tile, location_mm_size=mm_location,
                            dir=directory, random_order=random_order,
-                          visualization=visualization)
+                          visualization=visualization,  border=border, window_size_x=window_size_x, window_size_y=window_size_y,)
 
     simulator.run()
     logging.info('Finished')
