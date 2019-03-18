@@ -8,10 +8,11 @@ It also have the the coordination system and stated the maximum of the x and y c
 
 import importlib
 import random
-
+import math
 import logging
 from lib import csv_generator, particle, tile, location, vis
 from lib.gnuplot_generator import generate_gnuplot
+
 
 x_offset = [0.5, 1,  0.5,   -0.5,   -1, -0.5 ]
 y_offset = [ 1, 0, -1,   -1,    0,  1]
@@ -42,7 +43,7 @@ class Sim:
     def __init__(self, seed=1, max_round=10, solution="None", size_x = 0, size_y = 0,
                  scenario_name = None, max_particles = 50,
                  mm_limitation=False, particle_mm_size=0, tile_mm_size=0, location_mm_size=0, dir="",
-                 random_order=False, visualization=False, window_size_x=600, window_size_y=800):
+                 random_order=False, visualization=False, border=0, window_size_x=600, window_size_y=800):
         """
         Initializing the sim constructor
         :param seed: seed number for new random numbers
@@ -97,6 +98,7 @@ class Sim:
         self.visualization = visualization
         self.window_size_x = window_size_x
         self.window_size_y = window_size_y
+        self.border = border
         self.csv_round_writer = csv_generator.CsvRoundData(self, solution=solution.rsplit('.', 1)[0],
                                                            seed=seed,
                                                            tiles_num=0, particle_num=0,
@@ -339,6 +341,11 @@ class Sim:
                 return False
             else:
                 return True
+    def coords_to_sim(self, coords):
+        return coords[0], coords[1] * math.sqrt(3 / 4)
+
+    def sim_to_coords(self, x, y):
+        return x, round(y / math.sqrt(3 / 4), 0)
 
     def add_particle(self, x, y, color=black, alpha=1):
         """
