@@ -62,9 +62,11 @@ def swarm_sim(argv):
         elif opt in ("-n", "--maxrounds"):
            max_round = int(arg)
         elif opt in ("-m"):
-           multiple = int(arg)
+           multiple_sim = int(arg)
         elif opt in ("-v"):
-            visualization = arg
+            visualization = int(arg)
+        elif opt in ("-d"):
+            act_date = arg
 
 
     #logging.basicConfig(filename='myapp.log', filemode='w', level=logging.INFO, format='%(asctime)s %(message)s')
@@ -75,7 +77,7 @@ def swarm_sim(argv):
     dir_name =  nTime + "_" + solution_file.rsplit('.',1)[0] + "_" + \
                          str(seedvalue)
     if multiple_sim == 1:
-        directory = "./outputs/mulitple/" + dir_name + "/" + str(seedvalue)
+        directory = "./outputs/mulitple/"+ act_date + "/" + str(seedvalue)
     else:
         directory = "./outputs/" + dir_name
     if not os.path.exists(directory):
