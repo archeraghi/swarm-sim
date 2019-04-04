@@ -77,7 +77,8 @@ def swarm_sim(argv):
     dir_name =  nTime + "_" + solution_file.rsplit('.',1)[0] + "_" + \
                          str(seedvalue)
     if multiple_sim == 1:
-        directory = "./outputs/mulitple/"+ act_date + "/" + str(seedvalue)
+        directory = "./outputs/mulitple/"+ act_date + "_" + scenario_file.rsplit('.',1)[0] + \
+                     "_"+solution_file.rsplit('.',1)[0] + "/" + str(seedvalue)
     else:
         directory = "./outputs/" + dir_name
     if not os.path.exists(directory):
