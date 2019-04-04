@@ -116,7 +116,7 @@ class Sim:
         At the end it aggregate the data and generate a gnuplot
         :return:
         """
-        if self.visualization:
+        if self.visualization !=  0:
             window = vis.VisWindow(self.window_size_x, self.window_size_y, self)
             window.run()
         else:
@@ -134,6 +134,9 @@ class Sim:
         generate_gnuplot(self.directory)
         return
 
+    def success_termination(self):
+        self.csv_round_writer.success()
+        self.set_end()
 
     def get_max_round(self):
         """
