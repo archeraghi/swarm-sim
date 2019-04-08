@@ -24,7 +24,6 @@ dirs = [E, SE, SW, W, NW, NE]
 x_offset = [0.5, 1,  0.5, -0.5, -1, -0.5]
 y_offset = [1, 0, -1, -1,  0, 1]
 
-# TODO: (OPTIMIZATION) Add more sequences in dir_coords_array to randomize particle movement and rotation direction
 dirs_array = [[E, SE, SW, W, NW, NE],
               [SE, SW, W, NW, NE, E],
               [SW, W, NW, NE, E, SE],
@@ -134,7 +133,7 @@ def random_walk(particle):
 
 
 # Checks if the given coordinates are valid simulator coordinates
-def valid_sim_location(sim, coords):
+def valid_sim_coords(sim, coords):
     if sim.check_coords(coords[0], coords[1]):
         sim_coord = sim.coords_to_sim(coords)
         if sim.get_sim_x_size() >= abs(sim_coord[0]) and sim.get_sim_y_size() >= abs(sim_coord[1]):
@@ -185,7 +184,7 @@ def discover_adjacent_locations(sim, particle):
     for direction in particle.direction:
         adjacent_location_coords = sim.get_coords_in_dir(particle.current_location.coords, direction)
 
-        if not valid_sim_location(sim, adjacent_location_coords):
+        if not valid_sim_coords(sim, adjacent_location_coords):
             continue
 
         if is_border(sim, adjacent_location_coords):
@@ -214,7 +213,8 @@ def mark_location_as_visited(particle):
     particle.create_location(color=cyan)
 
 
-# Returns the distance between 2 locations ########### IS THE USAGE OF THIS FUNCTION CONSIDERED GPS????????????????
+# Returns the distance between 2 locations
+# TODO(CORE) Is the usage of this distance function considered a GPS tier ability?
 def get_distance(location1, location2):
     x1 = location1.coords[0]
     x2 = location2.coords[0]
@@ -253,12 +253,12 @@ def get_next_best_location(current_location, target_location, stuck_locations):
 
 
 # Returns the next closest unvisited location relative to the particle's current location
-def get_next_unvisited(particle, search_algorithm):
-    if particle.unvisited_queue[search_algorithm] not in particle.current_location.adjacent:
+def get_next_unvisited(particle):
+    if particle.unvisited_queue[particle.search_algorithm] not in particle.current_location.adjacent:
         return get_next_best_location(particle.current_location, get_nearest_unvisited(particle), particle.stuck_locations)
 
     else:
-        return particle.unvisited_queue[search_algorithm]
+        return particle.unvisited_queue[particle.search_algorithm]
 
 
 # Enables the particles to create packets with their own data and send them to one another if they are within range
@@ -306,6 +306,12 @@ def next_location_in_stuck_nodes(particle, next_location):
 def solution(sim):
     done_particles = 0
 
+    # ***** Research Variables ***** #
+    start_communication_round = 35
+    communication_frequency = 15
+    communication_range = 5
+    clear_cycle_frequency = 20
+
     for particle in sim.get_particle_list():
 
         if sim.get_actual_round() == 1:
@@ -316,20 +322,20 @@ def solution(sim):
 
         else:
             # TODO(OPTIMIZATION) How often should the particles communicate if they are within range?
-            if sim.get_actual_round() > 30:
-                if sim.get_actual_round() % 15 == 0:
-                    communicate(particle, 5)
+            if sim.get_actual_round() > start_communication_round:
+                if sim.get_actual_round() % communication_frequency == 0:
+                    communicate(particle, communication_range)
                     # pass
 
             analyse_memory(sim, particle)
 
             # TODO(OPTIMIZATION) How many locations should form the stuck cycle? Is there a better solution?
-            # if len(particle.stuck_locations) >= 20:
-            if sim.get_actual_round() % 20 == 0:
+            # if len(particle.stuck_locations) >= clear_cycle_frequency:
+            if sim.get_actual_round() % clear_cycle_frequency == 0:
                 particle.stuck_locations.clear()
 
             try:
-                next_location = get_next_unvisited(particle, particle.search_algorithm)  # 0 for BFS, -1 for DFS
+                next_location = get_next_unvisited(particle)  # 0 for BFS, -1 for DFS
 
                 if next_location_in_stuck_nodes(particle, next_location):
                     next_location = particle.current_location.adjacent[
@@ -340,6 +346,9 @@ def solution(sim):
                 discover_adjacent_locations(sim, particle)
                 mark_location_as_visited(particle)
                 particle.move_to(next_direction)
+
+            except ValueError:
+                discover_adjacent_locations(sim, particle)
 
             except IndexError:
                 mark_location_as_visited(particle)
@@ -371,6 +380,7 @@ def solution(sim):
                     except ValueError:
                         discover_adjacent_locations(sim, particle)
 
+    # TODO(OPTIMIZATION) Should the simulation succeed when all locations have been marked or when all particles are back to nest?
     if done_particles == len(sim.get_particle_list()):
         print(sim.get_actual_round())
         sim.csv_round_writer.success()
