@@ -114,7 +114,7 @@ class CsvRoundData:
         self.sim = sim
 
         self.task = task
-        self.scenario=scenario
+        self.scenario = scenario
         self.solution = solution
         self.actual_round=sim.get_actual_round()
         self.seed = seed
@@ -166,7 +166,7 @@ class CsvRoundData:
         self.csv_file = open(self.file_name, 'w', newline='')
         self.writer_round = csv.writer(self.csv_file)
         self.writer_round.writerow(['',
-                                     'scenario', 'solution', 'Seed', 'Round Number', 
+                                     'scenario', 'solution', 'Seed', 'Round Number',
                                     'Success Counter', 'Success Round',
                                     'Particle Counter',
                                     'Particles Created', 'Particles Created Sum',
@@ -275,7 +275,7 @@ class CsvRoundData:
         logging.debug("CSV: Ending writing_rounds")
 
     def next_line(self, round):
-        csv_iterator = ['', self.scenario, self.solution, self.seed, round, 
+        csv_iterator = ['', self.scenario, self.solution, self.seed, round,
                         self.success_counter, self.success_round,
                         self.particle_num, self.particle_created, self.particle_created_sum,
                         self.particle_deleted, self.particle_deleted_sum,
@@ -318,6 +318,126 @@ class CsvRoundData:
         self.particles_dropped = 0
 
     def aggregate_metrics(self):
+        self.csv_file.close()
+        data = pd.read_csv(self.file_name)
+        file_name = self.directory+"/aggregate_rounds.csv"
+        csv_file = open(file_name, 'w', newline='')
+        writer_round = csv.writer(csv_file)
+        """Average Min Max for all other metrics"""
+        writer_round.writerow(['Scenario','Solution', 'Seed', 'Rounds Total',
+                                'Success Rate Sum', 'Success Ratio',
+                                'Success Rate Avg', 'Success Rate Min', 'Success Rate Max',
+                                'Success Round Min', 'Success Round Max',
+                                'Particle Counter',
+                                'Particles Created Sum', 'Particles Created Avg',
+                                'Particles Created Min', 'Particles Created Max',
+                                'Particles Deleted Sum', 'Particles Deleted Avg',
+                                'Particles Deleted Min', 'Particles Deleted Max',
+                                'Particles Dropped Sum', 'Particles Dropped Avg',
+                                'Particles Dropped Min', 'Particles Dropped Max',
+                                'Particle Read Sum', 'Particle Read Avg', 'Particle Read Min', 'Particle Read Max',
+                                'Partilcle Steps Total',  'Particle Steps Avg',
+                                'Particle Steps Min', 'Particle Steps Max',
+                                'Particles Taken Sum', 'Particles Taken Avg',
+                                'Particles Taken Min', 'Particles Taken Max',
+                                'Particle Write Sum', 'Particle Write Avg', 'Particle Write Min', 'Particle Write Max',
+                                'Location Counter',
+                                'Location Created Sum', 'Location Created Avg',
+                                'Location Created Min', 'Location Created Max',
+                                'Location Deleted Sum', 'Location Deleted Avg',
+                                'Location Deleted Min', 'Location Deleted Max',
+                                'Location Read Sum', 'Location Read Avg', 'Location Read Min', 'Location Read Max',
+                                'Location Write Sum', 'Location Write Avg', 'Location Write Min', 'Location Write Max',
+                                'Memory Read Sum', 'Memory Read Avg', 'Memory Read Min', 'Memory Read Max',
+                                'Memory Write Sum', 'Memory Write Avg', 'Memory Write Min', 'Memory Write Max',
+                                'Tile Counter',
+                                'Tiles Created Sum', 'Tiles Created Avg', 'Tiles Created Min', 'Tiles Created Max',
+                                'Tiles Deleted Sum', 'Tiles Deleted Avg', 'Tiles Deleted Min', 'Tiles Deleted Max',
+                                'Tiles Dropped Sum', 'Tiles Dropped Avg', 'Tiles Dropped Min', 'Tiles Dropped Max',
+                                'Tile Read Sum', 'Tile Read Avg', 'Tile Read Min', 'Tile Read Max',
+                                'Tiles Taken Sum', 'Tiles Taken Avg', 'Tiles Taken Min', 'Tiles Taken Max',
+                                'Tile Write Sum', 'Tile Write Avg', 'Tile Write Min', 'Tile Write Max'])
+
+        csv_interator = [self.scenario, self.solution, self.seed, data['Round Number'].count(),
+
+                         data['Success Counter'].sum(),
+                         data['Success Counter'].sum()/ data['Round Number'].sum(),
+
+                         data['Success Counter'].mean(), data['Success Counter'].min(),
+                         data['Success Counter'].max(),
+
+                         data['Success Round'].min(),
+                         data['Success Round'].max(),
+
+                         self.particle_num,
+                         data['Particles Created'].sum(), data['Particles Created'].mean(),
+                         data['Particles Created'].min(), data['Particles Created'].max(),
+
+                         data['Particles Deleted'].sum(), data['Particles Deleted'].mean(),
+                         data['Particles Deleted'].min(), data['Particles Deleted'].max(),
+
+                         data['Particles Dropped'].sum(), data['Particles Dropped'].mean(),
+                         data['Particles Dropped'].min(), data['Particles Dropped'].max(),
+
+                         data['Particle Read'].sum(), data['Particle Read'].mean(), data['Particle Read'].min(),
+                         data['Particle Read'].max(),
+
+                         data['Particle Steps'].sum(), data['Particle Steps'].mean(),
+                         data['Particle Steps'].min(), data['Particle Steps'].max(),
+
+                         data['Particles Taken'].sum(), data['Particles Taken'].mean(), data['Particles Taken'].min(),
+                         data['Particles Taken'].max(),
+
+                         data['Particle Write'].sum(), data['Particle Write'].mean(), data['Particle Write'].min(),
+                         data['Particle Write'].max(),
+
+
+                         self.locations_num,
+                         data['Location Created'].sum(), data['Location Created'].mean(),
+                         data['Location Created'].min(), data['Location Created'].max(),
+
+                         data['Location Deleted'].sum(), data['Location Deleted'].mean(),
+                         data['Location Deleted'].min(), data['Location Deleted'].max(),
+
+                         data['Location Read'].sum(), data['Location Read'].mean(), data['Location Read'].min(),
+                         data['Location Read'].max(),
+
+                         data['Location Write'].sum(), data['Location Write'].mean(), data['Location Write'].min(),
+                         data['Location Write'].max(),
+
+                         data['Memory Read'].sum(), data['Memory Read'].mean(), data['Memory Read'].min(),
+                         data['Memory Read'].max(),
+
+                         data['Memory Write'].sum(), data['Memory Write'].mean(), data['Memory Write'].min(),
+                         data['Memory Write'].max(),
+
+
+                         self.tile_num,
+                         data['Tiles Created'].sum(), data['Tiles Created'].mean(), data['Tiles Created'].min(),
+                         data['Tiles Created'].max(),
+
+                         data['Tiles Deleted'].sum(), data['Tiles Deleted'].mean(), data['Tiles Deleted'].min(),
+                         data['Tiles Deleted'].max(),
+
+                         data['Tiles Dropped'].sum(), data['Tiles Dropped'].mean(), data['Tiles Dropped'].min(),
+                         data['Tiles Dropped'].max(),
+
+                         data['Tile Read'].sum(), data['Tile Read'].mean(),  data['Tile Read'].min(),
+                         data['Tile Read'].max(),
+
+                         data['Tiles Taken'].sum(), data['Tiles Taken'].mean(), data['Tiles Taken'].min(),
+                         data['Tiles Taken'].max(),
+
+                         data['Tile Write'].sum(), data['Tile Write'].mean(), data['Tile Write'].min(),
+                         data['Tile Write'].max()]
+
+
+
+        writer_round.writerow(csv_interator)
+        csv_file.close()
+
+
+    def all_aggregate_metrics(self):
         self.csv_file.close()
         data = pd.read_csv(self.file_name)
         file_name = self.directory+"/aggregate_rounds.csv"
@@ -437,5 +557,3 @@ class CsvRoundData:
 
         writer_round.writerow(csv_interator)
         csv_file.close()
-
-
