@@ -40,6 +40,7 @@ def swarm_sim(argv):
     mm_particle = config.getint("Matter", "particle_mm_size")
     mm_tile= config.getint("Matter", "tile_mm_size")
     mm_location=config.getint("Matter", "location_mm_size")
+    # tile_color_map = config.getboolean("Matter", "tile_color_map")
 
     multiple_sim=0
 
@@ -73,7 +74,7 @@ def swarm_sim(argv):
 
 
     nTime = datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f')[:-1]
-    dir_name =  nTime + "_" + solution_file.rsplit('.',1)[0] + "_" + \
+    dir_name =  nTime + "_" + scenario_file.rsplit('.',1)[0] + "_"  + solution_file.rsplit('.',1)[0]  + "_"+ \
                          str(seedvalue)
     if multiple_sim == 1:
         directory = "./outputs/mulitple/"+ act_date + "_" + scenario_file.rsplit('.',1)[0] + \
