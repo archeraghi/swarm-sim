@@ -36,11 +36,10 @@ def swarm_sim(argv):
     window_size_y = config.getint("Simulator", "window_size_y")
     border = config.getint("Simulator", "border")
     max_particles = config.getint("Simulator", "max_particles")
-    mm_limitation = config.getboolean("matter", "mm_limitation")
-    mm_particle = config.getint("matter", "particle_mm_size")
-    mm_tile= config.getint("matter", "tile_mm_size")
-    mm_location=config.getint("matter", "location_mm_size")
-    tile_color_map = config.getboolean("matter", "tile_color_map")
+    mm_limitation = config.getboolean("Matter", "mm_limitation")
+    mm_particle = config.getint("Matter", "particle_mm_size")
+    mm_tile= config.getint("Matter", "tile_mm_size")
+    mm_location=config.getint("Matter", "location_mm_size")
 
     multiple_sim=0
 
