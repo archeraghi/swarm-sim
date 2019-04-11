@@ -30,7 +30,7 @@ color_map = {
 }
 
 
-class matter():
+class Matter():
     """In the classe location all the methods for the characterstic of a location is included"""
 
     def __init__(self, sim, x, y, color=black, alpha=1, type=None, mm_limit=False, mm_size=0):
