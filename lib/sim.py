@@ -40,10 +40,7 @@ blue = 5
 
 
 class Sim:
-    def __init__(self, seed=1, max_round=10, solution="None", size_x = 0, size_y = 0,
-                 scenario_name = None, max_particles = 50,
-                 mm_limitation=False, particle_mm_size=0, tile_mm_size=0, location_mm_size=0, dir="",
-                 random_order=False, visualization=False, border=0, window_size_x=600, window_size_y=800):
+    def __init__(self, config_data):
         """
         Initializing the sim constructor
         :param seed: seed number for new random numbers
@@ -56,14 +53,14 @@ class Sim:
         :param seed: the seed number it is only used here for the csv file
         :param max_particles: the maximal number of particles that are allowed to be or created in this sim
         """
-        random.seed(seed)
-        self.__max_round = max_round
+        random.seed(config_data.seedvalue)
+        self.__max_round = config_data.max_round
         self.__round_counter = 1
-        self.__seed=seed
-        self.__solution = solution
-        self.solution_mod = importlib.import_module('solution.' + solution)
+        self.__seed=config_data.seedvalue
+        self.__solution = config_data.solution
+        self.solution_mod = importlib.import_module('solution.' + config_data.solution)
         self.__end = False
-        self.mm_limitation=mm_limitation
+        self.mm_limitation=config_data.mm_limitation
         self.init_particles=[]
         self.particle_num=0
         self.particles = []
@@ -71,7 +68,7 @@ class Sim:
         self.particle_rm = []
         self.particle_map_coords = {}
         self.particle_map_id = {}
-        self.particle_mm_size=particle_mm_size
+        self.particle_mm_size = config_data.particle_mm_size
         self.__particle_deleted=False
         self.tiles_num = 0
         self.tiles = []
@@ -81,32 +78,33 @@ class Sim:
         self.tile_map_id = {}
         self.__tile_deleted=False
         self.new_tile_flag = False
-        self.tile_mm_size=tile_mm_size
+        self.tile_mm_size=config_data.tile_mm_size
         self.locations_num=0
         self.locations = []
         self.locations_created = []
         self.location_map_coords = {}
         self.location_map_id = {}
         self.locations_rm = []
-        self.location_mm_size=location_mm_size
+        self.location_mm_size=config_data.location_mm_size
         self.__location_deleted = False
         self.new_tile=None
-        self.__size_x = size_x
-        self.__size_y = size_y
-        self.max_particles = max_particles
-        self.directory=dir
-        self.visualization = visualization
-        self.window_size_x = window_size_x
-        self.window_size_y = window_size_y
-        self.border = border
-        self.csv_round_writer = csv_generator.CsvRoundData(self, solution=solution.rsplit('.', 1)[0],
-                                                           seed=seed,
+        self.__size_x = config_data.size_x
+        self.__size_y = config_data.size_y
+        self.max_particles = config_data.max_particles
+        self.directory=config_data.dir_name
+        self.visualization = config_data.visualization
+        self.window_size_x = config_data.window_size_x
+        self.window_size_y = config_data.window_size_y
+        self.border = config_data.border
+        self.csv_round_writer = csv_generator.CsvRoundData(self, scenario=config_data.scenario,
+                                                           solution=self.solution_mod,
+                                                           seed=config_data.seedvalue,
                                                            tiles_num=0, particle_num=0,
-                                                           steps=0, directory=dir)
+                                                           steps=0, directory=self.directory)
 
-        mod = importlib.import_module('scenario.' + scenario_name.rsplit('.',1)[0])
+        mod = importlib.import_module('scenario.' + config_data.scenario)
         mod.scenario(self)
-        if random_order:
+        if config_data.random_order:
             random.shuffle(self.particles)
 
 
@@ -127,10 +125,10 @@ class Sim:
 
         #creating gnu plots
         self.csv_round_writer.aggregate_metrics()
-        particleFile = csv_generator.CsvParticleFile(self.directory)
+        particle_csv = csv_generator.CsvParticleFile(self.directory)
         for particle in self.init_particles:
-            particleFile.write_particle(particle)
-        particleFile.csv_file.close()
+            particle_csv.write_particle(particle)
+        particle_csv.csv_file.close()
         generate_gnuplot(self.directory)
         return
 
@@ -420,7 +418,6 @@ class Sim:
         if coords in self.particle_map_coords:
             self.particles.remove(self.particle_map_coords[coords])
             self.particle_rm.append(self.particle_map_coords[coords])
-           # del self.tile_map_coords[rm_tile.coords]
             try:  # cher: added so the program does not crashed if it does not find any entries in the map
                 del self.particle_map_id[self.particle_map_coords[coords].get_id()]
             except KeyError:
@@ -506,7 +503,6 @@ class Sim:
             self.tiles.remove(rm_tile)
             self.tiles_rm.append(rm_tile)
             logging.info("Deleted tile with tile id %s on %s", str(rm_tile.get_id()), str(rm_tile.coords) )
-           # del self.tile_map_coords[rm_tile.coords]
             try:  # cher: added so the program does not crashed if it does not find any entries in the map
                 del self.tile_map_id[rm_tile.get_id()]
             except KeyError:
@@ -532,7 +528,6 @@ class Sim:
         if coords in self.tile_map_coords:
             self.tiles.remove(self.tile_map_coords[coords])
             self.tiles_rm.append(self.tile_map_coords[coords])
-           # del self.tile_map_coords[rm_tile.coords]
             try:  # cher: added so the program does not crashed if it does not find any entries in the map
                 del self.tile_map_id[self.tile_map_coords[coords].get_id()]
             except KeyError:
