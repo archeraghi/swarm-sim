@@ -36,7 +36,6 @@ def read_write( sim):
     sim.get_particle_list()[0].write_to_with(sim.get_particle_list()[1], "particle4", "test6")
     loc_data = sim.get_particle_list()[0].read_from_with(sim.locations[0], "location")
     tile_data = sim.get_particle_list()[0].read_from_with(sim.tiles[0], "tile")
-    #part_data = sim.get_particle_list()[0].read_from_with(sim.get_particle_list()[1], "particle")
     if loc_data != 0:
         print(loc_data)
     if tile_data != 0:

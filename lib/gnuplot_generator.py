@@ -12,7 +12,6 @@ def generate_gnuplot(directory):
     plot.stdin.write('set xlabel "Rounds" \n')
     for bla in data.columns:
         if i >= 5:
-            # bla="Location"
             plot.stdin.write('set ylabel "%s" \n' % (bla))
             plot.stdin.write("set output '" + directory + "/rounds_%s.png' \n" % (bla))
             plot.stdin.write("set term png giant size 800,600 font 'Helvetica,20' \n")
@@ -32,7 +31,6 @@ def generate_gnuplot(directory):
     plot.stdin.write('set xlabel "Particle" \n')
     for bla in data.columns:
         if i >= 3 :
-            # bla="Location"
             plot.stdin.write('set ylabel "%s" \n' % (bla))
             plot.stdin.write("set term png giant size 800,600 font 'Helvetica,20' \n")
             plot.stdin.write("set output '" + directory + "/particle_%s.png' \n" % (bla))

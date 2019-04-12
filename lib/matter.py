@@ -119,13 +119,6 @@ class Matter():
         if (self.mm_limit == True and len( self._memory) < self.mm_size) or not self.mm_limit:
             self._memory[key] = data
             self.sim.csv_round_writer.update_metrics(memory_write=1)
-                # if self.memory_delay == True:
-                #     self._tmp_memory[key] = data
-                #     print("Wrote data at ", self.sim.sim.get_actual_round())
-                #     self.memory_buffer[self.sim.sim.get_actual_round()+self.memory_delay_time] = self._tmp_memory.copy()
-                #     self._tmp_memory.clear()
-                # else:
-                #     self._memory[key] = data
             return True
         else:
             return False

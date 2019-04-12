@@ -315,7 +315,7 @@ class VisWindow(pyglet.window.Window):
             tile_alpha = 1
         else:
             texLeft = 7 / 8
-            texRight = 8 / 8
+            texRight = 1 # 8/8
             texBottom = 4 / 8
             texTop = 5 / 8
             tile_alpha = 0.5
@@ -407,7 +407,7 @@ class VisWindow(pyglet.window.Window):
         self.location_vertex_list.vertices[8 * i: 8 * i + 8] = [x - weird, y - weird, x + weird, y - weird, x + weird,
                                                                 y + weird, x - weird, y + weird]
         texLeft = 7/8
-        texRight = 8/8
+        texRight = 1 #8/8
         texBottom = 0/8
         texTop = 1/8
 
