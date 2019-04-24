@@ -348,7 +348,7 @@ class Sim:
     def sim_to_coords(self, x, y):
         return x, round(y / math.sqrt(3 / 4), 0)
 
-    def add_particle(self, x, y, color=black, alpha=1):
+      def add_particle(self, x, y, color=black, alpha=1):
         """
         Add a particle to the sim database
 
@@ -357,7 +357,7 @@ class Sim:
         :param state: The state of the particle. Default: S for for Stopped or Not Moving. Other options
                       are the moving directions: E, SE, SW, W, NW, NE
         :param color: The color of the particle. Coloroptions: black, gray, red, green, or blue
-        :return: True: Successful added; False: Unsuccsessful
+        :return: Added Matter; False: Unsuccsessful
         """
         if alpha < 0 or alpha >1:
             alpha = 1
@@ -374,7 +374,7 @@ class Sim:
                     self.init_particles.append(new_particle)
                     new_particle.created=True
                     logging.info("Created particle at %s", new_particle.coords)
-                    return True
+                    return new_particle
                 else:
                     print("for x %f and y %f not not possible because Particle exist   ", x, y)
                     return False
@@ -441,9 +441,9 @@ class Sim:
         :param color:
         :param x: the x coordinates on which the tile should be added
         :param y: the y coordinates on which the tile should be added
-        :return: True: Successful added; False: Unsuccsessful
+        :return: Successful added matter; False: Unsuccsessful
         """
-        if alpha < 0 or alpha >1:
+      if alpha < 0 or alpha >1:
             alpha = 1
         if  self.check_coords(x,y) == True:
             if (x,y) not in self.tile_map_coords:
@@ -457,7 +457,7 @@ class Sim:
                 print("Afer adding ", len(self.tiles), self.new_tile.coords )
                 logging.info("Created tile with tile id %s on coords %s",str(self.new_tile.get_id()), str(self.new_tile.coords))
                 self.new_tile.touch()
-                return True
+                return self.new_tile
             else:
                 logging.info ("on x %f and y %f coordinates is a tile already", x, y)
                 return False
@@ -572,6 +572,8 @@ class Sim:
                 return False
         else:
             logging.info("for x %f and y %f not possible to draw ", x, y)
+            return False
+
 
     def remove_location(self, id):
         """
