@@ -31,7 +31,7 @@ read = 0
 write = 1
 particle_counter=0
 
-class Particle(matter.matter):
+class Particle(matter.Matter):
     """In the classe location all the methods for the characterstic of a location is included"""
 
     def __init__(self, sim, x, y, color=black, alpha=1, mm_limit=0, mm_size=0):

@@ -348,7 +348,7 @@ class Sim:
     def sim_to_coords(self, x, y):
         return x, round(y / math.sqrt(3 / 4), 0)
 
-      def add_particle(self, x, y, color=black, alpha=1):
+    def add_particle(self, x, y, color=black, alpha=1):
         """
         Add a particle to the sim database
 
@@ -443,7 +443,7 @@ class Sim:
         :param y: the y coordinates on which the tile should be added
         :return: Successful added matter; False: Unsuccsessful
         """
-      if alpha < 0 or alpha >1:
+        if alpha < 0 or alpha >1:
             alpha = 1
         if  self.check_coords(x,y) == True:
             if (x,y) not in self.tile_map_coords:

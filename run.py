@@ -37,6 +37,7 @@ class ConfigData():
         self.tile_mm_size = config.getint("Matter", "tile_mm_size")
         self.location_mm_size = config.getint("Matter", "location_mm_size")
         self.dir_name = None
+
 def swarm_sim( argv ):
     """In the main function first the config is getting parsed and than
     the simulator and the sim object is created. Afterwards the run method of the simulator
