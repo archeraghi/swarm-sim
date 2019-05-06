@@ -17,6 +17,10 @@ gray = 2
 red = 3
 green = 4
 blue = 5
+yellow = 6
+orange = 7
+cyan = 8
+violett = 9
 
 
 NE=0
@@ -309,30 +313,6 @@ class Particle(matter.Matter):
             return self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords()
         if matter=="location":
             return self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_location_map_coords()
-
-
-    def get_matter_in_dir(self, matter="tile", dir=E):
-        if matter=="tile":
-            if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords():
-                return self.sim.get_tile_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
-        if matter=="particle":
-            if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords():
-                return self.sim.get_particle_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
-        if matter=="location":
-            if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_location_map_coords():
-                return self.sim.get_location_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     def scan_for_matter_within(self, matter='all', hop=1):
