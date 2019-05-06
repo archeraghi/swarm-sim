@@ -168,9 +168,19 @@ class Matter():
             self.color = color_map[color]
         else:
             self.color = color
-
-
         self.touch()
+
+
+    def get_color(self):
+        """
+        Sets the location color
+
+        :param color: Location color
+        :return: None
+        """
+        for color, code in color_map.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
+         if code == self.color:
+           return(color)
 
     def touch(self):
         """Tells the visualization that something has been modified and that it shoud changed it"""
