@@ -271,7 +271,13 @@ class Particle(matter.Matter):
         if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_location_map_coords():
             return self.sim.get_location_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
 
+    def get_location(self):
+        if self.coords in self.sim.location_map_coords:
+            return self.sim.get_location_map_coords()[self.coords]
 
+    def get_tile(self):
+        if self.self.coords in self.sim.get_tile_map_coords():
+            return self.sim.get_tile_map_coords()[self.coords]
 
 
     def write_to_with(self, matter, key=None, data=None):
