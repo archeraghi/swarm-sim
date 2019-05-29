@@ -48,7 +48,7 @@ def swarm_sim( argv ):
     config_data=ConfigData(config)
 
     multiple_sim=0
-    local_time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')[:-1]
+    local_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')[:-1]
     try:
         opts, args = getopt.getopt(argv, "hs:w:r:n:m:d:v:", ["solution=", "scenario="])
     except getopt.GetoptError:
