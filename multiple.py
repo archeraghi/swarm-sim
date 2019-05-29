@@ -26,8 +26,8 @@ def runflac(idx, out, max_round, nTime ):
 
 def main(argv):
     max_round = 1700
-    seed_start = 15
-    seed_end = 20
+    seed_start = 1
+    seed_end = 2
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
     try:
