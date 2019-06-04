@@ -38,7 +38,7 @@ rounds_per_second = 10
 # tile_alpha = 0.6
 particle_alpha = 1
 
-location_alpha = 1
+marker_alpha = 1
 
 
 
@@ -118,7 +118,7 @@ class VisWindow(pyglet.window.Window):
         self.sim = sim
         self.init_tile_vertex_list()
         self.init_particle_vertex_list()
-        self.init_location_vertex_list()
+        self.init_marker_vertex_list()
         self.view = View()
 
         self.particleTexture = pyglet.image.load('lib/images/particle.png').get_mipmapped_texture()
@@ -206,7 +206,7 @@ class VisWindow(pyglet.window.Window):
     def draw(self):
         self.update_tiles()
         self.update_particles()
-        self.update_locations()
+        self.update_markers()
         glLoadIdentity()
         glOrtho(self.view.left, self.view.right, self.view.bottom, self.view.top, 1, -1)
 
@@ -222,7 +222,7 @@ class VisWindow(pyglet.window.Window):
         if len(self.sim.tiles) != 0:
             self.tile_vertex_list.draw(GL_QUADS)
         self.particle_vertex_list.draw(GL_QUADS)
-        self.location_vertex_list.draw(GL_QUADS)
+        self.marker_vertex_list.draw(GL_QUADS)
 
         self.flip()
 
@@ -375,46 +375,46 @@ class VisWindow(pyglet.window.Window):
 
         self.particle_vertex_list.colors[16 * i: 16 * i + 16] = (particle.color + [particle.get_alpha()]) * 4
 
-    def init_location_vertex_list(self):
-        self.location_vertex_list = self.location_vertex_list = pyglet.graphics.vertex_list \
-            (4 * len(self.sim.locations), 'v2f', 't2f', 'c4f')
-        self.update_locations(True)
+    def init_marker_vertex_list(self):
+        self.marker_vertex_list = self.marker_vertex_list = pyglet.graphics.vertex_list \
+            (4 * len(self.sim.markers), 'v2f', 't2f', 'c4f')
+        self.update_markers(True)
 
-    def update_locations(self, update_all=True):
-        if (len(self.sim.locations) != 0):
-            if self.sim.get_location_deleted():
-                self.location_vertex_list.resize(4 * len(self.sim.locations))
-                self.sim.set_location_deleted()
+    def update_markers(self, update_all=True):
+        if (len(self.sim.markers) != 0):
+            if self.sim.get_marker_deleted():
+                self.marker_vertex_list.resize(4 * len(self.sim.markers))
+                self.sim.set_marker_deleted()
                 update_all = True
-            for i, location in enumerate(self.sim.locations):
-                if location.created:
-                    self.location_vertex_list.resize(4 * len(self.sim.locations))
+            for i, marker in enumerate(self.sim.markers):
+                if marker.created:
+                    self.marker_vertex_list.resize(4 * len(self.sim.markers))
                     # self.tile_vertex_list.resize(4 * len(self.sim.tiles), 8 * len(self.sim.tiles))
-                    location.created = False
-                if update_all or location.modified:
-                    self.update_location(i, location)
-                    location.modified = False
+                    marker.created = False
+                if update_all or marker.modified:
+                    self.update_marker(i, marker)
+                    marker.modified = False
         else:
             pass
 
 
-    def update_location(self, i, location):
+    def update_marker(self, i, marker):
         weird = 256 / 220
-        pos = coords_to_sim(location.coords)
+        pos = coords_to_sim(marker.coords)
         x = pos[0]
         y = pos[1]
 
-        self.location_vertex_list.vertices[8 * i: 8 * i + 8] = [x - weird, y - weird, x + weird, y - weird, x + weird,
+        self.marker_vertex_list.vertices[8 * i: 8 * i + 8] = [x - weird, y - weird, x + weird, y - weird, x + weird,
                                                                 y + weird, x - weird, y + weird]
         texLeft = 7/8
         texRight = 1 #8/8
         texBottom = 0/8
         texTop = 1/8
 
-        self.location_vertex_list.tex_coords[8 * i: 8 * i + 8] = [texLeft, texBottom, texRight, texBottom,
+        self.marker_vertex_list.tex_coords[8 * i: 8 * i + 8] = [texLeft, texBottom, texRight, texBottom,
                                                                   texRight, texTop, texLeft, texTop]
 
-        self.location_vertex_list.colors[16 * i: 16 * i + 16] = (location.color + [location.get_alpha()]) * 4
+        self.marker_vertex_list.colors[16 * i: 16 * i + 16] = (marker.color + [marker.get_alpha()]) * 4
 
     def run(self):
         p = 0

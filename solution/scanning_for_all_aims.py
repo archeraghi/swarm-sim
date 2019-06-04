@@ -25,6 +25,6 @@ def solution(self, sim):
                 print ("particle at", list.coords)
             elif list.type=='tile':
                 print("tile", list.coords)
-            elif list.type=='location':
-                print("location", list.coords)
+            elif list.type=='marker':
+                print("marker", list.coords)
 

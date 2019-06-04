@@ -19,16 +19,16 @@ direction = [NE, E, SE, SW, W, NW]
 def solution(sim):
 
     if sim.get_actual_round() == 1:
-        print ("Scanning for locations, tiles and particles")
-        logging.info("Scanning for locations, tiles and particles")
+        print ("Scanning for markers, tiles and particles")
+        logging.info("Scanning for markers, tiles and particles")
         all_matters_list = sim.get_particle_map_coords()[(0, 0)].scan_for_matter_within()
         for list in all_matters_list:
             if list.type == 'particle':
                 print("particle at", list.coords)
             elif list.type == 'tile':
                 print("tile", list.coords)
-            elif list.type == 'location':
-                print("location", list.coords)
+            elif list.type == 'marker':
+                print("marker", list.coords)
         print ("Testing Interface: Take Drop Tiles and Particles")
         logging.info("Testing Interface: Take Drop Tiles and Particles")
 
@@ -76,13 +76,13 @@ def solution(sim):
         logging.info("Start Writing ")
         print("Start Writing")
 
-        sim.get_particle_list()[0].write_to_with(sim.locations[0], "K1", "Location Data")
+        sim.get_particle_list()[0].write_to_with(sim.markers[0], "K1", "marker Data")
         sim.get_particle_list()[0].write_to_with(sim.tiles[0], "K1", "Tile Data")
         sim.get_particle_list()[0].write_to_with(sim.get_particle_list()[1], "K1", "Particle Data")
     elif sim.get_actual_round() == 17:
         logging.info("Start Reading")
         print("Start Reading")
-        loc_data = sim.get_particle_list()[0].read_from_with(sim.locations[0], "K1")
+        loc_data = sim.get_particle_list()[0].read_from_with(sim.markers[0], "K1")
         tile_data = sim.get_particle_list()[0].read_from_with(sim.tiles[0], "K1")
         part_data = sim.get_particle_list()[0].read_from_with(sim.get_particle_list()[1], "K1")
 
@@ -103,12 +103,12 @@ def solution(sim):
                 sim.csv_round_writer.success()
     if sim.get_actual_round() == 24:
         sim.get_particle_list()[1].create_tile()
-        sim.get_particle_list()[2].create_location()
+        sim.get_particle_list()[2].create_marker()
         sim.get_particle_list()[3].create_particle()
 
     if sim.get_actual_round() == 40:
         sim.get_particle_list()[4].create_tile()
-        sim.get_particle_list()[5].create_location()
+        sim.get_particle_list()[5].create_marker()
         sim.get_particle_list()[6].create_particle()
 
 

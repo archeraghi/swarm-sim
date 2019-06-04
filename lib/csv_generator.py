@@ -1,7 +1,7 @@
 """
 
 TODO:
-1- Order the names based on particles, locations, and tiles and alphabetic
+1- Order the names based on particles, markers, and tiles and alphabetic
 2- A new column called round_success
 3- On demand extenstion of the metrics.
 
@@ -23,8 +23,8 @@ class CsvParticleFile:
             self.csv_file = open(self.file_name, 'w', newline='')
             self.writer = csv.writer(self.csv_file)
             self.writer.writerow(['Particle ID', 'Particle Number',
-                                  'Location Created', 'Location Deleted',
-                                  'Location Read', 'Location Write',
+                                  'marker Created', 'marker Deleted',
+                                  'marker Read', 'marker Write',
                                   'Memory Read', 'Memory Write',
                                   'Particles Created', 'Particles Deleted',
                                   'Particles Dropped',
@@ -37,8 +37,8 @@ class CsvParticleFile:
                                   ])
     def write_particle(self, particle):
         csv_iterator = [particle.csv_particle_writer.id, particle.csv_particle_writer.number,
-                        particle.csv_particle_writer.location_created, particle.csv_particle_writer.location_deleted,
-                        particle.csv_particle_writer.location_read, particle.csv_particle_writer.location_write,
+                        particle.csv_particle_writer.marker_created, particle.csv_particle_writer.marker_deleted,
+                        particle.csv_particle_writer.marker_read, particle.csv_particle_writer.marker_write,
                         particle.csv_particle_writer.memory_read, particle.csv_particle_writer.memory_write,
                         particle.csv_particle_writer.particle_created,particle.csv_particle_writer.particles_dropped,
                         particle.csv_particle_writer.particle_deleted, particle.csv_particle_writer.particle_read,
@@ -66,10 +66,10 @@ class CsvParticleData:
         self.tile_deleted = 0
         self.tile_read = 0
         self.tile_write = 0
-        self.location_read = 0
-        self.location_write = 0
-        self.location_created = 0
-        self.location_deleted = 0
+        self.marker_read = 0
+        self.marker_write = 0
+        self.marker_created = 0
+        self.marker_deleted = 0
         self.memory_read = 0
         self.memory_write = 0
         self.tiles_taken = 0
@@ -79,8 +79,8 @@ class CsvParticleData:
 
     def write_particle(self, steps= 0, particle_read=0, particle_created=0, particle_deleted=0, particles_dropped=0,
                        particles_taken=0,
-                       particle_write=0, tile_created=0, tile_deleted=0, tile_read=0, tile_write=0, location_read=0,
-                       location_write=0, location_created=0, location_deleted=0, memory_read=0, memory_write=0,
+                       particle_write=0, tile_created=0, tile_deleted=0, tile_read=0, tile_write=0, marker_read=0,
+                       marker_write=0, marker_created=0, marker_deleted=0, memory_read=0, memory_write=0,
                         tiles_taken = 0, tiles_dropped = 0, success=0):
         self.steps = self.steps + steps
         self.particle_created=self.particle_created+particle_created
@@ -93,10 +93,10 @@ class CsvParticleData:
         self.tile_deleted=self.tile_deleted+tile_deleted
         self.tile_read=self.tile_read+tile_read
         self.tile_write=self.tile_write+tile_write
-        self.location_read=self.location_read+location_read
-        self.location_write=self.location_write+location_write
-        self.location_created=self.location_created+location_created
-        self.location_deleted=self.location_deleted+location_deleted
+        self.marker_read=self.marker_read+marker_read
+        self.marker_write=self.marker_write+marker_write
+        self.marker_created=self.marker_created+marker_created
+        self.marker_deleted=self.marker_deleted+marker_deleted
         self.memory_read=self.memory_read+memory_read
         self.memory_write=self.memory_write+memory_write
         self.tiles_taken = self.tiles_taken + tiles_taken
@@ -109,7 +109,7 @@ class CsvParticleData:
 
 
 class CsvRoundData:
-    def __init__(self, sim, task=0, scenario=0, solution=0, seed=20,  particle_num=0, tiles_num=0, locations_num=0,
+    def __init__(self, sim, task=0, scenario=0, solution=0, seed=20,  particle_num=0, tiles_num=0, markers_num=0,
                  steps=0,  directory="outputs/"):
         self.sim = sim
 
@@ -130,11 +130,11 @@ class CsvRoundData:
         self.tile_num = tiles_num
         self.tile_read = 0
         self.tile_write = 0
-        self.locations_num = locations_num
-        self.location_read = 0
-        self.location_write = 0
-        self.location_created = 0
-        self.location_deleted = 0
+        self.markers_num = markers_num
+        self.marker_read = 0
+        self.marker_write = 0
+        self.marker_created = 0
+        self.marker_deleted = 0
         self.memory_read = 0
         self.memory_write = 0
         self.particle_created_sum = 0
@@ -149,10 +149,10 @@ class CsvRoundData:
         self.tile_deleted_sum = 0
         self.tile_read_sum = 0
         self.tile_write_sum = 0
-        self.location_read_sum = 0
-        self.location_write_sum = 0
-        self.location_created_sum = 0
-        self.location_deleted_sum = 0
+        self.marker_read_sum = 0
+        self.marker_write_sum = 0
+        self.marker_created_sum = 0
+        self.marker_deleted_sum = 0
         self.memory_read_sum = 0
         self.memory_write_sum = 0
         self.success_round = None
@@ -178,11 +178,11 @@ class CsvRoundData:
                                     'Particle Write', 'Particle Write Sum',
                                     'Memory Read', 'Memory Read Sum',
                                     'Memory Write', 'Memory Write Sum',
-                                    'Location Counter',
-                                    'Location Created', 'Location Created Sum',
-                                    'Location Deleted', 'Location Deleted Sum',
-                                    'Location Read', 'Location Read Sum',
-                                    'Location Write', 'Location Write Sum',
+                                    'marker Counter',
+                                    'marker Created', 'marker Created Sum',
+                                    'marker Deleted', 'marker Deleted Sum',
+                                    'marker Read', 'marker Read Sum',
+                                    'marker Write', 'marker Write Sum',
                                     'Tile Counter',
                                     'Tiles Created', 'Tiles Created Sum',
                                     'Tiles Deleted', 'Tiles Deleted Sum',
@@ -198,23 +198,23 @@ class CsvRoundData:
     def update_tiles_num (self, tile):
         self.tile_num = tile
 
-    def update_locations_num(self, act_locations_num):
-        self.locations_num = act_locations_num
+    def update_markers_num(self, act_markers_num):
+        self.markers_num = act_markers_num
 
     def success(self):
         self.success_counter=self.success_counter+1
 
     def update_metrics(self, steps = 0,
-                        particle_read = 0, tile_read = 0, location_read = 0, memory_read = 0,
-                        particle_write = 0, tile_write = 0, location_write = 0, memory_write = 0,
-                        particle_created=0, tile_created=0, location_created=0,
-                        particle_deleted=0, tile_deleted=0, location_deleted=0, tiles_taken=0, tiles_dropped=0,
+                        particle_read = 0, tile_read = 0, marker_read = 0, memory_read = 0,
+                        particle_write = 0, tile_write = 0, marker_write = 0, memory_write = 0,
+                        particle_created=0, tile_created=0, marker_created=0,
+                        particle_deleted=0, tile_deleted=0, marker_deleted=0, tiles_taken=0, tiles_dropped=0,
                         particles_taken=0, particles_dropped=0):
         logging.debug("CSV: Starting writing_rounds")
-        self.location_created_sum = self.location_created_sum + location_created
-        self.location_deleted_sum = self.location_deleted_sum + location_deleted
-        self.location_read_sum = self.location_read_sum + location_read
-        self.location_write_sum = self.location_write_sum + location_write
+        self.marker_created_sum = self.marker_created_sum + marker_created
+        self.marker_deleted_sum = self.marker_deleted_sum + marker_deleted
+        self.marker_read_sum = self.marker_read_sum + marker_read
+        self.marker_write_sum = self.marker_write_sum + marker_write
         self.particle_created_sum = self.particle_created_sum + particle_created
         self.particle_deleted_sum = self.particle_deleted_sum + particle_deleted
         self.particle_read_sum = self.particle_read_sum + particle_read
@@ -235,18 +235,18 @@ class CsvRoundData:
             self.steps = self.steps + steps
             self.particle_read = self.particle_read + particle_read
             self.tile_read = self.tile_read + tile_read
-            self.location_read = self.location_read + location_read
+            self.marker_read = self.marker_read + marker_read
             self.memory_read = self.memory_read + memory_read
             self.particle_write = self.particle_write + particle_write
             self.tile_write = self.tile_write + tile_write
-            self.location_write = self.location_write + location_write
+            self.marker_write = self.marker_write + marker_write
             self.memory_write = self.memory_write + memory_write
             self.particle_created = self.particle_created + particle_created
             self.tile_created = self.tile_created + tile_created
-            self.location_created = self.location_created + location_created
+            self.marker_created = self.marker_created + marker_created
             self.particle_deleted = self.particle_deleted + particle_deleted
             self.tile_deleted = self.tile_deleted + tile_deleted
-            self.location_deleted = self.location_deleted + location_deleted
+            self.marker_deleted = self.marker_deleted + marker_deleted
             self.tiles_dropped = self.tiles_dropped + tiles_dropped
             self.tiles_taken = self.tiles_taken + tiles_taken
             self.particles_taken= self.particles_taken + particles_taken
@@ -256,18 +256,18 @@ class CsvRoundData:
             self.steps = steps
             self.particle_read = particle_read
             self.tile_read = tile_read
-            self.location_read = location_read
+            self.marker_read = marker_read
             self.memory_read = memory_read
             self.particle_write = particle_write
             self.tile_write = tile_write
-            self.location_write = location_write
+            self.marker_write = marker_write
             self.memory_write = memory_write
             self.particle_created = particle_created
             self.tile_created = tile_created
-            self.location_created = location_created
+            self.marker_created = marker_created
             self.particle_deleted = particle_deleted
             self.tile_deleted = tile_deleted
-            self.location_deleted = location_deleted
+            self.marker_deleted = marker_deleted
             self.tiles_dropped = tiles_dropped
             self.tiles_taken = tiles_taken
             self.particles_taken = particles_taken
@@ -285,10 +285,10 @@ class CsvRoundData:
                         self.particles_taken, self.particles_taken_sum,
                         self.particle_write, self.particle_write_sum,
                         self.memory_read, self.memory_read_sum, self.memory_write, self.memory_write_sum,
-                        self.locations_num, self.location_created, self.location_created_sum,
-                        self.location_deleted, self.location_deleted_sum,
-                        self.location_read, self.location_read_sum,
-                        self.location_write, self.location_write_sum,
+                        self.markers_num, self.marker_created, self.marker_created_sum,
+                        self.marker_deleted, self.marker_deleted_sum,
+                        self.marker_read, self.marker_read_sum,
+                        self.marker_write, self.marker_write_sum,
                         self.tile_num, self.tile_created, self.tile_created_sum,
                         self.tile_deleted, self.tile_deleted_sum, self.tiles_dropped, self.tiles_dropped_sum,
                         self.tile_read, self.tile_read_sum, self.tiles_taken, self.tiles_taken_sum,
@@ -298,18 +298,18 @@ class CsvRoundData:
         self.steps=0
         self.particle_read=0
         self.tile_read=0
-        self.location_read=0
+        self.marker_read=0
         self.memory_read=0
         self.particle_write=0
         self.tile_write=0
-        self.location_write=0
+        self.marker_write=0
         self.memory_write=0
         self.particle_created = 0
         self.tile_created = 0
-        self.location_created = 0
+        self.marker_created = 0
         self.particle_deleted = 0
         self.tile_deleted = 0
-        self.location_deleted = 0
+        self.marker_deleted = 0
         self.tiles_dropped = 0
         self.tiles_taken = 0
         self.success_round = None
@@ -341,13 +341,13 @@ class CsvRoundData:
                                 'Particles Taken Sum', 'Particles Taken Avg',
                                 'Particles Taken Min', 'Particles Taken Max',
                                 'Particle Write Sum', 'Particle Write Avg', 'Particle Write Min', 'Particle Write Max',
-                                'Location Counter',
-                                'Location Created Sum', 'Location Created Avg',
-                                'Location Created Min', 'Location Created Max',
-                                'Location Deleted Sum', 'Location Deleted Avg',
-                                'Location Deleted Min', 'Location Deleted Max',
-                                'Location Read Sum', 'Location Read Avg', 'Location Read Min', 'Location Read Max',
-                                'Location Write Sum', 'Location Write Avg', 'Location Write Min', 'Location Write Max',
+                                'marker Counter',
+                                'marker Created Sum', 'marker Created Avg',
+                                'marker Created Min', 'marker Created Max',
+                                'marker Deleted Sum', 'marker Deleted Avg',
+                                'marker Deleted Min', 'marker Deleted Max',
+                                'marker Read Sum', 'marker Read Avg', 'marker Read Min', 'marker Read Max',
+                                'marker Write Sum', 'marker Write Avg', 'marker Write Min', 'marker Write Max',
                                 'Memory Read Sum', 'Memory Read Avg', 'Memory Read Min', 'Memory Read Max',
                                 'Memory Write Sum', 'Memory Write Avg', 'Memory Write Min', 'Memory Write Max',
                                 'Tile Counter',
@@ -392,18 +392,18 @@ class CsvRoundData:
                          data['Particle Write'].max(),
 
 
-                         self.locations_num,
-                         data['Location Created'].sum(), data['Location Created'].mean(),
-                         data['Location Created'].min(), data['Location Created'].max(),
+                         self.markers_num,
+                         data['marker Created'].sum(), data['marker Created'].mean(),
+                         data['marker Created'].min(), data['marker Created'].max(),
 
-                         data['Location Deleted'].sum(), data['Location Deleted'].mean(),
-                         data['Location Deleted'].min(), data['Location Deleted'].max(),
+                         data['marker Deleted'].sum(), data['marker Deleted'].mean(),
+                         data['marker Deleted'].min(), data['marker Deleted'].max(),
 
-                         data['Location Read'].sum(), data['Location Read'].mean(), data['Location Read'].min(),
-                         data['Location Read'].max(),
+                         data['marker Read'].sum(), data['marker Read'].mean(), data['marker Read'].min(),
+                         data['marker Read'].max(),
 
-                         data['Location Write'].sum(), data['Location Write'].mean(), data['Location Write'].min(),
-                         data['Location Write'].max(),
+                         data['marker Write'].sum(), data['marker Write'].mean(), data['marker Write'].min(),
+                         data['marker Write'].max(),
 
                          data['Memory Read'].sum(), data['Memory Read'].mean(), data['Memory Read'].min(),
                          data['Memory Read'].max(),
@@ -462,13 +462,13 @@ class CsvRoundData:
                                 'Particles Taken Sum', 'Particles Taken Avg',
                                 'Particles Taken Min', 'Particles Taken Max',
                                 'Particle Write Sum', 'Particle Write Avg', 'Particle Write Min', 'Particle Write Max',
-                                'Location Counter',
-                                'Location Created Sum', 'Location Created Avg',
-                                'Location Created Min', 'Location Created Max',
-                                'Location Deleted Sum', 'Location Deleted Avg',
-                                'Location Deleted Min', 'Location Deleted Max',
-                                'Location Read Sum', 'Location Read Avg', 'Location Read Min', 'Location Read Max',
-                                'Location Write Sum', 'Location Write Avg', 'Location Write Min', 'Location Write Max',
+                                'marker Counter',
+                                'marker Created Sum', 'marker Created Avg',
+                                'marker Created Min', 'marker Created Max',
+                                'marker Deleted Sum', 'marker Deleted Avg',
+                                'marker Deleted Min', 'marker Deleted Max',
+                                'marker Read Sum', 'marker Read Avg', 'marker Read Min', 'marker Read Max',
+                                'marker Write Sum', 'marker Write Avg', 'marker Write Min', 'marker Write Max',
                                 'Memory Read Sum', 'Memory Read Avg', 'Memory Read Min', 'Memory Read Max',
                                 'Memory Write Sum', 'Memory Write Avg', 'Memory Write Min', 'Memory Write Max',
                                 'Tile Counter',
@@ -514,18 +514,18 @@ class CsvRoundData:
                          data['Particle Write'].max(),
 
 
-                         self.locations_num,
-                         data['Location Created'].sum(), data['Location Created'].mean(),
-                         data['Location Created'].min(), data['Location Created'].max(),
+                         self.markers_num,
+                         data['marker Created'].sum(), data['marker Created'].mean(),
+                         data['marker Created'].min(), data['marker Created'].max(),
 
-                         data['Location Deleted'].sum(), data['Location Deleted'].mean(),
-                         data['Location Deleted'].min(), data['Location Deleted'].max(),
+                         data['marker Deleted'].sum(), data['marker Deleted'].mean(),
+                         data['marker Deleted'].min(), data['marker Deleted'].max(),
 
-                         data['Location Read'].sum(), data['Location Read'].mean(), data['Location Read'].min(),
-                         data['Location Read'].max(),
+                         data['marker Read'].sum(), data['marker Read'].mean(), data['marker Read'].min(),
+                         data['marker Read'].max(),
 
-                         data['Location Write'].sum(), data['Location Write'].mean(), data['Location Write'].min(),
-                         data['Location Write'].max(),
+                         data['marker Write'].sum(), data['marker Write'].mean(), data['marker Write'].min(),
+                         data['marker Write'].max(),
 
                          data['Memory Read'].sum(), data['Memory Read'].mean(), data['Memory Read'].min(),
                          data['Memory Read'].max(),

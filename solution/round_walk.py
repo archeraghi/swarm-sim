@@ -45,6 +45,6 @@ def solution(sim):
             elif dir==SE:
                 dir=NE
 
-        particle.create_location()
+        particle.create_marker()
         particle.move_to(dir)
         ttl = ttl - 1

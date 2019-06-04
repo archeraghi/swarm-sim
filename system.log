@@ -1,44 +1,44 @@
 Started
 Created particle at (0, 0)
-particle with id 1e8ccef4-d67f-44db-b4cf-25aa201b298b is
+particle with id c70f9ca7-a7da-4732-97f6-1c561e68bc8a is
 Going to create a tile in 1 
-Created tile with tile id 67b7793e-1401-4fc5-bc99-818e6c9593ea on coords (1, 0)
+Created tile with tile id cd1af7c7-f639-4b10-b89f-185127d80795 on coords (1, 0)
 Tile is created
-Going to create a location in 4 on position (-1, 0)
-Created location with id c4012956-d37e-4aa5-8f9c-444521bfaa98 on coords (-1, 0)
-Created location on coords (-1, 0)
+Going to create a marker in 4 on position (-1, 0)
+Created marker with id 0ab48d5b-a50d-4359-9da6-0ebb9d0ffa08 on coords (-1, 0)
+Created marker on coords (-1, 0)
 Going to create a particle in 4 on position (-1, 0)
 Created particle at (-1, 0)
 Created particle on coords (-1, 0)
 Going to create a particle in 4 on position (-1, 0)
 Take particle
-particle with particle id 8b10cc7c-6638-4952-89dd-ccbef50082c0  has been taken
+particle with particle id 657e272f-c0ef-48c4-aa94-a5aa75290a3b  has been taken
 Deleting tile in 4 direction
 Could not delet particle on coords (-1, 0)
 Deleting tile in 1 direction
 Deleted tile with tile on coords (1, 0)
-particle with id 1e8ccef4-d67f-44db-b4cf-25aa201b298b is
+particle with id c70f9ca7-a7da-4732-97f6-1c561e68bc8a is
 Going to create a tile on position \(1 , 0\)
-Created tile with tile id eb0ec433-0925-40f3-b44d-8ad73526f11f on coords (1, 0)
+Created tile with tile id 3bc6db4a-2c2b-49b7-890a-1e23d997a6e4 on coords (1, 0)
 Not created tile on coords  \(0 , 1\)
-Going to create a location on position (1, 0)
-Created location with id 93cf375a-6c2f-4228-b5dd-00986aaacf8b on coords (1, 0)
-Created location on coords (1, 0)
+Going to create a marker on position (1, 0)
+Created marker with id 28cf41cc-dcd6-4a08-bf36-5babe2d2a006 on coords (1, 0)
+Created marker on coords (1, 0)
 Deleted tile with tile on coords (1, 0)
 Going to create a particle on position (-1, 0)
 Created particle at (-1, 0)
 Created particle on coords (-1, 0)
-Deleted location  oords (1, 0)
+Deleted marker  oords (1, 0)
 Deleted particle with particle on coords (-1, 0)
 Going to create a tile on position (0, 0)
-Created tile with tile id 03582534-a0e9-4af7-9eba-6820681d63c3 on coords (0, 0)
+Created tile with tile id ef443045-3fab-405a-9254-b868534b76a6 on coords (0, 0)
 Going to create on position (0, 0)
-Created location with id d7112617-30f0-46b0-9bee-87c7190c73df on coords (0, 0)
-Particle 1e8ccef4-d67f-44db-b4cf-25aa201b298b is
+Created marker with id 470a6ec9-47d4-46c4-869a-360ee4d9ccde on coords (0, 0)
+Particle c70f9ca7-a7da-4732-97f6-1c561e68bc8a is
 is going to delete a tile on current position
 Going to create on position (0, 0)
-Particle 1e8ccef4-d67f-44db-b4cf-25aa201b298b is
+Particle c70f9ca7-a7da-4732-97f6-1c561e68bc8a is
 is going to delete a particle on current position
-Particle 8b10cc7c-6638-4952-89dd-ccbef50082c0 is
-is going to delete a location on current position
+Particle 657e272f-c0ef-48c4-aa94-a5aa75290a3b is
+is going to delete a marker on current position
 Finished

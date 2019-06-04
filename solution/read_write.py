@@ -28,13 +28,13 @@ def solution(sim):
 
 
 def read_write( sim):
-    sim.get_particle_list()[0].write_to_with(sim.locations[0], "location", "test1")
+    sim.get_particle_list()[0].write_to_with(sim.markers[0], "marker", "test1")
     sim.get_particle_list()[0].write_to_with(sim.tiles[0], "tile", "test2")
     sim.get_particle_list()[0].write_to_with(sim.get_particle_list()[1], "particle1", "test3")
     sim.get_particle_list()[0].write_to_with(sim.get_particle_list()[1], "particle2", "test4")
     sim.get_particle_list()[0].write_to_with(sim.get_particle_list()[1], "particle3", "test5")
     sim.get_particle_list()[0].write_to_with(sim.get_particle_list()[1], "particle4", "test6")
-    loc_data = sim.get_particle_list()[0].read_from_with(sim.locations[0], "location")
+    loc_data = sim.get_particle_list()[0].read_from_with(sim.markers[0], "marker")
     tile_data = sim.get_particle_list()[0].read_from_with(sim.tiles[0], "tile")
     if loc_data != 0:
         print(loc_data)

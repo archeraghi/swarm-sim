@@ -1,4 +1,4 @@
-"""The location module provides the interface to the locations. A location is any point on
+"""The marker module provides the interface to the markers. A marker is any point on
  the coordinate system of the simulators sim"""
 
 
@@ -31,10 +31,10 @@ color_map = {
 
 
 class Matter():
-    """In the classe location all the methods for the characterstic of a location is included"""
+    """In the classe marker all the methods for the characterstic of a marker is included"""
 
     def __init__(self, sim, x, y, color=black, alpha=1, type=None, mm_limit=False, mm_size=0):
-        """Initializing the location constructor"""
+        """Initializing the marker constructor"""
         self.coords = (x, y)
         self.color = color_map[color]
         self.__id = str(uuid.uuid4())
@@ -97,7 +97,7 @@ class Matter():
 
     def read_whole_memory(self):
         """
-        Reads all  locations own memory based on a give keywoard
+        Reads all  markers own memory based on a give keywoard
 
         :param key: Keywoard
         :return: The founded memory; None: When nothing is written based on the keywoard
@@ -152,16 +152,16 @@ class Matter():
 
     def get_id(self):
         """
-        Gets the location id
-        :return: Location id
+        Gets the marker id
+        :return: marker id
         """
         return self.__id
 
     def set_color(self, color):
         """
-        Sets the location color
+        Sets the marker color
 
-        :param color: Location color
+        :param color: marker color
         :return: None
         """
         if type (color) == int:
@@ -173,9 +173,9 @@ class Matter():
 
     def get_color(self):
         """
-        Sets the location color
+        Sets the marker color
 
-        :param color: Location color
+        :param color: marker color
         :return: None
         """
         for color, code in color_map.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)

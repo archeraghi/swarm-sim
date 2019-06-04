@@ -1,5 +1,5 @@
 """The sim module provides the interface of the simulation sim. In the simulation sim
-all the data of the particles, tiles, and locations are stored.
+all the data of the particles, tiles, and markers are stored.
 It also have the the coordination system and stated the maximum of the x and y coordinate.
 
  .. todo:: What happens if the maximum y or x axis is passed? Either the start from the other side or turns back.
@@ -10,7 +10,7 @@ import importlib
 import random
 import math
 import logging
-from lib import csv_generator, particle, tile, location, vis
+from lib import csv_generator, particle, tile, marker, vis
 from lib.gnuplot_generator import generate_gnuplot
 
 
@@ -80,14 +80,14 @@ class Sim:
         self.__tile_deleted=False
         self.new_tile_flag = False
         self.tile_mm_size=config_data.tile_mm_size
-        self.locations_num=0
-        self.locations = []
-        self.locations_created = []
-        self.location_map_coords = {}
-        self.location_map_id = {}
-        self.locations_rm = []
-        self.location_mm_size=config_data.location_mm_size
-        self.__location_deleted = False
+        self.markers_num=0
+        self.markers = []
+        self.markers_created = []
+        self.marker_map_coords = {}
+        self.marker_map_id = {}
+        self.markers_rm = []
+        self.marker_mm_size=config_data.marker_mm_size
+        self.__marker_deleted = False
         self.new_tile=None
         self.__size_x = config_data.size_x
         self.__size_y = config_data.size_y
@@ -249,37 +249,37 @@ class Sim:
         """
         return self.tile_map_id
 
-    def get_location_num(self):
+    def get_marker_num(self):
         """
-        Returns the actual number of locations in the sim
+        Returns the actual number of markers in the sim
 
-        :return: The actual number of locations
+        :return: The actual number of markers
         """
-        return self.locations_num
+        return self.markers_num
 
-    def get_location_list(self):
+    def get_marker_list(self):
         """
-        Returns the actual number of locations in the sim
+        Returns the actual number of markers in the sim
 
-        :return: The actual number of locations
+        :return: The actual number of markers
         """
-        return self.locations
+        return self.markers
 
-    def get_location_map_coords(self):
+    def get_marker_map_coords(self):
         """
-        Get a dictionary with all locations mapped with their actual coordinates
+        Get a dictionary with all markers mapped with their actual coordinates
 
-        :return: a dictionary with locations and their coordinates
+        :return: a dictionary with markers and their coordinates
         """
-        return self.location_map_coords
+        return self.marker_map_coords
 
-    def get_location_map_id(self):
+    def get_marker_map_id(self):
         """
-        Get a dictionary with all locations mapped with their own ids
+        Get a dictionary with all markers mapped with their own ids
 
-        :return: a dictionary with locations and their own ids
+        :return: a dictionary with markers and their own ids
         """
-        return self.location_map_id
+        return self.marker_map_id
 
 
     def get_coords_in_dir(self, coords, dir):
@@ -311,8 +311,8 @@ class Sim:
     def get_particle_deleted(self):
         return self.__particle_deleted
 
-    def get_location_deleted(self):
-        return self.__location_deleted
+    def get_marker_deleted(self):
+        return self.__marker_deleted
 
     def set_tile_deleted(self):
         self.__tile_deleted = False
@@ -320,8 +320,8 @@ class Sim:
     def set_particle_deleted(self):
         self.__particle_deleted=False
 
-    def set_location_deleted(self):
-        self.__location_deleted = False
+    def set_marker_deleted(self):
+        self.__marker_deleted = False
 
     def check_coords(self, coords_x, coords_y):
         """
@@ -545,7 +545,7 @@ class Sim:
             return False
 
 
-    def add_location(self, x, y, color=black, alpha=1):
+    def add_marker(self, x, y, color=black, alpha=1):
         """
         Add a tile to the sim database
 
@@ -557,77 +557,77 @@ class Sim:
         if alpha < 0 or alpha >1:
             alpha = 1
         if self.check_coords(x, y) == True:
-            if (x, y) not in self.location_map_coords:
-                self.new_location = location.Location(self, x, y, color, alpha,  self.mm_limitation, self.location_mm_size)
-                self.locations.append(self.new_location)
-                self.location_map_coords[self.new_location.coords] = self.new_location
-                self.location_map_id[self.new_location.get_id()] = self.new_location
-                self.csv_round_writer.update_locations_num(len(self.locations))
-                logging.info("Created location with id %s on coords %s", str(self.new_location.get_id()), str(self.new_location.coords))
+            if (x, y) not in self.marker_map_coords:
+                self.new_marker = marker.marker(self, x, y, color, alpha,  self.mm_limitation, self.marker_mm_size)
+                self.markers.append(self.new_marker)
+                self.marker_map_coords[self.new_marker.coords] = self.new_marker
+                self.marker_map_id[self.new_marker.get_id()] = self.new_marker
+                self.csv_round_writer.update_markers_num(len(self.markers))
+                logging.info("Created marker with id %s on coords %s", str(self.new_marker.get_id()), str(self.new_marker.coords))
 
-                self.new_location.created = True
-                self.new_location.touch()
-                return self.new_location
+                self.new_marker.created = True
+                self.new_marker.touch()
+                return self.new_marker
             else:
-                logging.info("on x %f and y %f coordinates is a location already", x, y)
+                logging.info("on x %f and y %f coordinates is a marker already", x, y)
                 return False
         else:
             logging.info("for x %f and y %f not possible to draw ", x, y)
             return False
 
 
-    def remove_location(self, id):
+    def remove_marker(self, id):
         """
         Removes a tile with a given tile_id from to the sim database
 
-        :param id: The locations id that should be removec
+        :param id: The markers id that should be removec
         :return:  True: Successful removed; False: Unsuccessful
         """
-        if id in self.location_map_id:
-            rm_location = self.location_map_id[id]
-            rm_location.touch()
-            if rm_location in self.locations:
-                self.locations.remove(rm_location)
+        if id in self.marker_map_id:
+            rm_marker = self.marker_map_id[id]
+            rm_marker.touch()
+            if rm_marker in self.markers:
+                self.markers.remove(rm_marker)
 
-            self.locations_rm.append(rm_location)
-            logging.info("Deleted location with location id %s on %s", str(id), str(rm_location.coords))
+            self.markers_rm.append(rm_marker)
+            logging.info("Deleted marker with marker id %s on %s", str(id), str(rm_marker.coords))
             try:
-                del self.location_map_coords[rm_location.coords]
+                del self.marker_map_coords[rm_marker.coords]
             except KeyError:
                 pass
             try:
-                del self.location_map_id[id]
+                del self.marker_map_id[id]
             except KeyError:
                 pass
-            self.csv_round_writer.update_locations_num(len(self.locations))
-            self.csv_round_writer.update_metrics( location_deleted=1)
-            self.__location_deleted = True
+            self.csv_round_writer.update_markers_num(len(self.markers))
+            self.csv_round_writer.update_metrics( marker_deleted=1)
+            self.__marker_deleted = True
             return True
         else:
             return False
 
 
-    def remove_location_on(self, coords):
+    def remove_marker_on(self, coords):
         """
-        Removes a location on a give coordinat from to the sim database
+        Removes a marker on a give coordinat from to the sim database
 
         :param coords: A tupel that includes the x and y coorindates
         :return: True: Successful removed; False: Unsuccessful
         """
-        if coords in self.location_map_coords:
-            self.locations.remove(self.location_map_coords[coords])
-            self.locations_rm.append(self.location_map_coords[coords])
+        if coords in self.marker_map_coords:
+            self.markers.remove(self.marker_map_coords[coords])
+            self.markers_rm.append(self.marker_map_coords[coords])
             try:  # cher: added so the program does not crashed if it does not find any entries in the map
-                del self.location_map_id[self.location_map_coords[coords].get_id()]
+                del self.marker_map_id[self.marker_map_coords[coords].get_id()]
             except KeyError:
                 pass
             try:  # cher: added so the program does not crashed if it does not find any entries in the map
-                del self.location_map_coords[coords]
+                del self.marker_map_coords[coords]
             except KeyError:
                 pass
-            self.csv_round_writer.update_locations_num(len(self.locations))
-            self.csv_round_writer.update_metrics( location_deleted=1)
-            self.__location_deleted = True
+            self.csv_round_writer.update_markers_num(len(self.markers))
+            self.csv_round_writer.update_metrics( marker_deleted=1)
+            self.__marker_deleted = True
             return True
         else:
             return False

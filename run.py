@@ -35,7 +35,7 @@ class ConfigData():
         self.mm_limitation = config.getboolean("Matter", "mm_limitation")
         self.particle_mm_size = config.getint("Matter", "particle_mm_size")
         self.tile_mm_size = config.getint("Matter", "tile_mm_size")
-        self.location_mm_size = config.getint("Matter", "location_mm_size")
+        self.marker_mm_size = config.getint("Matter", "marker_mm_size")
         self.dir_name = None
 
 def swarm_sim( argv ):

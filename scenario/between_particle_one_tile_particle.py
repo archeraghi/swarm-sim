@@ -1,5 +1,5 @@
 """
-A sim is created that has two particles, two locations, and two tiles.
+A sim is created that has two particles, two markers, and two tiles.
 """
 
 def scenario(sim):
