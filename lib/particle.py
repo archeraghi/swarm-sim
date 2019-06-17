@@ -195,37 +195,7 @@ class Particle(matter.Matter):
         else:
             return None
 
-    def write_to_with(self, matter, key=None, data=None):
-        """
-        Writes data with given a keyword directly on the matters (paricle, tile, or marker object) memory
-
-        :param matter: The matter can be either a particle, tile, or marker
-        :param key: A string keyword so to order the data that is written into the memory
-        :param data: The data that should be stored into the memory
-        :return: True: Successful written into the memory; False: Unsuccessful
-        """
-        wrote=False
-        if data != None:
-            wrote=False
-            if key==None:
-                wrote=matter.write_memory(data)
-            else:
-                wrote= matter.write_memory_with(key, data)
-            if  wrote==True:
-                if matter.type == "particle":
-                    self.sim.csv_round_writer.update_metrics( particle_write=1)
-                    self.csv_particle_writer.write_particle(particle_write=1)
-                elif matter.type == "tile":
-                    self.sim.csv_round_writer.update_metrics( tile_write=1)
-                    self.csv_particle_writer.write_particle(tile_write=1)
-                elif matter.type == "marker":
-                    self.sim.csv_round_writer.update_metrics( marker_write=1)
-                    self.csv_particle_writer.write_particle(marker_write=1)
-                return True
-            else:
-                return False
-        else:
-            return False
+  
 
 
 
