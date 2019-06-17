@@ -97,6 +97,7 @@ class Sim:
         self.window_size_x = config_data.window_size_x
         self.window_size_y = config_data.window_size_y
         self.border = config_data.border
+        self.config_data = config_data
         self.csv_round_writer = csv_generator.CsvRoundData(self, scenario=config_data.scenario,
                                                            solution=self.solution_mod,
                                                            seed=config_data.seedvalue,
@@ -558,7 +559,7 @@ class Sim:
             alpha = 1
         if self.check_coords(x, y) == True:
             if (x, y) not in self.marker_map_coords:
-                self.new_marker = marker.marker(self, x, y, color, alpha,  self.mm_limitation, self.marker_mm_size)
+                self.new_marker = marker.marker(self, x, y, color, alpha, self.mm_limitation, self.marker_mm_size)
                 self.markers.append(self.new_marker)
                 self.marker_map_coords[self.new_marker.coords] = self.new_marker
                 self.marker_map_id[self.new_marker.get_id()] = self.new_marker
