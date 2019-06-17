@@ -134,8 +134,9 @@ class Particle(matter.Matter):
                 del self.sim.particle_map_coords[self.coords]
             except KeyError:
                 pass
-            self.coords = dir_coord
-            if not self.coords in self.sim.particle_map_coords:
+
+            if not dir_coord in self.sim.particle_map_coords:
+                self.coords = dir_coord
                 self.sim.particle_map_coords[self.coords] = self
                 logging.info("particle %s successfully moved to %s", str(self.get_id()), dir)
                 self.sim.csv_round_writer.update_metrics( steps=1)
