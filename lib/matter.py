@@ -86,7 +86,7 @@ class Matter():
         # if self.memory_delay == True:
         #     for key in self._tmp_memory:
         #         if key ==
-        if  key in self._memory:
+        if key in self._memory:
             tmp_memory = self._memory[key]
             self.sim.csv_round_writer.update_metrics( memory_read=1)
         if isinstance(tmp_memory, list) and len(str(tmp_memory)) == 0:
@@ -103,7 +103,8 @@ class Matter():
         :return: The founded memory; None: When nothing is written based on the keywoard
         """
         if self._memory != None :
-          return self._memory
+            self.sim.csv_round_writer.update_metrics(memory_read=1)
+            return self._memory
         else:
             return None
 
