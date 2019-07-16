@@ -366,7 +366,7 @@ class Sim:
         if len(self.particles) < self.max_particles:
             if  self.check_coords(x,y) == True:
                 if (x,y) not in self.get_particle_map_coords():
-                    new_particle= particle.Particle(self, x, y, color, alpha, self.mm_limitation, self.particle_mm_size)
+                    new_particle= particle.Particle(self, x, y, color, alpha)
                     self.particles_created.append(new_particle)
                     self.particle_map_coords[new_particle.coords] = new_particle
                     self.particle_map_id[new_particle.get_id()] = new_particle
@@ -449,7 +449,7 @@ class Sim:
             alpha = 1
         if  self.check_coords(x,y) == True:
             if (x,y) not in self.tile_map_coords:
-                self.new_tile=tile.Tile(self, x, y, color, alpha, self.mm_limitation, self.tile_mm_size)
+                self.new_tile=tile.Tile(self, x, y, color, alpha)
                 print("Before adding ", len(self.tiles) )
                 self.tiles.append(self.new_tile)
                 self.csv_round_writer.update_tiles_num(len(self.tiles))
@@ -478,7 +478,7 @@ class Sim:
         """
         if self.check_coords(x, y) == True:
             if (x, y) not in self.tile_map_coords:
-                self.new_tile = tile.Tile(self, x, y, color, alpha, self.mm_limitation, self.tile_mm_size)
+                self.new_tile = tile.Tile(self, x, y, color, alpha)
                 self.tiles.append(self.new_tile)
 
                 self.tile_map_coords[self.new_tile.coords] = self.new_tile
@@ -559,7 +559,7 @@ class Sim:
             alpha = 1
         if self.check_coords(x, y) == True:
             if (x, y) not in self.marker_map_coords:
-                self.new_marker = marker.marker(self, x, y, color, alpha, self.mm_limitation, self.marker_mm_size)
+                self.new_marker = marker.marker(self, x, y, color, alpha)
                 self.markers.append(self.new_marker)
                 self.marker_map_coords[self.new_marker.coords] = self.new_marker
                 self.marker_map_id[self.new_marker.get_id()] = self.new_marker
