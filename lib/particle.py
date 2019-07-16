@@ -38,9 +38,9 @@ particle_counter=0
 class Particle(matter.Matter):
     """In the classe marker all the methods for the characterstic of a marker is included"""
 
-    def __init__(self, sim, x, y, color=black, alpha=1, mm_limit=0, mm_size=0):
+    def __init__(self, sim, x, y, color=black, alpha=1):
         """Initializing the marker constructor"""
-        super().__init__( sim, x, y, color, alpha, type="particle", mm_limit=mm_limit, mm_size=mm_size)
+        super().__init__( sim, (x, y), color, alpha, type="particle", mm_size=sim.config_data.particle_mm_size)
         global particle_counter
         particle_counter+=1
         self.number=particle_counter
@@ -122,18 +122,11 @@ class Particle(matter.Matter):
         :return: True: Success Moving;  False: Non moving
         """
         dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
-        #sim = self.sim_to_coords(dir_coord[0], dir_coord[1])
-        #print ("sim actual coord "+ str(sim))
-        if self.sim.border==1:
-            if abs(dir_coord[0]) > self.sim.get_sim_x_size() or  abs(dir_coord[1]) > self.sim.get_sim_y_size() :
-                dir = dir - 3 if dir > 2 else dir + 3
-                dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
+        dir, dir_coord = self.check_within_border(dir, dir_coord)
         if self.sim.check_coords(dir_coord[0], dir_coord[1]):
 
-            try:  # cher: added so the program does not crashed if it does not find any entries in the map
+            if self.sim.particle_map_coords[self.coords]:
                 del self.sim.particle_map_coords[self.coords]
-            except KeyError:
-                pass
 
             if not dir_coord in self.sim.particle_map_coords:
                 self.coords = dir_coord
@@ -142,14 +135,24 @@ class Particle(matter.Matter):
                 self.sim.csv_round_writer.update_metrics( steps=1)
                 self.csv_particle_writer.write_particle(steps=1)
                 self.touch()
-                if self.carried_tile is not None:
-                    self.carried_tile.coords = self.coords
-                    self.carried_tile.touch()
-                elif self.carried_particle is not None:
-                    self.carried_particle.coords = self.coords
-                    self.carried_particle.touch()
+                self.check_for_carried_tile_or_particle()
                 return True
         return False
+
+    def check_for_carried_tile_or_particle(self):
+        if self.carried_tile is not None:
+            self.carried_tile.coords = self.coords
+            self.carried_tile.touch()
+        elif self.carried_particle is not None:
+            self.carried_particle.coords = self.coords
+            self.carried_particle.touch()
+
+    def check_within_border(self, dir, dir_coord):
+        if self.sim.border == 1 and \
+                (abs(dir_coord[0]) > self.sim.get_sim_x_size() or abs(dir_coord[1]) > self.sim.get_sim_y_size()):
+            dir = dir - 3 if dir > 2 else dir + 3
+            dir_coord = self.sim.get_coords_in_dir(self.coords, dir)
+        return dir, dir_coord
 
     def move_to_in_bounds(self, dir):
         """
@@ -194,9 +197,6 @@ class Particle(matter.Matter):
             return tmp_memory
         else:
             return None
-
-
-
 
     def matter_in(self, dir=E):
         """
@@ -250,7 +250,6 @@ class Particle(matter.Matter):
         else:
             return False
 
-
     def get_tile_in(self, dir=E):
         if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords():
             return self.sim.get_tile_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
@@ -280,7 +279,6 @@ class Particle(matter.Matter):
             return self.sim.get_tile_map_coords()[self.coords]
         else:
             return False
-
 
     def write_to_with(self, matter, key=None, data=None):
         """
@@ -1487,7 +1485,6 @@ class Particle(matter.Matter):
             logging.info("Going to create a marker in %s on position %s", str(dir), str(coords))
             new_marker = self.sim.add_marker(coords[0], coords[1], color, alpha)
             if new_marker:
-                # self.sim.new_marker_flag = True
                 logging.info("Created marker on coords %s", str(coords))
                 self.sim.csv_round_writer.update_markers_num(len(self.sim.get_marker_list()))
                 self.sim.csv_round_writer.update_metrics( marker_created=1)
@@ -1514,7 +1511,6 @@ class Particle(matter.Matter):
                 logging.info("Going to create a marker on position %s", str(coords))
                 new_marker =  self.sim.add_marker(coords[0], coords[1], color, alpha)
                 if new_marker:
-                    # self.sim.new_marker_flag = True
                     logging.info("Created marker on coords %s", str(coords))
                     self.sim.csv_round_writer.update_markers_num(len(self.sim.get_marker_list()))
                     self.sim.csv_round_writer.update_metrics( marker_created=1)
