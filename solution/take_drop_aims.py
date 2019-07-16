@@ -15,13 +15,13 @@ NW = 5
 
 direction = [NE, E, SE, SW, W, NW]
 
-def solution(self, sim):
-    if self.get_actual_round() == 1 :
+def solution(sim):
+    if sim.get_actual_round() == 1 :
         sim.get_particle_list()[0].take_tile_in(E)
-    elif self.get_actual_round() == 2 :
+    elif sim.get_actual_round() == 2 :
         sim.get_particle_list()[0].drop_tile_in(NW)
-    elif self.get_actual_round() == 3 :
+    elif sim.get_actual_round() == 3 :
         sim.get_particle_list()[0].take_particle_in(W)
-    elif self.get_actual_round() == 4:
+    elif sim.get_actual_round() == 4:
         sim.get_particle_list()[0].drop_particle_in(SE)
 

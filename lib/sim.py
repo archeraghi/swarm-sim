@@ -559,7 +559,7 @@ class Sim:
             alpha = 1
         if self.check_coords(x, y) == True:
             if (x, y) not in self.marker_map_coords:
-                self.new_marker = marker.marker(self, x, y, color, alpha)
+                self.new_marker = marker.Marker(self, x, y, color, alpha)
                 self.markers.append(self.new_marker)
                 self.marker_map_coords[self.new_marker.coords] = self.new_marker
                 self.marker_map_id[self.new_marker.get_id()] = self.new_marker

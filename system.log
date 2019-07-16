@@ -1,44 +1,49 @@
 Started
 Created particle at (0, 0)
-particle with id c70f9ca7-a7da-4732-97f6-1c561e68bc8a is
-Going to create a tile in 1 
-Created tile with tile id cd1af7c7-f639-4b10-b89f-185127d80795 on coords (1, 0)
-Tile is created
-Going to create a marker in 4 on position (-1, 0)
-Created marker with id 0ab48d5b-a50d-4359-9da6-0ebb9d0ffa08 on coords (-1, 0)
-Created marker on coords (-1, 0)
-Going to create a particle in 4 on position (-1, 0)
-Created particle at (-1, 0)
-Created particle on coords (-1, 0)
-Going to create a particle in 4 on position (-1, 0)
-Take particle
-particle with particle id 657e272f-c0ef-48c4-aa94-a5aa75290a3b  has been taken
-Deleting tile in 4 direction
-Could not delet particle on coords (-1, 0)
-Deleting tile in 1 direction
-Deleted tile with tile on coords (1, 0)
-particle with id c70f9ca7-a7da-4732-97f6-1c561e68bc8a is
-Going to create a tile on position \(1 , 0\)
-Created tile with tile id 3bc6db4a-2c2b-49b7-890a-1e23d997a6e4 on coords (1, 0)
-Not created tile on coords  \(0 , 1\)
-Going to create a marker on position (1, 0)
-Created marker with id 28cf41cc-dcd6-4a08-bf36-5babe2d2a006 on coords (1, 0)
-Created marker on coords (1, 0)
-Deleted tile with tile on coords (1, 0)
-Going to create a particle on position (-1, 0)
-Created particle at (-1, 0)
-Created particle on coords (-1, 0)
-Deleted marker  oords (1, 0)
-Deleted particle with particle on coords (-1, 0)
-Going to create a tile on position (0, 0)
-Created tile with tile id ef443045-3fab-405a-9254-b868534b76a6 on coords (0, 0)
-Going to create on position (0, 0)
-Created marker with id 470a6ec9-47d4-46c4-869a-360ee4d9ccde on coords (0, 0)
-Particle c70f9ca7-a7da-4732-97f6-1c561e68bc8a is
-is going to delete a tile on current position
-Going to create on position (0, 0)
-Particle c70f9ca7-a7da-4732-97f6-1c561e68bc8a is
-is going to delete a particle on current position
-Particle 657e272f-c0ef-48c4-aa94-a5aa75290a3b is
-is going to delete a marker on current position
+Created particle at (1.0, 0.0)
+Created particle at (-1.0, 0.0)
+Created particle at (0.5, 1.0)
+Created particle at (0.5, -1.0)
+Created particle at (-0.5, 1.0)
+Created particle at (-0.5, -1.0)
+Created tile with tile id 5846a692-4b1b-4575-9c26-6d07d2129b7f on coords (2.0, 0.0)
+Created tile with tile id 516cb256-23fc-4fd9-a411-2288cef90e13 on coords (-2.0, 0.0)
+Created tile with tile id 52ae8466-9c6c-4dde-b9ab-eae695fbeec6 on coords (1.5, 1.0)
+Created tile with tile id af89cf4d-1282-4ce0-92b3-99b346a11b12 on coords (1.5, -1.0)
+Created tile with tile id 67007c4a-4792-4754-82e9-fcd4e6f51026 on coords (-1.5, 1.0)
+Created tile with tile id 639eda53-1a14-4eb9-9ed3-bb9ceb8e8665 on coords (-1.5, -1.0)
+Created tile with tile id f07fe444-f198-47f4-b5ea-0e8bd60b85ae on coords (1.0, 2.0)
+Created tile with tile id 560835a2-a8b6-4ca8-b0b4-86f5f2811d7f on coords (1.0, -2.0)
+Created tile with tile id c2bff714-9723-422d-8a92-f64281dce296 on coords (0.0, 2.0)
+Created tile with tile id 7f37210c-8620-4ea8-9439-04e6a12b0cf0 on coords (0.0, -2.0)
+Created tile with tile id 26b24cf7-4bb6-45d5-b222-d89ae4473c4d on coords (-1.0, 2.0)
+Created tile with tile id d1f92f25-d36d-4282-ad36-053b954d479b on coords (-1.0, -2.0)
+Created marker with id e251ca89-961a-41e7-b1e9-b81b64fdd15f on coords (3.0, 0.0)
+Created marker with id a74f671a-0dca-4eb5-a4b3-524d22b4b71d on coords (-3.0, 0.0)
+Created marker with id b5c8dfb9-1f03-4805-8b3f-40a6779323b7 on coords (2.5, 1.0)
+Created marker with id 3e6532e0-4034-4bac-b1c4-f1a778c0da47 on coords (2.5, -1.0)
+Created marker with id 72f903dc-8fb0-4ee4-8a4d-c2cc4fa4ab06 on coords (-2.5, 1.0)
+Created marker with id acb1b235-56c5-4fb1-add6-1f795c40d27b on coords (-2.5, -1.0)
+Created marker with id 822a7766-a252-443e-a7a3-65aaa7d9617f on coords (2.0, 2.0)
+Created marker with id d483bec7-1631-4349-8c92-60aed00905fd on coords (2.0, -2.0)
+Created marker with id 90f3d2cf-d991-4a44-b10d-0f98b618876c on coords (-2.0, 2.0)
+Created marker with id 6700331c-6e74-4f21-9cac-514c9d1c9e18 on coords (-2.0, -2.0)
+Created marker with id 23eb18e2-2aaa-4607-9545-c8d7ec0f3218 on coords (1.5, 3.0)
+Created marker with id a973967c-3254-4961-b942-c8c955f7cae3 on coords (1.5, -3.0)
+Created marker with id 155b2d34-4023-43b6-8a09-ad49a1b0c380 on coords (0.5, 3.0)
+Created marker with id a80c6fb7-e039-4cee-a739-9a6d76915f5b on coords (0.5, -3.0)
+Created marker with id 423d2e23-9cf5-4428-a75e-c95da0a1012f on coords (-0.5, 3.0)
+Created marker with id 3f61385b-9f9a-4c4e-a142-ea02e058fd4c on coords (-0.5, -3.0)
+Created marker with id 68d0c416-22e5-4f1a-ba7b-6d956133bfaf on coords (-1.5, 3.0)
+Created marker with id fa2e22cd-2135-4ab6-a573-bf2546122613 on coords (-1.5, -3.0)
+particle on (0, 0) is scanning for all in 1 hops
+Got 6 in 1 hops
+particle on (0, 0) is scanning for all in 2 hops
+Got 12 in 2 hops
+particle on (0, 0) is scanning for all in 3 hops
+Got 18 in 3 hops
+particle on (0, 0) is scanning for all in 4 hops
+Nothing in 4 hops
+particle on (0, 0) is scanning for all in 5 hops
+Nothing in 5 hops
 Finished
