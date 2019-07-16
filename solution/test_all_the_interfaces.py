@@ -3,18 +3,10 @@ This solution tests all the interfaces that are provided from swarm-sim MAX Roun
 """
 
 import logging
-from locale import str
 import random
 
-NE = 0
-E = 1
-SE = 2
-SW = 3
-W = 4
-NW = 5
-
-
-direction = [NE, E, SE, SW, W, NW]
+#Standard Lib that has to be in each solution
+from lib.std_lib import *
 
 def solution(sim):
 
@@ -110,12 +102,4 @@ def solution(sim):
         sim.get_particle_list()[4].create_tile()
         sim.get_particle_list()[5].create_marker()
         sim.get_particle_list()[6].create_particle()
-
-
-
-        #sim.get_particle_list()[0].take_tile_in(E)
-    #    sim.get_particle_list()[0].drop_particle_in(W)
-    #   sim.get_particle_list()[0].drop_particle_in(E)
-
-    #elif sim.get_actual_round() == 5 :
 

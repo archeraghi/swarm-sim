@@ -2,18 +2,8 @@
 This solution just scans for particles that are within 5 hops range and prints them out.
 """
 
-import logging
-from locale import str
-
-NE = 0
-E = 1
-SE = 2
-SW = 3
-W = 4
-NW = 5
-
-
-direction = [NE, E, SE, SW, W, NW]
+#Standard Lib that has to be in each solution
+from lib.std_lib import *
 
 def solution(sim):
 

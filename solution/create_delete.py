@@ -1,20 +1,8 @@
 """
 This solution is an example for creating and deleting, particles, tiles or markers
 """
-
-import logging
-from locale import str
-import random
-
-NE = 0
-E = 1
-SE = 2
-SW = 3
-W = 4
-NW = 5
-
-
-direction = [NE, E, SE, SW, W, NW]
+#Standard Lib that has to be in each solution
+from lib.std_lib import *
 
 def solution(sim):
     if sim.get_actual_round() == 1:

@@ -125,7 +125,7 @@ class Particle(matter.Matter):
         dir, dir_coord = self.check_within_border(dir, dir_coord)
         if self.sim.check_coords(dir_coord[0], dir_coord[1]):
 
-            if self.sim.particle_map_coords[self.coords]:
+            if self.coords in self.sim.particle_map_coords:
                 del self.sim.particle_map_coords[self.coords]
 
             if not dir_coord in self.sim.particle_map_coords:

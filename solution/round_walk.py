@@ -1,22 +1,6 @@
-import logging
-import random
 
-
-NE = 0
-E = 1
-SE = 2
-SW = 3
-W = 4
-NW = 5
-
-
-direction = [NE, E, SE, SW, W, NW]
-
-ttl = 0
-dir = NE
-max = 0
-
-
+#Standard Lib that has to be in each solution
+from lib.std_lib import *
 
 def solution(sim):
 

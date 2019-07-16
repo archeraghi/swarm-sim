@@ -2,19 +2,8 @@
 The particles are moving infront each other but in the different direction but whenever they meet each other
 the start either to write to each other and then they give out the what it they received from each other.
 """
-
-import logging
-
-NE = 0
-E = 1
-SE = 2
-SW = 3
-W = 4
-NW = 5
-
-
-direction = [NE, E, SE, SW, W, NW]
-
+#Standard Lib that has to be in each solution
+from lib.std_lib import *
 
 def solution(sim):
     """

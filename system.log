@@ -1,49 +1,213 @@
 Started
 Created particle at (0, 0)
+Created tile with tile id 71cee096-f96b-4426-8e50-cbb11661d268 on coords (1.0, 0.0)
+Created marker with id e31124a1-d9fd-40dc-af23-4b68f2c7ca5a on coords (3.0, 2.0)
 Created particle at (1.0, 0.0)
 Created particle at (-1.0, 0.0)
 Created particle at (0.5, 1.0)
 Created particle at (0.5, -1.0)
 Created particle at (-0.5, 1.0)
 Created particle at (-0.5, -1.0)
-Created tile with tile id 5846a692-4b1b-4575-9c26-6d07d2129b7f on coords (2.0, 0.0)
-Created tile with tile id 516cb256-23fc-4fd9-a411-2288cef90e13 on coords (-2.0, 0.0)
-Created tile with tile id 52ae8466-9c6c-4dde-b9ab-eae695fbeec6 on coords (1.5, 1.0)
-Created tile with tile id af89cf4d-1282-4ce0-92b3-99b346a11b12 on coords (1.5, -1.0)
-Created tile with tile id 67007c4a-4792-4754-82e9-fcd4e6f51026 on coords (-1.5, 1.0)
-Created tile with tile id 639eda53-1a14-4eb9-9ed3-bb9ceb8e8665 on coords (-1.5, -1.0)
-Created tile with tile id f07fe444-f198-47f4-b5ea-0e8bd60b85ae on coords (1.0, 2.0)
-Created tile with tile id 560835a2-a8b6-4ca8-b0b4-86f5f2811d7f on coords (1.0, -2.0)
-Created tile with tile id c2bff714-9723-422d-8a92-f64281dce296 on coords (0.0, 2.0)
-Created tile with tile id 7f37210c-8620-4ea8-9439-04e6a12b0cf0 on coords (0.0, -2.0)
-Created tile with tile id 26b24cf7-4bb6-45d5-b222-d89ae4473c4d on coords (-1.0, 2.0)
-Created tile with tile id d1f92f25-d36d-4282-ad36-053b954d479b on coords (-1.0, -2.0)
-Created marker with id e251ca89-961a-41e7-b1e9-b81b64fdd15f on coords (3.0, 0.0)
-Created marker with id a74f671a-0dca-4eb5-a4b3-524d22b4b71d on coords (-3.0, 0.0)
-Created marker with id b5c8dfb9-1f03-4805-8b3f-40a6779323b7 on coords (2.5, 1.0)
-Created marker with id 3e6532e0-4034-4bac-b1c4-f1a778c0da47 on coords (2.5, -1.0)
-Created marker with id 72f903dc-8fb0-4ee4-8a4d-c2cc4fa4ab06 on coords (-2.5, 1.0)
-Created marker with id acb1b235-56c5-4fb1-add6-1f795c40d27b on coords (-2.5, -1.0)
-Created marker with id 822a7766-a252-443e-a7a3-65aaa7d9617f on coords (2.0, 2.0)
-Created marker with id d483bec7-1631-4349-8c92-60aed00905fd on coords (2.0, -2.0)
-Created marker with id 90f3d2cf-d991-4a44-b10d-0f98b618876c on coords (-2.0, 2.0)
-Created marker with id 6700331c-6e74-4f21-9cac-514c9d1c9e18 on coords (-2.0, -2.0)
-Created marker with id 23eb18e2-2aaa-4607-9545-c8d7ec0f3218 on coords (1.5, 3.0)
-Created marker with id a973967c-3254-4961-b942-c8c955f7cae3 on coords (1.5, -3.0)
-Created marker with id 155b2d34-4023-43b6-8a09-ad49a1b0c380 on coords (0.5, 3.0)
-Created marker with id a80c6fb7-e039-4cee-a739-9a6d76915f5b on coords (0.5, -3.0)
-Created marker with id 423d2e23-9cf5-4428-a75e-c95da0a1012f on coords (-0.5, 3.0)
-Created marker with id 3f61385b-9f9a-4c4e-a142-ea02e058fd4c on coords (-0.5, -3.0)
-Created marker with id 68d0c416-22e5-4f1a-ba7b-6d956133bfaf on coords (-1.5, 3.0)
-Created marker with id fa2e22cd-2135-4ab6-a573-bf2546122613 on coords (-1.5, -3.0)
+Created particle at (2.0, 0.0)
+Created particle at (-2.0, 0.0)
+Created particle at (1.5, 1.0)
+Created particle at (1.5, -1.0)
+Created particle at (-1.5, 1.0)
+Created particle at (-1.5, -1.0)
+Created particle at (1.0, 2.0)
+Created particle at (1.0, -2.0)
+Created particle at (0.0, 2.0)
+Created particle at (0.0, -2.0)
+Created particle at (-1.0, 2.0)
+Created particle at (-1.0, -2.0)
+Created tile with tile id 4b93b9b7-b8b9-4bc6-91a0-9f1ca18b7ea9 on coords (4.0, 6.0)
+Created tile with tile id 021beea8-bec3-4bf6-ba79-a4c88d9df793 on coords (2.5, 7.0)
+Created tile with tile id 9d45178e-c849-4030-a9da-51c87b146eeb on coords (4.0, 8.0)
+Created tile with tile id 187cd411-5823-4cdb-b250-82745ece4937 on coords (2.5, 9.0)
+Scanning for markers, tiles and particles
 particle on (0, 0) is scanning for all in 1 hops
-Got 6 in 1 hops
-particle on (0, 0) is scanning for all in 2 hops
-Got 12 in 2 hops
-particle on (0, 0) is scanning for all in 3 hops
-Got 18 in 3 hops
-particle on (0, 0) is scanning for all in 4 hops
-Nothing in 4 hops
-particle on (0, 0) is scanning for all in 5 hops
-Nothing in 5 hops
+Got 7 in 1 hops
+Testing Interface: Take Drop Tiles and Particles
+Tile is not in the sim
+Take particle
+particle with particle id 255b9e5c-09b1-46e6-a24e-db3e379c03c7  has been taken
+No tile taken for dropping
+particle cannot be  taken
+Is not possible to drop the particle on that position
+Tile cannot taken because particle is carrieng either a tile or a particle
+Tile cannot taken because particle is carrieng either a tile or a particle
+Is not possible to drop the particle on that position because it is occupied
+particle cannot be  taken
+Particle succesfull dropped
+particle with particle id e665a64e-9cad-462f-b35b-110ee6d704e2 is in the sim
+particle with particle id e665a64e-9cad-462f-b35b-110ee6d704e2  has been taken
+Particle succesfull dropped
+Tile with tile id 71cee096-f96b-4426-8e50-cbb11661d268 is in the sim
+Tile with tile id 71cee096-f96b-4426-8e50-cbb11661d268  has been taken
+Tile has been dropped on the actual position
+Tile is not in the sim
+No tile is taken for dropping
+particle has been taken
+Dropped particle on (-7, 0) coordinate
+Testing Read and Write
+Start Writing 
+Start Reading
+particle 31317329-c889-48d5-9df1-aef110256e43 successfully moved to 1
+particle e665a64e-9cad-462f-b35b-110ee6d704e2 successfully moved to 2
+particle 46ce4b2d-1e35-461d-9989-1a7fb5e0cac9 successfully moved to 0
+particle 0952f928-fd73-439a-9713-80d0d90d74c6 successfully moved to 5
+particle 6ba7d88a-abf4-4269-85e6-0fd92a048b18 successfully moved to 2
+particle 3f61c10c-2c83-45f1-8c5e-50b316c2fd1c successfully moved to 5
+particle 73916320-6f50-471d-be73-073de0805549 successfully moved to 0
+particle aed53aad-0110-4ab8-a238-480ba3eef292 successfully moved to 0
+particle 972a35a0-6f8e-4b21-9f63-d3688dfe6625 successfully moved to 0
+particle 9e621c14-804f-4518-9b2b-d9949aa5782c successfully moved to 5
+particle 255b9e5c-09b1-46e6-a24e-db3e379c03c7 successfully moved to 4
+particle 798b09e2-63dd-4e25-84f5-5b632a91c554 successfully moved to 1
+particle e303067d-8378-4caa-a3b6-fd3a54bf406d successfully moved to 0
+particle 31317329-c889-48d5-9df1-aef110256e43 successfully moved to 3
+particle e665a64e-9cad-462f-b35b-110ee6d704e2 successfully moved to 3
+particle 0d637896-41c5-46c4-92c7-4dd1d777fdd8 successfully moved to 0
+particle 2468cb71-f3e2-4f0b-9979-a7c0d8a25d3c successfully moved to 1
+particle 46ce4b2d-1e35-461d-9989-1a7fb5e0cac9 successfully moved to 4
+particle 645a246b-9153-4706-8bd2-afd031bb4e59 successfully moved to 2
+particle 6ba7d88a-abf4-4269-85e6-0fd92a048b18 successfully moved to 4
+particle 3f61c10c-2c83-45f1-8c5e-50b316c2fd1c successfully moved to 1
+particle eedc8142-fdc0-400a-ac23-7138a881faf3 successfully moved to 5
+particle 972a35a0-6f8e-4b21-9f63-d3688dfe6625 successfully moved to 1
+particle 9e621c14-804f-4518-9b2b-d9949aa5782c successfully moved to 4
+particle 255b9e5c-09b1-46e6-a24e-db3e379c03c7 successfully moved to 0
+particle 798b09e2-63dd-4e25-84f5-5b632a91c554 successfully moved to 3
+particle 31317329-c889-48d5-9df1-aef110256e43 successfully moved to 3
+particle e665a64e-9cad-462f-b35b-110ee6d704e2 successfully moved to 5
+particle 0d637896-41c5-46c4-92c7-4dd1d777fdd8 successfully moved to 4
+particle 8ffc5c10-6b65-4b3d-b9a3-c81bfcc80e7a successfully moved to 3
+particle 645a246b-9153-4706-8bd2-afd031bb4e59 successfully moved to 4
+particle 0952f928-fd73-439a-9713-80d0d90d74c6 successfully moved to 0
+particle 6ba7d88a-abf4-4269-85e6-0fd92a048b18 successfully moved to 5
+particle 3f61c10c-2c83-45f1-8c5e-50b316c2fd1c successfully moved to 5
+particle eedc8142-fdc0-400a-ac23-7138a881faf3 successfully moved to 0
+particle aed53aad-0110-4ab8-a238-480ba3eef292 successfully moved to 5
+particle 972a35a0-6f8e-4b21-9f63-d3688dfe6625 successfully moved to 2
+particle 9e621c14-804f-4518-9b2b-d9949aa5782c successfully moved to 2
+particle 255b9e5c-09b1-46e6-a24e-db3e379c03c7 successfully moved to 2
+particle 798b09e2-63dd-4e25-84f5-5b632a91c554 successfully moved to 5
+particle e303067d-8378-4caa-a3b6-fd3a54bf406d successfully moved to 3
+particle 31317329-c889-48d5-9df1-aef110256e43 successfully moved to 5
+particle e665a64e-9cad-462f-b35b-110ee6d704e2 successfully moved to 2
+particle 0d637896-41c5-46c4-92c7-4dd1d777fdd8 successfully moved to 0
+particle 8ffc5c10-6b65-4b3d-b9a3-c81bfcc80e7a successfully moved to 2
+particle 2468cb71-f3e2-4f0b-9979-a7c0d8a25d3c successfully moved to 2
+particle 645a246b-9153-4706-8bd2-afd031bb4e59 successfully moved to 2
+particle 0952f928-fd73-439a-9713-80d0d90d74c6 successfully moved to 4
+particle 6ba7d88a-abf4-4269-85e6-0fd92a048b18 successfully moved to 4
+particle 3f61c10c-2c83-45f1-8c5e-50b316c2fd1c successfully moved to 4
+particle eedc8142-fdc0-400a-ac23-7138a881faf3 successfully moved to 1
+particle aed53aad-0110-4ab8-a238-480ba3eef292 successfully moved to 3
+particle 9e621c14-804f-4518-9b2b-d9949aa5782c successfully moved to 0
+particle 255b9e5c-09b1-46e6-a24e-db3e379c03c7 successfully moved to 4
+particle 798b09e2-63dd-4e25-84f5-5b632a91c554 successfully moved to 0
+Going to create a tile on position (-1.0, -4.0)
+Created tile with tile id e23188d9-c3bc-4bb7-8ad0-57a596c2e004 on coords (-1.0, -4.0)
+Going to create on position (-1.0, 4.0)
+Created marker with id 7f4529d9-791a-41d4-9b9a-90e30ba12879 on coords (-1.0, 4.0)
+Going to create on position (1.0, -2.0)
+particle 31317329-c889-48d5-9df1-aef110256e43 successfully moved to 5
+particle e665a64e-9cad-462f-b35b-110ee6d704e2 successfully moved to 3
+particle 0d637896-41c5-46c4-92c7-4dd1d777fdd8 successfully moved to 0
+particle 8ffc5c10-6b65-4b3d-b9a3-c81bfcc80e7a successfully moved to 3
+particle a089a18a-bc0b-4877-a51b-c17c41a7e89f successfully moved to 1
+particle 2468cb71-f3e2-4f0b-9979-a7c0d8a25d3c successfully moved to 4
+Tile has been taken
+particle 46ce4b2d-1e35-461d-9989-1a7fb5e0cac9 successfully moved to 0
+particle 645a246b-9153-4706-8bd2-afd031bb4e59 successfully moved to 4
+particle 0952f928-fd73-439a-9713-80d0d90d74c6 successfully moved to 1
+particle eedc8142-fdc0-400a-ac23-7138a881faf3 successfully moved to 5
+particle 73916320-6f50-471d-be73-073de0805549 successfully moved to 2
+particle aed53aad-0110-4ab8-a238-480ba3eef292 successfully moved to 0
+particle 972a35a0-6f8e-4b21-9f63-d3688dfe6625 successfully moved to 3
+particle 255b9e5c-09b1-46e6-a24e-db3e379c03c7 successfully moved to 3
+particle 798b09e2-63dd-4e25-84f5-5b632a91c554 successfully moved to 2
+particle e303067d-8378-4caa-a3b6-fd3a54bf406d successfully moved to 4
+particle 31317329-c889-48d5-9df1-aef110256e43 successfully moved to 5
+particle e665a64e-9cad-462f-b35b-110ee6d704e2 successfully moved to 5
+particle 0d637896-41c5-46c4-92c7-4dd1d777fdd8 successfully moved to 0
+particle 8ffc5c10-6b65-4b3d-b9a3-c81bfcc80e7a successfully moved to 4
+particle 46ce4b2d-1e35-461d-9989-1a7fb5e0cac9 successfully moved to 1
+particle 645a246b-9153-4706-8bd2-afd031bb4e59 successfully moved to 2
+particle 0952f928-fd73-439a-9713-80d0d90d74c6 successfully moved to 2
+particle 6ba7d88a-abf4-4269-85e6-0fd92a048b18 successfully moved to 3
+particle 3f61c10c-2c83-45f1-8c5e-50b316c2fd1c successfully moved to 3
+particle eedc8142-fdc0-400a-ac23-7138a881faf3 successfully moved to 5
+particle 972a35a0-6f8e-4b21-9f63-d3688dfe6625 successfully moved to 1
+particle 9e621c14-804f-4518-9b2b-d9949aa5782c successfully moved to 3
+particle 255b9e5c-09b1-46e6-a24e-db3e379c03c7 successfully moved to 4
+particle 798b09e2-63dd-4e25-84f5-5b632a91c554 successfully moved to 2
+particle e303067d-8378-4caa-a3b6-fd3a54bf406d successfully moved to 1
+particle 31317329-c889-48d5-9df1-aef110256e43 successfully moved to 1
+particle e665a64e-9cad-462f-b35b-110ee6d704e2 successfully moved to 5
+particle 0d637896-41c5-46c4-92c7-4dd1d777fdd8 successfully moved to 1
+particle 8ffc5c10-6b65-4b3d-b9a3-c81bfcc80e7a successfully moved to 4
+particle 2468cb71-f3e2-4f0b-9979-a7c0d8a25d3c successfully moved to 2
+particle 46ce4b2d-1e35-461d-9989-1a7fb5e0cac9 successfully moved to 2
+particle 645a246b-9153-4706-8bd2-afd031bb4e59 successfully moved to 1
+particle 0952f928-fd73-439a-9713-80d0d90d74c6 successfully moved to 1
+particle 6ba7d88a-abf4-4269-85e6-0fd92a048b18 successfully moved to 0
+particle 3f61c10c-2c83-45f1-8c5e-50b316c2fd1c successfully moved to 4
+particle eedc8142-fdc0-400a-ac23-7138a881faf3 successfully moved to 0
+particle 73916320-6f50-471d-be73-073de0805549 successfully moved to 1
+particle aed53aad-0110-4ab8-a238-480ba3eef292 successfully moved to 4
+particle 9e621c14-804f-4518-9b2b-d9949aa5782c successfully moved to 2
+particle 255b9e5c-09b1-46e6-a24e-db3e379c03c7 successfully moved to 4
+particle e303067d-8378-4caa-a3b6-fd3a54bf406d successfully moved to 1
+particle 31317329-c889-48d5-9df1-aef110256e43 successfully moved to 0
+particle e665a64e-9cad-462f-b35b-110ee6d704e2 successfully moved to 2
+particle 0d637896-41c5-46c4-92c7-4dd1d777fdd8 successfully moved to 5
+particle 8ffc5c10-6b65-4b3d-b9a3-c81bfcc80e7a successfully moved to 2
+Tile has been taken
+particle a089a18a-bc0b-4877-a51b-c17c41a7e89f successfully moved to 5
+particle 2468cb71-f3e2-4f0b-9979-a7c0d8a25d3c successfully moved to 0
+particle 46ce4b2d-1e35-461d-9989-1a7fb5e0cac9 successfully moved to 1
+particle 6ba7d88a-abf4-4269-85e6-0fd92a048b18 successfully moved to 3
+particle 3f61c10c-2c83-45f1-8c5e-50b316c2fd1c successfully moved to 3
+particle eedc8142-fdc0-400a-ac23-7138a881faf3 successfully moved to 5
+particle 73916320-6f50-471d-be73-073de0805549 successfully moved to 2
+particle 972a35a0-6f8e-4b21-9f63-d3688dfe6625 successfully moved to 5
+particle 9e621c14-804f-4518-9b2b-d9949aa5782c successfully moved to 3
+particle 255b9e5c-09b1-46e6-a24e-db3e379c03c7 successfully moved to 5
+particle 798b09e2-63dd-4e25-84f5-5b632a91c554 successfully moved to 1
+particle e303067d-8378-4caa-a3b6-fd3a54bf406d successfully moved to 3
+particle 31317329-c889-48d5-9df1-aef110256e43 successfully moved to 2
+particle e665a64e-9cad-462f-b35b-110ee6d704e2 successfully moved to 4
+particle 0d637896-41c5-46c4-92c7-4dd1d777fdd8 successfully moved to 0
+particle 8ffc5c10-6b65-4b3d-b9a3-c81bfcc80e7a successfully moved to 2
+particle a089a18a-bc0b-4877-a51b-c17c41a7e89f successfully moved to 2
+particle 2468cb71-f3e2-4f0b-9979-a7c0d8a25d3c successfully moved to 4
+particle 46ce4b2d-1e35-461d-9989-1a7fb5e0cac9 successfully moved to 5
+particle 3f61c10c-2c83-45f1-8c5e-50b316c2fd1c successfully moved to 1
+particle eedc8142-fdc0-400a-ac23-7138a881faf3 successfully moved to 5
+particle 73916320-6f50-471d-be73-073de0805549 successfully moved to 2
+particle aed53aad-0110-4ab8-a238-480ba3eef292 successfully moved to 4
+particle 972a35a0-6f8e-4b21-9f63-d3688dfe6625 successfully moved to 2
+particle 9e621c14-804f-4518-9b2b-d9949aa5782c successfully moved to 0
+particle 255b9e5c-09b1-46e6-a24e-db3e379c03c7 successfully moved to 5
+particle 798b09e2-63dd-4e25-84f5-5b632a91c554 successfully moved to 0
+particle e303067d-8378-4caa-a3b6-fd3a54bf406d successfully moved to 5
+particle 31317329-c889-48d5-9df1-aef110256e43 successfully moved to 0
+particle e665a64e-9cad-462f-b35b-110ee6d704e2 successfully moved to 1
+particle 0d637896-41c5-46c4-92c7-4dd1d777fdd8 successfully moved to 4
+particle 8ffc5c10-6b65-4b3d-b9a3-c81bfcc80e7a successfully moved to 2
+particle a089a18a-bc0b-4877-a51b-c17c41a7e89f successfully moved to 3
+particle 2468cb71-f3e2-4f0b-9979-a7c0d8a25d3c successfully moved to 1
+particle 46ce4b2d-1e35-461d-9989-1a7fb5e0cac9 successfully moved to 1
+particle 645a246b-9153-4706-8bd2-afd031bb4e59 successfully moved to 1
+particle 0952f928-fd73-439a-9713-80d0d90d74c6 successfully moved to 3
+particle 6ba7d88a-abf4-4269-85e6-0fd92a048b18 successfully moved to 3
+particle 3f61c10c-2c83-45f1-8c5e-50b316c2fd1c successfully moved to 0
+particle eedc8142-fdc0-400a-ac23-7138a881faf3 successfully moved to 4
+particle aed53aad-0110-4ab8-a238-480ba3eef292 successfully moved to 4
+particle 9e621c14-804f-4518-9b2b-d9949aa5782c successfully moved to 2
+particle 255b9e5c-09b1-46e6-a24e-db3e379c03c7 successfully moved to 0
+particle 798b09e2-63dd-4e25-84f5-5b632a91c554 successfully moved to 3
+particle e303067d-8378-4caa-a3b6-fd3a54bf406d successfully moved to 3
 Finished
