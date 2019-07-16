@@ -195,60 +195,91 @@ class Particle(matter.Matter):
         else:
             return None
 
-  
 
 
 
-    def matter_in(self, matter="tile", dir=E):
-        if matter=="tile":
-            return self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords()
-        if matter=="particle":
-            return self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords()
-        if matter=="marker":
-            return self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords()
-
+    def matter_in(self, dir=E):
+        """
+        :param dir: the direction to check if a matter is there
+        :return: True: if a matter is there, False: if not
+        """
+        if  self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords() \
+            or self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords() \
+            or self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords():
+            return True
+        else:
+            return False
 
     def tile_in(self, dir=E):
-            return self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords()
+        """
+        :param dir: the direction to check if a tile is there
+        :return: True: if a tile is there, False: if not
+        """
+        if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords():
+            return True
+        else:
+            return False
 
     def particle_in(self, dir=E):
-        return self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords()
+        """
+        :param dir: the direction to check if a particle is there
+        :return: True: if a particle is there, False: if not
+        """
+        if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords():
+            return True
+        else:
+            return False
 
     def marker_in(self, dir=E):
-         return self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords()
+        """
+        :param dir: the direction to check if a marker is there
+        :return: True: if a marker is there, False: if not
+        """
+        if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords():
+            return True
+        else:
+            return False
 
-
-    def get_matter_in_dir(self, matter="tile", dir=E):
-        if matter=="tile":
-            if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords():
-                return self.sim.get_tile_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
-        if matter=="particle":
-            if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords():
-                return self.sim.get_particle_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
-        if matter=="marker":
-            if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords():
-                return self.sim.get_marker_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
+    def get_matter_in(self, dir=E):
+        if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords():
+            return self.sim.get_tile_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
+        elif self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords():
+            return self.sim.get_particle_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
+        elif self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords():
+            return self.sim.get_marker_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
+        else:
+            return False
 
 
     def get_tile_in(self, dir=E):
         if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords():
             return self.sim.get_tile_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
+        else:
+            return False
 
     def get_particle_in(self, dir=E):
         if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords():
             return self.sim.get_particle_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
+        else:
+            return False
 
     def get_marker_in(self, dir=E):
         if self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords():
             return self.sim.get_marker_map_coords()[self.sim.get_coords_in_dir(self.coords, dir)]
+        else:
+            return False
 
     def get_marker(self):
         if self.coords in self.sim.marker_map_coords:
             return self.sim.get_marker_map_coords()[self.coords]
+        else:
+            return False
 
     def get_tile(self):
         if self.self.coords in self.sim.get_tile_map_coords():
             return self.sim.get_tile_map_coords()[self.coords]
+        else:
+            return False
 
 
     def write_to_with(self, matter, key=None, data=None):
@@ -282,15 +313,6 @@ class Particle(matter.Matter):
                 return False
         else:
             return False
-
-    def if_matter_in_dir(self, matter="tile", dir=E):
-        if matter=="tile":
-            return self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_tile_map_coords()
-        if matter=="particle":
-            return self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_particle_map_coords()
-        if matter=="marker":
-            return self.sim.get_coords_in_dir(self.coords, dir) in self.sim.get_marker_map_coords()
-
 
     def scan_for_matter_within(self, matter='all', hop=1):
         """
@@ -334,33 +356,22 @@ class Particle(matter.Matter):
             y_scan_coord_pos = self.coords[1] + cnt
             if cnt == 0:
                 if matter == "particles":
-                    # if self.coords in self.sim.particle_map_coords:
-                    #     hop_list.append(self.sim.particle_map_coords[self.coords])
                     if (x_scan_pos, y_scan_coord_neg) in self.sim.particle_map_coords:
                         hop_list.append(self.sim.particle_map_coords[(x_scan_pos, y_scan_coord_neg)])
                     if (x_scan_neg, y_scan_coord_neg) in self.sim.particle_map_coords:
                         hop_list.append(self.sim.particle_map_coords[(x_scan_neg, y_scan_coord_neg)])
                 elif matter == "markers":
-                    # if self.coords in self.sim.marker_map_coords:
-                    #     hop_list.append(self.sim.marker_map_coords[self.coords])
                     if (x_scan_pos, y_scan_coord_neg) in self.sim.marker_map_coords:
                         hop_list.append(self.sim.marker_map_coords[(x_scan_pos, y_scan_coord_neg)])
                     if (x_scan_neg, y_scan_coord_neg) in self.sim.marker_map_coords:
                         hop_list.append(self.sim.marker_map_coords[(x_scan_neg, y_scan_coord_neg)])
                 elif matter == "tiles":
-                    # if self.coords in self.sim.tile_map_coords:
-                    #     hop_list.append(self.sim.tile_map_coords[self.coords])
                     if (x_scan_pos, y_scan_coord_neg) in self.sim.tile_map_coords:
                         hop_list.append(self.sim.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
                     if (x_scan_neg, y_scan_coord_neg) in self.sim.tile_map_coords:
                         hop_list.append(self.sim.tile_map_coords[(x_scan_neg, y_scan_coord_neg)])
                 elif matter == "all":
-                    # if self.coords in self.sim.tile_map_coords:
-                    #     hop_list.append(self.sim.tile_map_coords[self.coords])
-                    # if self.coords in self.sim.marker_map_coords:
-                    #     hop_list.append(self.sim.marker_map_coords[self.coords])
-                    # if self.coords in self.sim.particle_map_coords:
-                    #    hop_list.append(self.sim.particle_map_coords[self.coords])
+
                     if (x_scan_pos, y_scan_coord_neg) in self.sim.tile_map_coords:
                         hop_list.append(self.sim.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
                     if (x_scan_neg, y_scan_coord_neg) in self.sim.tile_map_coords:
@@ -464,7 +475,6 @@ class Particle(matter.Matter):
                         hop_list.append(self.sim.marker_map_coords[(0, 0)])
                     if (0, 0) in self.sim.tile_map_coords:
                         hop_list.append(self.sim.tile_map_coords[(0, 0)])
-
                 else:
                     if (x_upper_scan, y_up_scan) in self.sim.particle_map_coords:
                         hop_list.append(self.sim.particle_map_coords[(x_upper_scan, y_up_scan)])
@@ -729,8 +739,6 @@ class Particle(matter.Matter):
             logging.info("Nothing in %s hops", str(hop))
             return None
 
-
-
     def take_me(self, coords=0):
         """
         The particle is getting taken from the the other particle on the given coordinate
@@ -749,7 +757,6 @@ class Particle(matter.Matter):
         else:
             return False
 
-
     def drop_me(self, coords):
         """
         The actual particle is getting dropped
@@ -761,8 +768,6 @@ class Particle(matter.Matter):
         self.coords = coords
         self.__isCarried = False
         self.touch()
-
-
 
     def create_tile(self, color=gray, alpha=1):
         """
@@ -913,7 +918,6 @@ class Particle(matter.Matter):
             logging.info("Could not delet tile on coords %s", str(coords))
             return False
 
-
     def take_tile(self):
         """
         Takes a tile on the actual position
@@ -938,7 +942,6 @@ class Particle(matter.Matter):
         else:
             logging.info("Tile cannot taken because particle is carrieng either a tile or a particle")
             return False
-
 
     def take_tile_with(self, id):
         """
