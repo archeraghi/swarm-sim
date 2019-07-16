@@ -9,7 +9,7 @@ def solution(sim):
         global max
         global dir
 
-        if sim.get_actual_round() == 0:
+        if sim.get_actual_round() == 1:
             max = 0
             ttl = 0
             dir = NE
