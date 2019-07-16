@@ -10,7 +10,7 @@ red = 3
 green = 4
 blue = 5
 
-class marker(matter.Matter):
+class Marker(matter.Matter):
     """In the classe marker all the methods for the characterstic of a marker is included"""
 
     def __init__(self, sim, x, y, color=black, alpha=1, mm_limit=0, mm_size=0):
