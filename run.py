@@ -52,11 +52,11 @@ def swarm_sim( argv ):
     try:
         opts, args = getopt.getopt(argv, "hs:w:r:n:m:d:v:", ["solution=", "scenario="])
     except getopt.GetoptError:
-        print('Error: run.py -r <randomeSeed> -w <scenario> -s <solution> -n <maxRounds>')
+        print('Error: run.py -r <seed> -w <scenario> -s <solution> -n <maxRounds>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('run.py -r <randomeSeed> -w <scenario> -s <solution> -n <maxRounds>')
+            print('run.py -r <seed> -w <scenario> -s <solution> -n <maxRounds>')
             sys.exit()
         elif opt in ("-s", "--solution"):
             config_data.solution = arg
@@ -73,10 +73,7 @@ def swarm_sim( argv ):
         elif opt in ("-d"):
             local_time = str(arg)
 
-
-    #logging.basicConfig(filename='myapp.log', filemode='w', level=logging.INFO, format='%(asctime)s %(message)s')
     logging.basicConfig(filename='system.log', filemode='w', level=logging.INFO, format='%(message)s')
-
 
     if multiple_sim == 1:
         config_data.dir_name= local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
