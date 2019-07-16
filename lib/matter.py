@@ -33,9 +33,9 @@ color_map = {
 class Matter():
     """In the classe marker all the methods for the characterstic of a marker is included"""
 
-    def __init__(self, sim, x, y, color=black, alpha=1, type=None, mm_limit=False, mm_size=0):
+    def __init__(self, sim, coords, color=black, alpha=1, type=None, mm_size=100):
         """Initializing the marker constructor"""
-        self.coords = (x, y)
+        self.coords = coords
         self.color = color_map[color]
         self.__id = str(uuid.uuid4())
         self.memory_delay_time=3
@@ -47,7 +47,7 @@ class Matter():
         self.__modified=False
         self.__alpha=alpha
         self.type = type
-        self.mm_limit = mm_limit
+        self.mm_limit = sim.config_data.mm_limitation
         self.mm_size = mm_size
 
     def set_alpha(self, alpha):
