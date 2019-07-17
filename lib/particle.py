@@ -750,6 +750,7 @@ class Particle(matter.Matter):
                 del self.sim.particle_map_coords[self.coords]
             self.__isCarried = True
             self.coords = coords
+            self.set_alpha(0.5)
             self.touch()
             return True
         else:
@@ -765,6 +766,7 @@ class Particle(matter.Matter):
         self.sim.particle_map_coords[coords] = self
         self.coords = coords
         self.__isCarried = False
+        self.set_alpha(1)
         self.touch()
 
     def create_tile(self, color=gray, alpha=1):

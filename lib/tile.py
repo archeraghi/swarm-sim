@@ -54,6 +54,7 @@ class Tile(matter.Matter):
                 if self.coords in self.sim.tile_map:
                     del self.sim.tile_map_coords[self.coords]
                 self.__isCarried = True
+                self.set_alpha(0.5)
                 self.touch()
                 return True
             else:
@@ -64,6 +65,7 @@ class Tile(matter.Matter):
                     del self.sim.tile_map_coords[self.coords]
                 self.__isCarried = True
                 self.coords = coords
+                self.set_alpha(0.5)
                 self.touch()
                 return True
             else:
@@ -81,6 +83,7 @@ class Tile(matter.Matter):
         self.sim.tile_map_coords[coords] = self
         self.coords = coords
         self.__isCarried = False
+        self.set_alpha(1)
         self.touch()
 
     def update_tile_coords(self, tile, new_coords):

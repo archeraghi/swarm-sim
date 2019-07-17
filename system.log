@@ -1,93 +1,24 @@
 Started
 Created particle at (0, 0)
-Going to create on position (0, 0)
-Created marker with id d160e9af-1767-486c-a6eb-854bcdfaa567 on coords (0, 0)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 5
-Going to create on position (-0.5, 1)
-Created marker with id 60b1d952-dc74-4242-bca2-5ebfee47ea90 on coords (-0.5, 1)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 3
-Going to create on position (-1.0, 0)
-Created marker with id c0ecd07f-4bd9-4971-943b-9bc8854510b3 on coords (-1.0, 0)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 2
-Going to create on position (-0.5, -1)
-Created marker with id 2b6a2353-c0a2-44d8-ae35-2fe50268e72a on coords (-0.5, -1)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 2
-Going to create on position (0.0, -2)
-Created marker with id 05ea2b35-e11e-4799-b09e-48a7db4943be on coords (0.0, -2)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 0
-Going to create on position (0.5, -1)
-Created marker with id 404776d8-80ec-4f7d-8c77-fb5ff7f03642 on coords (0.5, -1)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 0
-Going to create on position (1.0, 0)
-Created marker with id d5ac977b-bad7-47fd-97ab-4288005bae9b on coords (1.0, 0)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 5
-Going to create on position (0.5, 1)
-Created marker with id 2286f9f5-7efe-447a-b4e7-e0f7ca5d0403 on coords (0.5, 1)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 5
-Going to create on position (0.0, 2)
-Created marker with id faaa8496-8d26-47d0-a10e-9e1654eef272 on coords (0.0, 2)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 5
-Going to create on position (-0.5, 3)
-Created marker with id 601d43f8-ec92-44b7-8c64-e6309da2924b on coords (-0.5, 3)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 3
-Going to create on position (-1.0, 2)
-Created marker with id 6ea4e2ae-834a-4d2f-aa94-a106b52f7800 on coords (-1.0, 2)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 3
-Going to create on position (-1.5, 1)
-Created marker with id 4f0142a6-f38b-45fa-a474-b26593969870 on coords (-1.5, 1)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 3
-Going to create on position (-2.0, 0)
-Created marker with id f78e472e-e6a9-493d-8627-43edf1fee37f on coords (-2.0, 0)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 2
-Going to create on position (-1.5, -1)
-Created marker with id 8967696e-8b06-4b7b-a345-680540acb705 on coords (-1.5, -1)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 2
-Going to create on position (-1.0, -2)
-Created marker with id 8e7fc1ec-db39-4e75-94cd-527749383fdc on coords (-1.0, -2)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 2
-Going to create on position (-0.5, -3)
-Created marker with id 0356be49-325e-400b-9e36-b282f7d1dfd8 on coords (-0.5, -3)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 2
-Going to create on position (0.0, -4)
-Created marker with id 028dbefd-a258-465d-bcfb-6ad4ea8123f3 on coords (0.0, -4)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 0
-Going to create on position (0.5, -3)
-Created marker with id 5ac16549-5448-46ea-8144-a2ed4dc2c8af on coords (0.5, -3)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 0
-Going to create on position (1.0, -2)
-Created marker with id 950cdfa3-a1cd-4500-9eaa-0466365f1d5a on coords (1.0, -2)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 0
-Going to create on position (1.5, -1)
-Created marker with id 4b453dc8-834b-41c1-a669-934099f99e21 on coords (1.5, -1)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 0
-Going to create on position (2.0, 0)
-Created marker with id 2e51962e-1815-4aa3-970c-5d85ace2825b on coords (2.0, 0)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 5
-Going to create on position (1.5, 1)
-Created marker with id b7504ddc-4610-4cf4-a33d-8e515069acb8 on coords (1.5, 1)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 5
-Going to create on position (1.0, 2)
-Created marker with id 544f2614-03a5-40d4-8307-8511515e5ac8 on coords (1.0, 2)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 5
-Going to create on position (0.5, 3)
-Created marker with id 2800579f-bd98-4396-a56b-51da41f45792 on coords (0.5, 3)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 5
-Going to create on position (0.0, 4)
-Created marker with id f259a047-820d-459a-99b8-1b987edf881c on coords (0.0, 4)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 5
-Going to create on position (-0.5, 5)
-Created marker with id 1af972ef-8864-41a2-b444-b5d4d9de58b6 on coords (-0.5, 5)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 3
-Going to create on position (-1.0, 4)
-Created marker with id 51485aed-961a-4b47-94b4-4fa29a30dac7 on coords (-1.0, 4)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 3
-Going to create on position (-1.5, 3)
-Created marker with id 5cc67cf5-805d-4a9c-9f89-c52b745c3e5f on coords (-1.5, 3)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 3
-Going to create on position (-2.0, 2)
-Created marker with id bedd846a-db23-4e41-8c45-20518a4c3b57 on coords (-2.0, 2)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 3
-Going to create on position (-2.5, 1)
-Created marker with id 6688f11d-f135-4d86-a1fa-385df5875c97 on coords (-2.5, 1)
-particle a60c5138-c5e5-4fe6-b6b2-c1bbcba2219d successfully moved to 3
-Finished
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 3
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 2
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 5
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 4
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 5
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 2
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 1
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 3
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 0
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 2
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 3
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 2
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 5
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 3
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 5
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 4
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 1
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 4
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 0
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 5
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 4
+particle 20c69e8f-4ea4-4d32-afb8-d97ccf876e55 successfully moved to 1

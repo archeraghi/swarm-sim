@@ -59,14 +59,11 @@ class Matter():
         """
         if (0 <= alpha <= 1):
             self.__alpha = round(alpha,2)
-            self.touch()
         elif alpha < 0:
             self.__alpha = 0
-            self.touch()
         elif alpha > 1:
             self.__alpha = 1
-            self.touch()
-
+        self.touch()
     def get_alpha(self):
         """
         Returns the alpha value of the particle

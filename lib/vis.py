@@ -312,13 +312,13 @@ class VisWindow(pyglet.window.Window):
             texRight = 1 / 8
             texBottom = 5 / 8
             texTop = 6 / 8
-            tile_alpha = 1
+            #tile_alpha = 1
         else:
             texLeft = 7 / 8
             texRight = 1 # 8/8
             texBottom = 4 / 8
             texTop = 5 / 8
-            tile_alpha = 0.5
+            #tile_alpha = 0.5
 
         self.tile_vertex_list.tex_coords[8 * i: 8 * i + 8] = [texLeft, texBottom, texRight, texBottom, texRight, texTop,
                                                               texLeft, texTop]
@@ -363,13 +363,13 @@ class VisWindow(pyglet.window.Window):
             texRight = 1 / 8
             texBottom = 7 / 8
             texTop = 6 / 8
-            particle.set_alpha(0.5)
+            #particle.set_alpha(0.5)
         else:
             texLeft = 0 / 8
             texRight = 1 / 8
             texBottom = 0 / 8
             texTop = 1 / 8
-            particle.set_alpha(1)
+            #particle.set_alpha(1)
         self.particle_vertex_list.tex_coords[8 * i: 8 * i + 8] = [texLeft, texBottom, texRight, texBottom,
                                                                   texRight, texTop, texLeft, texTop]
 
