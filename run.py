@@ -26,11 +26,11 @@ class ConfigData():
             self.solution = config.get("File", "solution")
         except (configparser.NoOptionError) as noe:
             self.solution = "solution.py"
-        self.size_x = config.getint("Simulator", "size_x")
-        self.size_y = config.getint("Simulator", "size_y")
+        self.size_x = config.getfloat("Simulator", "size_x")
+        self.size_y = config.getfloat("Simulator", "size_y")
         self.window_size_x = config.getint("Simulator", "window_size_x")
         self.window_size_y = config.getint("Simulator", "window_size_y")
-        self.border = config.getint("Simulator", "border")
+        self.border = config.getfloat("Simulator", "border")
         self.max_particles = config.getint("Simulator", "max_particles")
         self.mm_limitation = config.getboolean("Matter", "mm_limitation")
         self.particle_mm_size = config.getint("Matter", "particle_mm_size")
