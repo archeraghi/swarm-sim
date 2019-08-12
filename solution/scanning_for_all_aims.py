@@ -3,7 +3,6 @@ This solution just scans for particles that are within 5 hops range and prints t
 """
 
 #Standard Lib that has to be in each solution
-from lib.std_lib import *
 
 def solution(sim):
 

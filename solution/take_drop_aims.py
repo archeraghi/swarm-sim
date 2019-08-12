@@ -2,7 +2,7 @@
 This solution just scans for particles that are within 5 hops range and prints them out.
 """
 #Standard Lib that has to be in each solution
-from lib.std_lib import *
+from solution.std_lib import *
 
 def solution(sim):
     if sim.get_actual_round() == 1 :

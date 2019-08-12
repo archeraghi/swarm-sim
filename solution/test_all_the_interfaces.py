@@ -6,7 +6,7 @@ import logging
 import random
 
 #Standard Lib that has to be in each solution
-from lib.std_lib import *
+from solution.std_lib import *
 
 def solution(sim):
 
