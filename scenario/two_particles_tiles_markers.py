@@ -1,10 +1,11 @@
 """
-A sim is created that has two particles, two markers, and two tiles.
+A world is created that has two particles, two markers, and two tiles.
 """
 
-def scenario(sim):
-    sim.add_particle(0, 0)
-    sim.add_particle(1, 0)
-    sim.add_marker(0.5, 1)
-    sim.add_tile(-1, 0)
-    sim.add_tile(1, 0)
+
+def scenario(world):
+    world.add_particle(0, 0)
+    world.add_particle(1, 0)
+    world.add_marker(0.5, 1)
+    world.add_tile(-1, 0)
+    world.add_tile(1, 0)

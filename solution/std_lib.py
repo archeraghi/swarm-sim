@@ -1,27 +1,6 @@
-#colors
-black = 1
-gray = 2
-red = 3
-green = 4
-blue = 5
-yellow = 6
-orange = 7
-cyan = 8
-violett = 9
-
-
-#directions
-NE = 0
-E = 1
-SE = 2
-SW = 3
-W = 4
-NW = 5
-
-direction = [NE, E, SE, SW, W, NW]
-
-
 #standard libaries
+from lib.header import *
+
 
 def scan_neighborhood(particle):
     """
@@ -32,10 +11,12 @@ def scan_neighborhood(particle):
     for dir in direction:
         nh_dict[dir] = particle.get_matter_in(dir)
 
+
 def move_to_dest_in_one_rnd(particle, destiny):
     if move_to_dest_step_by_step(particle, destiny):
         return True
     move_to_dest_in_one_rnd(particle, destiny)
+
 
 def move_to_dest_step_by_step(particle, destiny):
     """
@@ -51,6 +32,8 @@ def move_to_dest_step_by_step(particle, destiny):
     particle.move_to(next_dir)
     print("\n P", particle.number, " moves to", dir_to_str(next_dir))
     return False
+
+
 def get_next_dir_to(src_x, src_y, dest_x, dest_y):
     """
     :param src_x: x coordinate of the source
@@ -74,31 +57,3 @@ def get_next_dir_to(src_x, src_y, dest_x, dest_y):
         next_dir = E
     return next_dir
 
-
-def dir_to_str(dir):
-    """
-    :param dir: the direction that should get converted to a string
-    :return: the string of the direction
-    """
-    if dir == 0:
-        return "NE"
-    elif dir == 1:
-        return "E"
-    elif dir == 2:
-        return "SE"
-    elif dir == 3:
-        return "SW"
-    elif dir == 4:
-        return "W"
-    elif dir == 5:
-        return "NW"
-    else:
-        return "Error"
-
-
-def get_the_invert(dir):
-    return (dir + 3) % 6
-
-
-def dir_in_range(dir):
-    return dir % 6

@@ -2,9 +2,6 @@ import datetime, math, os, time
 from pyglet.gl import *
 from pyglet.window import mouse
 import pyglet.window.key as key
-import importlib
-import subprocess
-import pandas as pd
 
 # screenshot manager parameters
 screenshot_directory = 'screenshots/'
@@ -28,12 +25,16 @@ show_grid = True
 rotate_thirty_degree = False  # the grid is not drawn correctly if the view is rotated!
 
 # rendering parameters
-target_frame_rate = 60
-busy_waiting_time = 0.0015
+target_frame_rate = 10
+busy_waiting_time = 1
 print_frame_stats = False
 
 # simulation parameters
-rounds_per_second = 10
+rounds_per_second = 40
+
+refresh_time = 1  #how many seconds to wait for a new round and a new frame. 1 means one round and frame every 1 second
+                  #0.25 means one round and frame every 0.25 sec (250ms)
+
 
 # tile_alpha = 0.6
 particle_alpha = 1
@@ -60,6 +61,7 @@ class ScreenshotManager:
     dt = datetime.datetime.now()
     #prefix = dt.isoformat(sep = '_', timespec = 'seconds').replace(':', '') + '_'
     prefix = dt.isoformat(sep='_').replace(':', '') + '_'
+
     def takeScreenshot():
         if not os.path.exists(screenshot_directory):
             os.makedirs(screenshot_directory)
@@ -73,6 +75,7 @@ class View:
     def __init__(self):
         self.focusPos = translation_init
         self.zoom = zoom_init
+        halfZoomRec = 0.5 / self.zoom
 
     def setDimensions(self, width, height):
         self.width = width
@@ -108,19 +111,20 @@ class View:
 
 
 class VisWindow(pyglet.window.Window):
-    def __init__(self, window_size_x, window_size_y, sim):
-        #super().__init__(sim.get_sim_x_size(), sim.get_sim_y_size(), resizable=window_resizable, vsync=False, caption="Simulator")
+    def __init__(self, window_size_x, window_size_y, world):
+        #super().__init__(world.get_sim_x_size(), world.get_sim_y_size(), resizable=window_resizable, vsync=False, caption="Simulator")
         super().__init__(window_size_x, window_size_y , resizable=window_resizable, vsync=False, caption="Simulator")
         self.window_active = True
         glClearColor(0.0, 0.0, 0.0, 0.0)
         glClearDepth(1.0)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        self.sim = sim
+        self.world = world
         self.init_tile_vertex_list()
         self.init_particle_vertex_list()
         self.init_marker_vertex_list()
         self.view = View()
-
+        self.view.setDimensions(window_size_x, window_size_y)
+        self.elapsed_frame_time = 0
         self.particleTexture = pyglet.image.load('lib/images/particle.png').get_mipmapped_texture()
         self.gridTexture = pyglet.image.load('lib/images/grid.png').get_mipmapped_texture()
 
@@ -142,6 +146,8 @@ class VisWindow(pyglet.window.Window):
 
         self.simulation_running = False
         self.video_mode = False
+        self.draw()
+
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         if buttons & mouse.LEFT:
@@ -162,19 +168,19 @@ class VisWindow(pyglet.window.Window):
                 rounded_coords = round(coords_coords[0],0) + 0.5
             else:
                 rounded_coords =round(coords_coords[0], 0)
-            if (rounded_coords,coords_coords[1]) not in self.sim.tile_map_coords:
+            if (rounded_coords,coords_coords[1]) not in self.world.tile_map_coords:
                 # add tile and vertices
-                if self.sim.add_tile_vis(rounded_coords, coords_coords[1]):
-                    self.tile_vertex_list.resize(4 * len(self.sim.tiles), 4 * len(self.sim.tiles))
-                    #self.tile_vertex_list.resize(4 * len(self.sim.tiles), 8 * len(self.sim.tiles))
-                    self.tile_vertex_list.indices[4 * (len(self.sim.tiles) - 1) : 4 * (len(self.sim.tiles) - 1) + 4] = range(4 * (len(self.sim.tiles) - 1), 4 * (len(self.sim.tiles) - 1) + 4)
-                   # self.tile_vertex_list.indices = list(range(0, 8 * len(self.sim.tiles)))
-                   # self.update_tile(len(self.sim.tiles) - 1, tile)
+                if self.world.add_tile_vis(rounded_coords, coords_coords[1]):
+                    self.tile_vertex_list.resize(4 * len(self.world.tiles), 4 * len(self.world.tiles))
+                    #self.tile_vertex_list.resize(4 * len(self.world.tiles), 8 * len(self.world.tiles))
+                    self.tile_vertex_list.indices[4 * (len(self.world.tiles) - 1) : 4 * (len(self.world.tiles) - 1) + 4] = range(4 * (len(self.world.tiles) - 1), 4 * (len(self.world.tiles) - 1) + 4)
+                   # self.tile_vertex_list.indices = list(range(0, 8 * len(self.world.tiles)))
+                   # self.update_tile(len(self.world.tiles) - 1, tile)
                     self.update_tiles(True)
             else:
                 # delete tile
-                self.sim.remove_tile_on((rounded_coords,coords_coords[1]))
-                self.tile_vertex_list.resize(4 * len(self.sim.tiles), 4 * len(self.sim.tiles))
+                self.world.remove_tile_on((rounded_coords,coords_coords[1]))
+                self.tile_vertex_list.resize(4 * len(self.world.tiles), 4 * len(self.world.tiles))
                 self.update_tiles(True)
 
     def on_resize(self, width, height):
@@ -219,7 +225,7 @@ class VisWindow(pyglet.window.Window):
 
         glBindTexture(self.particleTexture.target, self.particleTexture.id)
 
-        if len(self.sim.tiles) != 0:
+        if len(self.world.tiles) != 0:
             self.tile_vertex_list.draw(GL_QUADS)
         self.particle_vertex_list.draw(GL_QUADS)
         self.marker_vertex_list.draw(GL_QUADS)
@@ -257,13 +263,13 @@ class VisWindow(pyglet.window.Window):
         self.simulation_running = not self.simulation_running
 
     def round(self):
-        if self.sim.run_sim():
+        if self.world.run_sim():
             return True
 
     def init_tile_vertex_list(self):
-        self.tile_vertex_list = pyglet.graphics.vertex_list_indexed(4 * len(self.sim.tiles),
-                                                                    list(range(0, 4 * len(self.sim.tiles))),
-                                                                    #list(range(0,8 * len(self.sim.tiles))),
+        self.tile_vertex_list = pyglet.graphics.vertex_list_indexed(4 * len(self.world.tiles),
+                                                                    list(range(0, 4 * len(self.world.tiles))),
+                                                                    #list(range(0,8 * len(self.world.tiles))),
                                                                     'v2f', 't2f', 'c4f')
         self.update_tiles(True)
 
@@ -272,17 +278,17 @@ class VisWindow(pyglet.window.Window):
         foreground = []
         background = []
 
-        if (len(self.sim.tiles) != 0):
-            if self.sim.get_tile_deleted():
-                self.tile_vertex_list.resize(4 * len(self.sim.tiles), 4 * len(self.sim.tiles))
+        if (len(self.world.tiles) != 0):
+            if self.world.get_tile_deleted():
+                self.tile_vertex_list.resize(4 * len(self.world.tiles), 4 * len(self.world.tiles))
                 update_all=True
-                self.sim.set_tile_deleted()
-            for i, tile in enumerate(self.sim.tiles):
+                self.world.set_tile_deleted()
+            for i, tile in enumerate(self.world.tiles):
                 if tile.created:
-                    self.tile_vertex_list.resize(4 * len(self.sim.tiles), 4 * len(self.sim.tiles))
+                    self.tile_vertex_list.resize(4 * len(self.world.tiles), 4 * len(self.world.tiles))
                     self.tile_vertex_list.indices[
-                    4 * (len(self.sim.tiles) - 1): 4 * (len(self.sim.tiles) - 1) + 4] = range(
-                        4 * (len(self.sim.tiles) - 1), 4 * (len(self.sim.tiles) - 1) + 4)
+                    4 * (len(self.world.tiles) - 1): 4 * (len(self.world.tiles) - 1) + 4] = range(
+                        4 * (len(self.world.tiles) - 1), 4 * (len(self.world.tiles) - 1) + 4)
                     tile.created =  False
                 if update_all or tile.modified:
                     self.update_tile(i, tile)
@@ -327,19 +333,19 @@ class VisWindow(pyglet.window.Window):
 
     def init_particle_vertex_list(self):
         self.particle_vertex_list = self.particle_vertex_list = pyglet.graphics.vertex_list \
-            (4 * len(self.sim.particles), 'v2f', 't2f', 'c4f')
+            (4 * len(self.world.particles), 'v2f', 't2f', 'c4f')
         self.update_particles(True)
 
     def update_particles(self, update_all = False):
-        if (len(self.sim.particles) != 0):
-            if self.sim.get_particle_deleted():
-                self.particle_vertex_list.resize(4 * len(self.sim.particles))
-                self.sim.set_particle_deleted()
+        if (len(self.world.particles) != 0):
+            if self.world.get_particle_deleted():
+                self.particle_vertex_list.resize(4 * len(self.world.particles))
+                self.world.set_particle_deleted()
                 update_all = True
-            for i, particle in enumerate(self.sim.particles):
+            for i, particle in enumerate(self.world.particles):
                 if particle.created:
-                    self.particle_vertex_list.resize(4 * len(self.sim.particles))
-                    # self.tile_vertex_list.resize(4 * len(self.sim.tiles), 8 * len(self.sim.tiles))
+                    self.particle_vertex_list.resize(4 * len(self.world.particles))
+                    # self.tile_vertex_list.resize(4 * len(self.world.tiles), 8 * len(self.world.tiles))
                     particle.created=False
                 if update_all or particle.modified:
                     self.update_particle(i, particle)
@@ -377,19 +383,19 @@ class VisWindow(pyglet.window.Window):
 
     def init_marker_vertex_list(self):
         self.marker_vertex_list = self.marker_vertex_list = pyglet.graphics.vertex_list \
-            (4 * len(self.sim.markers), 'v2f', 't2f', 'c4f')
+            (4 * len(self.world.markers), 'v2f', 't2f', 'c4f')
         self.update_markers(True)
 
     def update_markers(self, update_all=True):
-        if (len(self.sim.markers) != 0):
-            if self.sim.get_marker_deleted():
-                self.marker_vertex_list.resize(4 * len(self.sim.markers))
-                self.sim.set_marker_deleted()
+        if (len(self.world.markers) != 0):
+            if self.world.get_marker_deleted():
+                self.marker_vertex_list.resize(4 * len(self.world.markers))
+                self.world.set_marker_deleted()
                 update_all = True
-            for i, marker in enumerate(self.sim.markers):
+            for i, marker in enumerate(self.world.markers):
                 if marker.created:
-                    self.marker_vertex_list.resize(4 * len(self.sim.markers))
-                    # self.tile_vertex_list.resize(4 * len(self.sim.tiles), 8 * len(self.sim.tiles))
+                    self.marker_vertex_list.resize(4 * len(self.world.markers))
+                    # self.tile_vertex_list.resize(4 * len(self.world.tiles), 8 * len(self.world.tiles))
                     marker.created = False
                 if update_all or marker.modified:
                     self.update_marker(i, marker)
@@ -416,38 +422,17 @@ class VisWindow(pyglet.window.Window):
 
         self.marker_vertex_list.colors[16 * i: 16 * i + 16] = (marker.color + [marker.get_alpha()]) * 4
 
-    def run(self):
-        p = 0
-        target_frame_time = 1 / target_frame_rate
-        round_time = 1 / rounds_per_second
-        self.elapsed_frame_time = 0
-        mod = importlib.import_module('solution.' + self.sim.get_solution())
-        while (self.sim.get_actual_round() <= self.sim.get_max_round()) and self.window_active and self.sim.get_end()==False:
-            #while actual simulation round is below max round
-            last_time = time.perf_counter()
-            while self.elapsed_frame_time >= round_time:
-                mod.solution(self.sim)
-                self.elapsed_frame_time -= round_time
-                if self.elapsed_frame_time <= round_time:
-                    self.sim.csv_round_writer.next_line(self.sim.get_actual_round())
-                    self.sim.inc_round_cnter()  # increase simulation round counter by one.
+    def draw_world(self):
+        while not self.simulation_running:
             self.dispatch_events()
-            self.draw()
-            while time.perf_counter() - last_time < target_frame_time:
-                sleep_time = max(target_frame_time - (time.perf_counter() - last_time), 0)
-                if sleep_time >= busy_waiting_time:
-                    time.sleep(sleep_time - busy_waiting_time)
-                else:
-                    pass
-
-            if self.simulation_running:
-                self.elapsed_frame_time += target_frame_time
-
-            if print_frame_stats:
-                frame_time_delta = time.perf_counter() - last_time - target_frame_time
-                frame_time_ok = abs(frame_time_delta) <= 0.0001
-                print('frame time:', format(time.perf_counter() - last_time, '.6f'), '\tdelta:', format(frame_time_delta, '0.6f'), '\tok:', frame_time_ok)
-
-        self.window_active =  False
+            if self.simulation_running or self.window_active is False:
+                return
+        self.dispatch_events()
+        #while actual simulation round is below max round
+        time.sleep(refresh_time)
+        self.draw()
         return
+
+    def finished(self):
+        self.window_active = False
 

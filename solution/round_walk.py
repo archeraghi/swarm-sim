@@ -2,14 +2,14 @@
 #Standard Lib that has to be in each solution
 from solution.std_lib import *
 
-def solution(sim):
+def solution(world):
 
-    for particle in sim.get_particle_list():
+    for particle in world.get_particle_list():
         global ttl
         global max
         global dir
 
-        if sim.get_actual_round() == 1:
+        if world.get_actual_round() == 1:
             max = 0
             ttl = 0
             dir = NE
@@ -18,7 +18,7 @@ def solution(sim):
             max = max+1
 
         if ttl==0:
-            print("Round ", sim.get_actual_round())
+            print("Round ", world.get_actual_round())
             ttl=max
             if dir==NE:
                 dir=NW

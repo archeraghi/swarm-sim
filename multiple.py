@@ -2,15 +2,12 @@ import sys, getopt, subprocess
 from datetime import datetime
 import os
 import configparser
-import multiprocessing
-import concurrent.futures
-
 
 
 def main(argv):
     max_round = 10
     seed_start = 1
-    seed_end = 10
+    seed_end = 2
     config = configparser.ConfigParser(allow_no_value=True)
     config.read("config.ini")
 
@@ -52,14 +49,14 @@ def main(argv):
         os.makedirs(dir)
     out = open(dir + "/multiprocess.txt", "w")
     child_processes = []
-    round_cnt=0
+    process_cnt=0
     for seed in range(seed_start, seed_end+1):
-        process ="python3.6", "run.py", "-n"+ str(max_round), "-m 1", "-d"+str(n_time),\
+        process ="python3.6", "swarm-sim.py", "-n"+ str(max_round), "-m 1", "-d"+str(n_time),\
                               "-r"+ str(seed), "-v" + str(0)
         p = subprocess.Popen(process, stdout=out, stderr=out)
         child_processes.append(p)
-        round_cnt += 1
-        print("Round Nr. ", round_cnt, "started")
+        process_cnt += 1
+        print("Process Nr. ", process_cnt, "started")
         if len(child_processes) == os.cpu_count():
             for cp in child_processes:
                 cp.wait()
@@ -67,7 +64,7 @@ def main(argv):
 
     for cp in child_processes:
         cp.wait()
-    fout=open(dir+"/all_aggregates.csv","w+")
+    fout = open(dir+"/all_aggregates.csv","w+")
     for seed in range(seed_start, seed_end+1):
         f = open(dir+"/"+str(seed)+"/aggregate_rounds.csv")
         f.__next__() # skip the header
@@ -75,8 +72,6 @@ def main(argv):
             fout.write(line)
         f.close() # not really needed
     fout.close()
-
-
 
 
 if __name__ == "__main__":

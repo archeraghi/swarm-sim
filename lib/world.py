@@ -1,67 +1,35 @@
-"""The sim module provides the interface of the simulation sim. In the simulation sim
+"""The world module provides the interface of the simulation world. In the simulation world
 all the data of the particles, tiles, and markers are stored.
 It also have the the coordination system and stated the maximum of the x and y coordinate.
 
  .. todo:: What happens if the maximum y or x axis is passed? Either the start from the other side or turns back.
 """
-
-
 import importlib
 import random
 import math
 import logging
 from lib import csv_generator, particle, tile, marker, vis
-from lib.gnuplot_generator import generate_gnuplot
+from lib.header import *
 
 
-x_offset = [0.5, 1,  0.5,   -0.5,   -1, -0.5 ]
-y_offset = [ 1, 0, -1,   -1,    0,  1]
-
-
-
-NE=0
-E = 1
-SE = 2
-SW = 3
-W = 4
-NW = 5
-
-
-direction = [NE, E, SE, SW, W, NW]
-
-
-read=0
-write=1
-
-black = 1
-gray = 2
-red = 3
-green = 4
-blue = 5
-
-
-class Sim:
+class World:
     def __init__(self, config_data):
         """
-        Initializing the sim constructor
+        Initializing the world constructor
         :param seed: seed number for new random numbers
         :param max_round: the max round number for terminating the simulator
         :param solution: The name of the solution that is going to be used
         :param size_x: the maximal size of the x axes
         :param size_y: the maximal size of the y axes
-        :param sim_name: the name of the sim file that is used to build up the sim
+        :param sim_name: the name of the world file that is used to build up the world
         :param solution_name: the name of the solution file that is only used for the csv file
         :param seed: the seed number it is only used here for the csv file
-        :param max_particles: the maximal number of particles that are allowed to be or created in this sim
+        :param max_particles: the maximal number of particles that are allowed to be or created in this world
         """
-        random.seed(config_data.seedvalue)
-        self.__max_round = config_data.max_round
+        random.seed(config_data.seed_value)
         self.__round_counter = 1
-        self.__seed=config_data.seedvalue
-        self.__solution = config_data.solution
-        self.solution_mod = importlib.import_module('solution.' + config_data.solution)
         self.__end = False
-        self.mm_limitation=config_data.mm_limitation
+
         self.init_particles=[]
         self.particle_num=0
         self.particles = []
@@ -69,8 +37,8 @@ class Sim:
         self.particle_rm = []
         self.particle_map_coords = {}
         self.particle_map_id = {}
-        self.particle_mm_size = config_data.particle_mm_size
         self.__particle_deleted=False
+
         self.tiles_num = 0
         self.tiles = []
         self.tiles_created = []
@@ -78,64 +46,43 @@ class Sim:
         self.tile_map_coords = {}
         self.tile_map_id = {}
         self.__tile_deleted=False
-        self.new_tile_flag = False
-        self.tile_mm_size=config_data.tile_mm_size
+        self.new_tile = None
+
         self.markers_num=0
         self.markers = []
         self.markers_created = []
         self.marker_map_coords = {}
         self.marker_map_id = {}
         self.markers_rm = []
-        self.marker_mm_size=config_data.marker_mm_size
         self.__marker_deleted = False
-        self.new_tile=None
-        self.__size_x = config_data.size_x
-        self.__size_y = config_data.size_y
-        self.max_particles = config_data.max_particles
-        self.directory=config_data.dir_name
-        self.visualization = config_data.visualization
-        self.window_size_x = config_data.window_size_x
-        self.window_size_y = config_data.window_size_y
-        self.border = config_data.border
-        self.config_data = config_data
-        self.csv_round_writer = csv_generator.CsvRoundData(self, scenario=config_data.scenario,
-                                                           solution=self.solution_mod,
-                                                           seed=config_data.seedvalue,
-                                                           tiles_num=0, particle_num=0,
-                                                           steps=0, directory=self.directory)
 
-        mod = importlib.import_module('scenario.' + config_data.scenario)
+        self.directory = config_data.dir_name
+        self.config_data = config_data
+
+        self.csv_round = csv_generator.CsvRoundData(scenario=config_data.scenario,
+                                                    solution=config_data.solution,
+                                                    seed=config_data.seed_value,
+                                                    tiles_num=0, particle_num=0,
+                                                    steps=0, directory=config_data.dir_name)
+
+        mod = importlib.import_module('scenario.' + self.config_data.scenario)
         mod.scenario(self)
-        if config_data.random_order:
+
+        if self.config_data.random_order:
             random.shuffle(self.particles)
 
+        if config_data.visualization:
+            self.window = vis.VisWindow(config_data.window_size_x, config_data.window_size_y, self)
 
-    def run(self):
-        """
-        Runs the simulator either with or without visualization
-        At the end it aggregate the data and generate a gnuplot
-        :return:
-        """
-        if self.visualization !=  0:
-            window = vis.VisWindow(self.window_size_x, self.window_size_y, self)
-            window.run()
-        else:
-            while self.get_actual_round() <= self.get_max_round() and self.__end == False:
-                self.solution_mod.solution(self)
-                self.csv_round_writer.next_line(self.get_actual_round())
-                self.__round_counter = self.__round_counter + 1
-
-        #creating gnu plots
-        self.csv_round_writer.aggregate_metrics()
+    def csv_aggregator(self):
+        self.csv_round.aggregate_metrics()
         particle_csv = csv_generator.CsvParticleFile(self.directory)
-        for particle in self.init_particles:
+        for particle in self.particles:
             particle_csv.write_particle(particle)
         particle_csv.csv_file.close()
-        generate_gnuplot(self.directory)
-        return
 
     def success_termination(self):
-        self.csv_round_writer.success()
+        self.csv_round.success()
         self.set_end()
 
     def get_max_round(self):
@@ -144,7 +91,7 @@ class Sim:
 
         :return: The maximum round number
         """
-        return self.__max_round
+        return self.config_data.max_round
 
     def get_actual_round(self):
         """
@@ -166,14 +113,12 @@ class Sim:
         """
         return self.__end
 
-
     def inc_round_cnter(self):
         """
         Increases the the round counter by
 
         :return:
         """
-
         self.__round_counter +=  1
 
     def get_solution(self):
@@ -187,7 +132,7 @@ class Sim:
 
     def get_particles_num(self):
         """
-        Returns the actual number of particles in the sim
+        Returns the actual number of particles in the world
 
         :return: The actual number of Particles
         """
@@ -195,7 +140,7 @@ class Sim:
 
     def get_particle_list(self):
         """
-        Returns the actual number of particles in the sim
+        Returns the actual number of particles in the world
 
         :return: The actual number of Particles
         """
@@ -220,7 +165,7 @@ class Sim:
 
     def get_tiles_num(self):
         """
-        Returns the actual number of particles in the sim
+        Returns the actual number of particles in the world
 
         :return: The actual number of Particles
         """
@@ -228,9 +173,9 @@ class Sim:
 
     def get_tiles_list(self):
         """
-        Returns the actual number of tiles in the sim
+        Returns the actual number of tiles in the world
 
-        :return: a list of all the tiles in the sim
+        :return: a list of all the tiles in the world
         """
         return self.tiles
 
@@ -252,7 +197,7 @@ class Sim:
 
     def get_marker_num(self):
         """
-        Returns the actual number of markers in the sim
+        Returns the actual number of markers in the world
 
         :return: The actual number of markers
         """
@@ -260,7 +205,7 @@ class Sim:
 
     def get_marker_list(self):
         """
-        Returns the actual number of markers in the sim
+        Returns the actual number of markers in the world
 
         :return: The actual number of markers
         """
@@ -296,15 +241,15 @@ class Sim:
     def get_sim_x_size(self):
         """
 
-        :return: Returns the maximal x size of the sim
+        :return: Returns the maximal x size of the world
         """
-        return self.__size_x
+        return self.config_data.size_x
 
     def get_sim_y_size(self):
         """
-        :return: Returns the maximal y size of the sim
+        :return: Returns the maximal y size of the world
         """
-        return self.__size_y
+        return self.config_data.size_y
 
     def get_tile_deleted(self):
         return self.__tile_deleted
@@ -352,7 +297,7 @@ class Sim:
 
     def add_particle(self, x, y, color=black, alpha=1):
         """
-        Add a particle to the sim database
+        Add a particle to the world database
 
         :param x: The x coordinate of the particle
         :param y: The y coordinate of the particle
@@ -363,7 +308,7 @@ class Sim:
         """
         if alpha < 0 or alpha >1:
             alpha = 1
-        if len(self.particles) < self.max_particles:
+        if len(self.particles) < self.config_data.max_particles:
             if  self.check_coords(x,y) == True:
                 if (x,y) not in self.get_particle_map_coords():
                     new_particle= particle.Particle(self, x, y, color, alpha)
@@ -372,7 +317,7 @@ class Sim:
                     self.particle_map_id[new_particle.get_id()] = new_particle
                     self.particles.append(new_particle)
                     new_particle.touch()
-                    self.csv_round_writer.update_particle_num(len(self.particles))
+                    self.csv_round.update_particle_num(len(self.particles))
                     self.init_particles.append(new_particle)
                     new_particle.created=True
                     logging.info("Created particle at %s", new_particle.coords)
@@ -388,7 +333,7 @@ class Sim:
             return False
 
     def remove_particle(self,id):
-        """ Removes a particle with a given particle id from the sim database
+        """ Removes a particle with a given particle id from the world database
 
 
         :param particle_id: particle id
@@ -403,8 +348,8 @@ class Sim:
             except:
                 pass
             self.particle_rm.append(rm_particle)
-            self.csv_round_writer.update_particle_num(len(self.particles))
-            self.csv_round_writer.update_metrics(particle_deleted=1)
+            self.csv_round.update_particle_num(len(self.particles))
+            self.csv_round.update_metrics(particle_deleted=1)
             self.__particle_deleted = True
             return True
         else:
@@ -412,7 +357,7 @@ class Sim:
 
     def remove_particle_on(self, coords):
         """
-        Removes a particle on a give coordinat from to the sim database
+        Removes a particle on a give coordinat from to the world database
 
         :param coords: A tupel that includes the x and y coorindates
         :return: True: Successful removed; False: Unsuccessful
@@ -428,17 +373,16 @@ class Sim:
                 del self.particle_map_coords[coords]
             except KeyError:
                 pass
-            self.csv_round_writer.update_particle_num(len(self.particles))
-            self.csv_round_writer.update_metrics( particle_deleted=1)
+            self.csv_round.update_particle_num(len(self.particles))
+            self.csv_round.update_metrics( particle_deleted=1)
             self.__particle_deleted = True
             return True
         else:
             return False
 
-
     def add_tile(self, x, y, color=gray, alpha=1):
         """
-        Adds a tile to the sim database
+        Adds a tile to the world database
 
         :param color:
         :param x: the x coordinates on which the tile should be added
@@ -452,7 +396,7 @@ class Sim:
                 self.new_tile=tile.Tile(self, x, y, color, alpha)
                 print("Before adding ", len(self.tiles) )
                 self.tiles.append(self.new_tile)
-                self.csv_round_writer.update_tiles_num(len(self.tiles))
+                self.csv_round.update_tiles_num(len(self.tiles))
                 self.tile_map_coords[self.new_tile.coords] = self.new_tile
                 self.tile_map_id[self.new_tile.get_id()] = self.new_tile
 
@@ -469,7 +413,7 @@ class Sim:
 
     def add_tile_vis(self, x, y, color=gray, alpha=1):
         """
-        Adds a tile to the sim database
+        Adds a tile to the world database
 
         :param color:
         :param x: the x coordinates on which the tile should be added
@@ -484,7 +428,7 @@ class Sim:
                 self.tile_map_coords[self.new_tile.coords] = self.new_tile
                 self.tile_map_id[self.new_tile.get_id()] = self.new_tile
 
-                print("sim.add_tile",self.new_tile.coords)
+                print("world.add_tile",self.new_tile.coords)
                 logging.info("Created tile with tile id %s on coords %s", str(self.new_tile.get_id()),
                              str(self.new_tile.coords))
                 return True
@@ -494,7 +438,7 @@ class Sim:
 
     def remove_tile(self,id):
         """
-        Removes a tile with a given tile_id from to the sim database
+        Removes a tile with a given tile_id from to the world database
 
         :param tile_id: The tiles id that should be removec
         :return:  True: Successful removed; False: Unsuccessful
@@ -513,8 +457,8 @@ class Sim:
                 del self.tile_map_coords[rm_tile.coords]
             except KeyError:
                 pass
-            self.csv_round_writer.update_tiles_num(len(self.tiles))
-            self.csv_round_writer.update_metrics(tile_deleted=1)
+            self.csv_round.update_tiles_num(len(self.tiles))
+            self.csv_round.update_metrics(tile_deleted=1)
             self.__tile_deleted = True
             return True
         else:
@@ -522,7 +466,7 @@ class Sim:
 
     def remove_tile_on(self, coords):
         """
-        Removes a tile on a give coordinat from to the sim database
+        Removes a tile on a give coordinat from to the world database
 
         :param coords: A tupel that includes the x and y coorindates
         :return: True: Successful removed; False: Unsuccessful
@@ -538,8 +482,8 @@ class Sim:
                 del self.tile_map_coords[coords]
             except KeyError:
                 pass
-            self.csv_round_writer.update_tiles_num(len(self.tiles))
-            self.csv_round_writer.update_metrics( tile_deleted=1)
+            self.csv_round.update_tiles_num(len(self.tiles))
+            self.csv_round.update_metrics( tile_deleted=1)
             self.__tile_deleted = True
             return True
         else:
@@ -548,7 +492,7 @@ class Sim:
 
     def add_marker(self, x, y, color=black, alpha=1):
         """
-        Add a tile to the sim database
+        Add a tile to the world database
 
         :param color:
         :param x: the x coordinates on which the tile should be added
@@ -563,7 +507,7 @@ class Sim:
                 self.markers.append(self.new_marker)
                 self.marker_map_coords[self.new_marker.coords] = self.new_marker
                 self.marker_map_id[self.new_marker.get_id()] = self.new_marker
-                self.csv_round_writer.update_markers_num(len(self.markers))
+                self.csv_round.update_markers_num(len(self.markers))
                 logging.info("Created marker with id %s on coords %s", str(self.new_marker.get_id()), str(self.new_marker.coords))
 
                 self.new_marker.created = True
@@ -579,7 +523,7 @@ class Sim:
 
     def remove_marker(self, id):
         """
-        Removes a tile with a given tile_id from to the sim database
+        Removes a tile with a given tile_id from to the world database
 
         :param id: The markers id that should be removec
         :return:  True: Successful removed; False: Unsuccessful
@@ -600,8 +544,8 @@ class Sim:
                 del self.marker_map_id[id]
             except KeyError:
                 pass
-            self.csv_round_writer.update_markers_num(len(self.markers))
-            self.csv_round_writer.update_metrics( marker_deleted=1)
+            self.csv_round.update_markers_num(len(self.markers))
+            self.csv_round.update_metrics( marker_deleted=1)
             self.__marker_deleted = True
             return True
         else:
@@ -610,7 +554,7 @@ class Sim:
 
     def remove_marker_on(self, coords):
         """
-        Removes a marker on a give coordinat from to the sim database
+        Removes a marker on a give coordinat from to the world database
 
         :param coords: A tupel that includes the x and y coorindates
         :return: True: Successful removed; False: Unsuccessful
@@ -626,8 +570,8 @@ class Sim:
                 del self.marker_map_coords[coords]
             except KeyError:
                 pass
-            self.csv_round_writer.update_markers_num(len(self.markers))
-            self.csv_round_writer.update_metrics( marker_deleted=1)
+            self.csv_round.update_markers_num(len(self.markers))
+            self.csv_round.update_metrics( marker_deleted=1)
             self.__marker_deleted = True
             return True
         else:

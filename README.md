@@ -2,7 +2,7 @@ For Linux:
 
 -unzip the source code:
 
-    unzip swarm-sim.zip
+    unzip swarm-world.zip
 
 
 -install the following python packages:
@@ -34,7 +34,7 @@ For Windows:
 - install python3.6
 - install pycharm
 - run pycharm
-- open swarm-sim as a project
+- open swarm-world as a project
 - Open File->Settings-"Project-Interpreter"
 - Chose python3.6 as an interpreter
 - Chose the plus sign and install:

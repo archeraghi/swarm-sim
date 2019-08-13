@@ -1,2 +1,2 @@
-def scenario(sim):
-    sim.add_particle(0, 0)
+def scenario(world):
+    world.add_particle(0, 0)

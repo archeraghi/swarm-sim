@@ -109,14 +109,13 @@ class CsvParticleData:
 
 
 class CsvRoundData:
-    def __init__(self, sim, task=0, scenario=0, solution=0, seed=20,  particle_num=0, tiles_num=0, markers_num=0,
+    def __init__(self, task=0, scenario=0, solution=0, seed=20,  particle_num=0, tiles_num=0, markers_num=0,
                  steps=0,  directory="outputs/"):
-        self.sim = sim
 
         self.task = task
         self.scenario = scenario
         self.solution = solution
-        self.actual_round=sim.get_actual_round()
+        self.actual_round= 1
         self.seed = seed
         self.steps  = steps
         self.steps_sum = steps
@@ -155,7 +154,7 @@ class CsvRoundData:
         self.marker_deleted_sum = 0
         self.memory_read_sum = 0
         self.memory_write_sum = 0
-        self.success_round = None
+        self.success_round = 0
         self.success_counter = 0
         self.tiles_taken = 0
         self.tiles_dropped = 0
@@ -231,51 +230,30 @@ class CsvRoundData:
         self.particles_taken_sum = self.particles_taken_sum + particles_taken
         self.particles_dropped_sum = self.particles_dropped_sum + particles_dropped
 
-        if self.actual_round == self.sim.get_actual_round():
-            self.steps = self.steps + steps
-            self.particle_read = self.particle_read + particle_read
-            self.tile_read = self.tile_read + tile_read
-            self.marker_read = self.marker_read + marker_read
-            self.memory_read = self.memory_read + memory_read
-            self.particle_write = self.particle_write + particle_write
-            self.tile_write = self.tile_write + tile_write
-            self.marker_write = self.marker_write + marker_write
-            self.memory_write = self.memory_write + memory_write
-            self.particle_created = self.particle_created + particle_created
-            self.tile_created = self.tile_created + tile_created
-            self.marker_created = self.marker_created + marker_created
-            self.particle_deleted = self.particle_deleted + particle_deleted
-            self.tile_deleted = self.tile_deleted + tile_deleted
-            self.marker_deleted = self.marker_deleted + marker_deleted
-            self.tiles_dropped = self.tiles_dropped + tiles_dropped
-            self.tiles_taken = self.tiles_taken + tiles_taken
-            self.particles_taken= self.particles_taken + particles_taken
-            self.particles_dropped = self.particles_dropped + particles_dropped
-        elif self.actual_round !=self.sim.get_actual_round():
-            self.actual_round = self.sim.get_actual_round()
-            self.steps = steps
-            self.particle_read = particle_read
-            self.tile_read = tile_read
-            self.marker_read = marker_read
-            self.memory_read = memory_read
-            self.particle_write = particle_write
-            self.tile_write = tile_write
-            self.marker_write = marker_write
-            self.memory_write = memory_write
-            self.particle_created = particle_created
-            self.tile_created = tile_created
-            self.marker_created = marker_created
-            self.particle_deleted = particle_deleted
-            self.tile_deleted = tile_deleted
-            self.marker_deleted = marker_deleted
-            self.tiles_dropped = tiles_dropped
-            self.tiles_taken = tiles_taken
-            self.particles_taken = particles_taken
-            self.particles_dropped = particles_dropped
+
+        self.steps = self.steps + steps
+        self.particle_read = self.particle_read + particle_read
+        self.tile_read = self.tile_read + tile_read
+        self.marker_read = self.marker_read + marker_read
+        self.memory_read = self.memory_read + memory_read
+        self.particle_write = self.particle_write + particle_write
+        self.tile_write = self.tile_write + tile_write
+        self.marker_write = self.marker_write + marker_write
+        self.memory_write = self.memory_write + memory_write
+        self.particle_created = self.particle_created + particle_created
+        self.tile_created = self.tile_created + tile_created
+        self.marker_created = self.marker_created + marker_created
+        self.particle_deleted = self.particle_deleted + particle_deleted
+        self.tile_deleted = self.tile_deleted + tile_deleted
+        self.marker_deleted = self.marker_deleted + marker_deleted
+        self.tiles_dropped = self.tiles_dropped + tiles_dropped
+        self.tiles_taken = self.tiles_taken + tiles_taken
+        self.particles_taken= self.particles_taken + particles_taken
+        self.particles_dropped = self.particles_dropped + particles_dropped
         logging.debug("CSV: Ending writing_rounds")
 
-    def next_line(self, round):
-        csv_iterator = ['', self.scenario, self.solution, self.seed, round,
+    def next_line(self, sim_round):
+        csv_iterator = ['', self.scenario, self.solution, self.seed, sim_round,
                         self.success_counter, self.success_round,
                         self.particle_num, self.particle_created, self.particle_created_sum,
                         self.particle_deleted, self.particle_deleted_sum,
@@ -294,7 +272,7 @@ class CsvRoundData:
                         self.tile_read, self.tile_read_sum, self.tiles_taken, self.tiles_taken_sum,
                         self.tile_write, self.tile_write_sum]
         self.writer_round.writerow(csv_iterator)
-        self.actual_round = round
+        self.actual_round = sim_round
         self.steps=0
         self.particle_read=0
         self.tile_read=0
@@ -312,7 +290,7 @@ class CsvRoundData:
         self.marker_deleted = 0
         self.tiles_dropped = 0
         self.tiles_taken = 0
-        self.success_round = None
+        self.success_round = 0
         self.success_counter = 0
         self.particles_taken = 0
         self.particles_dropped = 0
