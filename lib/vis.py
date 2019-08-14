@@ -30,17 +30,12 @@ busy_waiting_time = 1
 print_frame_stats = False
 
 # simulation parameters
-rounds_per_second = 40
-
-refresh_time = 1  #how many seconds to wait for a new round and a new frame. 1 means one round and frame every 1 second
-                  #0.25 means one round and frame every 0.25 sec (250ms)
-
+rounds_per_second = 1
 
 # tile_alpha = 0.6
 particle_alpha = 1
 
 marker_alpha = 1
-
 
 
 def coords_to_sim(coords):
@@ -429,7 +424,7 @@ class VisWindow(pyglet.window.Window):
                 return
         self.dispatch_events()
         #while actual simulation round is below max round
-        time.sleep(refresh_time)
+        time.sleep(1/rounds_per_second)
         self.draw()
         return
 

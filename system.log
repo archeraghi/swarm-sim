@@ -1,7 +1,7 @@
 Started
 Created particle at (0, 0)
-Created tile with tile id 0436e5d0-7e6d-4038-945d-b420f419b87f on coords (1.0, 0.0)
-Created marker with id 7affe1aa-f5e1-43d3-93d7-49767fc7abd5 on coords (3.0, 2.0)
+Created tile with tile id 3e96bd4c-efb1-4703-ad71-316e6300b64f on coords (1.0, 0.0)
+Created marker with id b72b3567-b432-466e-8d62-04d9302e8a21 on coords (3.0, 2.0)
 Created particle at (1.0, 0.0)
 Created particle at (-1.0, 0.0)
 Created particle at (0.5, 1.0)
@@ -20,12 +20,32 @@ Created particle at (0.0, 2.0)
 Created particle at (0.0, -2.0)
 Created particle at (-1.0, 2.0)
 Created particle at (-1.0, -2.0)
-Created tile with tile id d0ecad9f-9a59-4a02-9a2c-36f690d9d3c3 on coords (4.0, 6.0)
-Created tile with tile id befb8f77-1048-4ab2-991a-ffd3d392e0a5 on coords (2.5, 7.0)
-Created tile with tile id 0ba4f6af-46cc-4fdb-8ac7-36158d55c37c on coords (4.0, 8.0)
-Created tile with tile id 69004558-9c28-4b34-9efa-8e209c1c397f on coords (2.5, 9.0)
+Created tile with tile id 73706540-fa58-49ba-ad02-5a69f3025d07 on coords (4.0, 6.0)
+Created tile with tile id 7cacdb3b-9ce5-42f0-9c7a-d70be0500d7e on coords (2.5, 7.0)
+Created tile with tile id 3e97b427-8a70-4fdd-b835-5b6730a246a3 on coords (4.0, 8.0)
+Created tile with tile id dabab542-59f0-4624-aa78-92b269c24fe5 on coords (2.5, 9.0)
 Scanning for markers, tiles and particles
 particle on (0, 0) is scanning for all in 1 hops
 Got 7 in 1 hops
 Testing Interface: Take Drop Tiles and Particles
-Finished
+Tile is not in the world
+Take particle
+particle with particle id 19a7f173-870e-48e7-acf5-2ea8c3da97ca  has been taken
+No tile taken for dropping
+particle cannot be  taken
+Is not possible to drop the particle on that position
+Tile cannot taken because particle is carrieng either a tile or a particle
+Tile cannot taken because particle is carrieng either a tile or a particle
+Is not possible to drop the particle on that position because it is occupied
+particle cannot be  taken
+Particle succesfull dropped
+particle with particle id d304b764-38a7-4c5e-afd2-3bcf2f4020bf is in the world
+particle with particle id d304b764-38a7-4c5e-afd2-3bcf2f4020bf  has been taken
+Particle succesfull dropped
+Tile with tile id 3e96bd4c-efb1-4703-ad71-316e6300b64f is in the world
+Tile with tile id 3e96bd4c-efb1-4703-ad71-316e6300b64f  has been taken
+Tile has been dropped on the actual position
+Tile is not in the world
+No tile is taken for dropping
+particle has been taken
+Dropped particle on (-7, 0) coordinate
