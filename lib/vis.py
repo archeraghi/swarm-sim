@@ -420,6 +420,7 @@ class VisWindow(pyglet.window.Window):
     def draw_world(self):
         while not self.simulation_running:
             self.dispatch_events()
+            self.draw()
             if self.simulation_running or self.window_active is False:
                 return
         self.dispatch_events()
