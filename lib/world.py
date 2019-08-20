@@ -64,7 +64,7 @@ class World:
         mod = importlib.import_module('scenario.' + self.config_data.scenario)
         mod.scenario(self)
 
-        if self.config_data.random_order:
+        if self.config_data.particle_random_order:
             random.shuffle(self.particles)
 
         if config_data.visualization:

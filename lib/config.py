@@ -9,7 +9,7 @@ class ConfigData:
         config.read("config.ini")
         self.seed_value = config.getint("Simulator", "seedvalue")
         self.max_round = config.getint("Simulator", "max_round")
-        self.random_order = config.getboolean("Simulator", "random_order")
+        self.particle_random_order = config.getboolean("Simulator", "particle_random_order")
         self.visualization = config.getint("Simulator", "visualization")
         self.window_size_x = config.getint("Simulator", "window_size_x")
         self.window_size_y = config.getint("Simulator", "window_size_y")
