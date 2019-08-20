@@ -30,7 +30,7 @@ busy_waiting_time = 1
 print_frame_stats = False
 
 # simulation parameters
-rounds_per_second = 1
+rounds_per_second = 10
 
 # tile_alpha = 0.6
 particle_alpha = 1
@@ -417,16 +417,25 @@ class VisWindow(pyglet.window.Window):
 
         self.marker_vertex_list.colors[16 * i: 16 * i + 16] = (marker.color + [marker.get_alpha()]) * 4
 
-    def draw_world(self):
+    def draw_world(self, round_start_timestamp):
         while not self.simulation_running:
             self.dispatch_events()
             self.draw()
             if self.simulation_running or self.window_active is False:
                 return
-        self.dispatch_events()
-        #while actual simulation round is below max round
-        time.sleep(1/rounds_per_second)
+
         self.draw()
+
+        # waiting until enough time passed to do the next simulation round.
+        time_elapsed = time.perf_counter() - round_start_timestamp
+        while time_elapsed < 1 / rounds_per_second:
+            # waiting for 1/100 of the round_time
+            waiting_time = (1 / rounds_per_second) / 100
+            time.sleep(waiting_time)
+            self.dispatch_events()
+            self.draw()
+            time_elapsed = time.perf_counter() - round_start_timestamp
+
         return
 
     def finished(self):

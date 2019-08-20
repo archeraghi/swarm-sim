@@ -109,27 +109,26 @@ class CsvParticleData:
 
 
 class CsvRoundData:
-    def __init__(self, task=0, scenario=0, solution=0, seed=20,  particle_num=0, tiles_num=0, markers_num=0,
-                 steps=0,  directory="outputs/"):
+    def __init__(self, task=0, scenario=0, solution=0, seed=20, directory="outputs/"):
 
         self.task = task
         self.scenario = scenario
         self.solution = solution
         self.actual_round= 1
         self.seed = seed
-        self.steps  = steps
-        self.steps_sum = steps
+        self.steps  = 0
+        self.steps_sum = 0
         self.particle_created=0
         self.particle_deleted=0
-        self.particle_num = particle_num
+        self.particle_num = 0
         self.particle_read = 0
         self.particle_write = 0
         self.tile_created = 0
         self.tile_deleted = 0
-        self.tile_num = tiles_num
+        self.tile_num = 0
         self.tile_read = 0
         self.tile_write = 0
-        self.markers_num = markers_num
+        self.markers_num = 0
         self.marker_read = 0
         self.marker_write = 0
         self.marker_created = 0

@@ -10,7 +10,6 @@ class Tile(matter.Matter):
         """Initializing the marker constructor"""
         super().__init__( world, (x, y), color, alpha,  type="tile", mm_size=world.config_data.tile_mm_size)
         self.__isCarried = False
-        self.created = False
 
     def get_tile_status(self):
         """

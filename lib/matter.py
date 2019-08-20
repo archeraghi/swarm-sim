@@ -24,6 +24,7 @@ class Matter:
         self.mm_limit = world.config_data.mm_limitation
         self.mm_size = mm_size
         self.modified = False
+        self.created = False
 
     def set_alpha(self, alpha):
         """

@@ -1,3 +1,4 @@
+import math
 from enum import Enum
 
 
@@ -79,3 +80,32 @@ def get_the_invert(dir):
 def dir_in_range(dir):
     return dir % 6
 
+
+def check_coords( coords_x, coords_y):
+    """
+    Checks if the given coordinates are matching the
+    hexagon coordinates
+
+    :param coords_x: proposed x coordinate
+    :param coords_y: proposed y coordinate
+    :return: True: Correct x and y coordinates; False: Incorrect coordinates
+    """
+
+    if (coords_x / 0.5) % 2 == 0:
+        if coords_y % 2 != 0:
+            return False
+        else:
+            return True
+    else:
+        if coords_y % 2 == 0:
+            return False
+        else:
+            return True
+
+
+def coords_to_sim(coords):
+    return coords[0], coords[1] * math.sqrt(3 / 4)
+
+
+def sim_to_coords(x, y):
+    return x, round(y / math.sqrt(3 / 4), 0)

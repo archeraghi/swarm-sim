@@ -18,26 +18,16 @@ particle_counter=0
 
 class Particle(matter.Matter):
     """In the classe marker all the methods for the characterstic of a marker is included"""
-    def __init__(self, world, x, y, color=black, alpha=1):
+    def __init__(self, world, x, y, color=black, alpha=1, particle_counter = particle_counter):
         """Initializing the marker constructor"""
-        super().__init__( world, (x, y), color, alpha, type="particle", mm_size=world.config_data.particle_mm_size)
-        global particle_counter
-        particle_counter+=1
-        self.number=particle_counter
+        super().__init__( world, (x, y), color, alpha,
+                          type="particle", mm_size=world.config_data.particle_mm_size)
+        self.number = particle_counter
         self.__isCarried = False
-        self.created = False
         self.carried_tile = None
         self.carried_particle = None
-        self.__isCarried = False
         self.steps = 0
-        self.created = False
         self.csv_particle_writer = csv_generator.CsvParticleData( self.get_id(), self.number)
-
-    def coords_to_sim(self, coords):
-        return coords[0], coords[1] * math.sqrt(3 / 4)
-
-    def sim_to_coords(self, x, y):
-        return x, round(y / math.sqrt(3 / 4), 0)
 
     def has_tile(self):
         if self.carried_tile == None:
@@ -50,7 +40,6 @@ class Particle(matter.Matter):
             return False
         else:
             return True
-
 
     def get_carried_status(self):
         """
@@ -70,7 +59,6 @@ class Particle(matter.Matter):
             return True
         else:
             return False
-
 
     def check_on_particle(self):
         """
@@ -103,7 +91,7 @@ class Particle(matter.Matter):
         """
         dir_coord = self.world.get_coords_in_dir(self.coords, dir)
         dir, dir_coord = self.check_within_border(dir, dir_coord)
-        if self.world.check_coords(dir_coord[0], dir_coord[1]):
+        if check_coords(dir_coord[0], dir_coord[1]):
 
             if self.coords in self.world.particle_map_coords:
                 del self.world.particle_map_coords[self.coords]
@@ -142,7 +130,7 @@ class Particle(matter.Matter):
             :return: True: Success Moving;  False: Non moving
         """
         dir_coord = self.world.get_coords_in_dir(self.coords, dir)
-        sim_coord = self.coords_to_sim(dir_coord)
+        sim_coord = coords_to_sim(dir_coord)
         if self.world.get_sim_x_size() >=  abs(sim_coord[0]) and \
                         self.world.get_sim_y_size() >=  abs(sim_coord[1]):
             return self.move_to(dir)
@@ -799,7 +787,7 @@ class Particle(matter.Matter):
         logging.info("particle with id %s is", self.get_id())
         if x is not None and y is not None:
             coords = (x, y)
-            if self.world.check_coords(x,y):
+            if check_coords(x,y):
                 logging.info("Going to create a tile on position \(%i , %i\)", x,y )
                 if self.world.add_tile(coords[0], coords[1], color, alpha) == True:
                     self.world.tile_map_coords[coords[0], coords[1]].created = True
@@ -980,7 +968,7 @@ class Particle(matter.Matter):
         :return: True: successful taken; False: unsuccessful taken
         """
         if self.carried_particle is None and self.carried_tile is None:
-            if self.world.check_coords(x, y):
+            if check_coords(x, y):
                 coords = (x, y)
                 if coords in self.world.tile_map_coords:
                     self.carried_tile = self.world.tile_map_coords[coords]
@@ -1060,7 +1048,7 @@ class Particle(matter.Matter):
         :param y: y coordinate
         """
         if self.carried_tile is not None:
-            if self.world.check_coords(x, y):
+            if check_coords(x, y):
                 coords = (x, y)
                 if coords not in self.world.get_tile_map_coords():
                     try:  # cher: insert so to overcome the AttributeError
@@ -1138,7 +1126,7 @@ class Particle(matter.Matter):
         """
         coords = (0, 0)
         if x is not None and y is not None:
-            if self.world.check_coords(x, y):
+            if check_coords(x, y):
                 coords = (x, y)
                 logging.info("Going to create a particle on position %s", str(coords))
                 new_particle = self.world.add_particle(coords[0], coords[1], color, alpha)
@@ -1213,7 +1201,7 @@ class Particle(matter.Matter):
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
         if x is not None and y is not None:
-            if self.world.check_coords(x, y):
+            if check_coords(x, y):
                 coords = (x, y)
                 if self.world.remove_particle_on(coords):
                     logging.info("Deleted particle with particle on coords %s", str(coords))
@@ -1313,7 +1301,7 @@ class Particle(matter.Matter):
         :return: True: Successful taken; False: Cannot be taken or wrong Coordinates
         """
         if self.carried_particle is None and self.carried_tile is None:
-            if self.world.check_coords(x, y):
+            if check_coords(x, y):
                 coords = (x, y)
                 if coords in self.world.particle_map_coords:
                     self.carried_particle = self.world.particle_map_coords[coords]
@@ -1394,7 +1382,7 @@ class Particle(matter.Matter):
         """
         if self.carried_particle is not None:
             if x is not None and y is not None:
-                if self.world.check_coords(x, y):
+                if check_coords(x, y):
                     coords = (x, y)
                     if coords not in self.world.particle_map_coords:
                         try:  # cher: insert so to overcome the AttributeError
@@ -1483,7 +1471,7 @@ class Particle(matter.Matter):
         """
         coords = (0, 0)
         if x is not None and y is not None:
-            if self.world.check_coords(x, y):
+            if check_coords(x, y):
                 coords = (x, y)
                 logging.info("Going to create a marker on position %s", str(coords))
                 new_marker =  self.world.add_marker(coords[0], coords[1], color, alpha)
@@ -1558,7 +1546,7 @@ class Particle(matter.Matter):
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
         if x is not None and y is not None:
-            if self.world.check_coords(x, y):
+            if check_coords(x, y):
                 coords = (x, y)
                 if self.world.remove_marker_on(coords):
                     logging.info("Deleted marker  oords %s", str(coords))

@@ -17,11 +17,11 @@ class World:
         """
         Initializing the world constructor
         :param seed: seed number for new random numbers
-        :param max_round: the max round number for terminating the simulator
+        :param max_round: the max round number for terminating the worldulator
         :param solution: The name of the solution that is going to be used
         :param size_x: the maximal size of the x axes
         :param size_y: the maximal size of the y axes
-        :param sim_name: the name of the world file that is used to build up the world
+        :param world_name: the name of the world file that is used to build up the world
         :param solution_name: the name of the solution file that is only used for the csv file
         :param seed: the seed number it is only used here for the csv file
         :param max_particles: the maximal number of particles that are allowed to be or created in this world
@@ -31,7 +31,7 @@ class World:
         self.__end = False
 
         self.init_particles=[]
-        self.particle_num=0
+        self.particle_id_counter = 0
         self.particles = []
         self.particles_created = []
         self.particle_rm = []
@@ -39,7 +39,6 @@ class World:
         self.particle_map_id = {}
         self.__particle_deleted=False
 
-        self.tiles_num = 0
         self.tiles = []
         self.tiles_created = []
         self.tiles_rm = []
@@ -48,7 +47,6 @@ class World:
         self.__tile_deleted=False
         self.new_tile = None
 
-        self.markers_num=0
         self.markers = []
         self.markers_created = []
         self.marker_map_coords = {}
@@ -56,14 +54,12 @@ class World:
         self.markers_rm = []
         self.__marker_deleted = False
 
-        self.directory = config_data.dir_name
         self.config_data = config_data
 
         self.csv_round = csv_generator.CsvRoundData(scenario=config_data.scenario,
                                                     solution=config_data.solution,
                                                     seed=config_data.seed_value,
-                                                    tiles_num=0, particle_num=0,
-                                                    steps=0, directory=config_data.dir_name)
+                                                    directory=config_data.dir_name)
 
         mod = importlib.import_module('scenario.' + self.config_data.scenario)
         mod.scenario(self)
@@ -76,7 +72,7 @@ class World:
 
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()
-        particle_csv = csv_generator.CsvParticleFile(self.directory)
+        particle_csv = csv_generator.CsvParticleFile(self.config_data.dir_name)
         for particle in self.particles:
             particle_csv.write_particle(particle)
         particle_csv.csv_file.close()
@@ -129,14 +125,13 @@ class World:
         """
         return self.__solution
 
-
-    def get_particles_num(self):
+    def get_amount_of_particles(self):
         """
         Returns the actual number of particles in the world
 
         :return: The actual number of Particles
         """
-        return self.tiles_num
+        return len(self.particles)
 
     def get_particle_list(self):
         """
@@ -162,14 +157,13 @@ class World:
         """
         return self.particle_map_id
 
-
-    def get_tiles_num(self):
+    def get_amount_of_tiles(self):
         """
         Returns the actual number of particles in the world
 
         :return: The actual number of Particles
         """
-        return self.tiles_num
+        return len(self.tiles)
 
     def get_tiles_list(self):
         """
@@ -195,13 +189,13 @@ class World:
         """
         return self.tile_map_id
 
-    def get_marker_num(self):
+    def get_amount_of_markers(self):
         """
         Returns the actual number of markers in the world
 
         :return: The actual number of markers
         """
-        return self.markers_num
+        return len(self.markers)
 
     def get_marker_list(self):
         """
@@ -227,7 +221,6 @@ class World:
         """
         return self.marker_map_id
 
-
     def get_coords_in_dir(self, coords, dir):
         """
         Returns the coordination data of the pointed directions
@@ -238,14 +231,14 @@ class World:
         """
         return coords[0] + x_offset[dir], coords[1] + y_offset[dir]
 
-    def get_sim_x_size(self):
+    def get_world_x_size(self):
         """
 
         :return: Returns the maximal x size of the world
         """
         return self.config_data.size_x
 
-    def get_sim_y_size(self):
+    def get_world_y_size(self):
         """
         :return: Returns the maximal y size of the world
         """
@@ -269,32 +262,6 @@ class World:
     def set_marker_deleted(self):
         self.__marker_deleted = False
 
-    def check_coords(self, coords_x, coords_y):
-        """
-        Checks if the given coordinates are matching the
-        hexagon coordinates
-
-        :param coords_x: proposed x coordinate
-        :param coords_y: proposed y coordinate
-        :return: True: Correct x and y coordinates; False: Incorrect coordinates
-        """
-
-        if (coords_x / 0.5) % 2 == 0:
-            if coords_y % 2 != 0:
-                return False
-            else:
-                return True
-        else:
-            if coords_y % 2 == 0:
-                return False
-            else:
-                return True
-    def coords_to_sim(self, coords):
-        return coords[0], coords[1] * math.sqrt(3 / 4)
-
-    def sim_to_coords(self, x, y):
-        return x, round(y / math.sqrt(3 / 4), 0)
-
     def add_particle(self, x, y, color=black, alpha=1):
         """
         Add a particle to the world database
@@ -309,9 +276,11 @@ class World:
         if alpha < 0 or alpha >1:
             alpha = 1
         if len(self.particles) < self.config_data.max_particles:
-            if  self.check_coords(x,y) == True:
+            if check_coords(x,y) == True:
                 if (x,y) not in self.get_particle_map_coords():
-                    new_particle= particle.Particle(self, x, y, color, alpha)
+                    self.particle_id_counter += 1
+                    new_particle = particle.Particle(self, x, y, color, alpha, self.particle_id_counter)
+                    print(new_particle.number)
                     self.particles_created.append(new_particle)
                     self.particle_map_coords[new_particle.coords] = new_particle
                     self.particle_map_id[new_particle.get_id()] = new_particle
@@ -391,7 +360,7 @@ class World:
         """
         if alpha < 0 or alpha >1:
             alpha = 1
-        if  self.check_coords(x,y) == True:
+        if check_coords(x,y) == True:
             if (x,y) not in self.tile_map_coords:
                 self.new_tile=tile.Tile(self, x, y, color, alpha)
                 print("Before adding ", len(self.tiles) )
@@ -420,7 +389,7 @@ class World:
         :param y: the y coordinates on which the tile should be added
         :return: True: Successful added; False: Unsuccsessful
         """
-        if self.check_coords(x, y) == True:
+        if check_coords(x, y) == True:
             if (x, y) not in self.tile_map_coords:
                 self.new_tile = tile.Tile(self, x, y, color, alpha)
                 self.tiles.append(self.new_tile)
@@ -501,7 +470,7 @@ class World:
         """
         if alpha < 0 or alpha >1:
             alpha = 1
-        if self.check_coords(x, y) == True:
+        if check_coords(x, y) == True:
             if (x, y) not in self.marker_map_coords:
                 self.new_marker = marker.Marker(self, x, y, color, alpha)
                 self.markers.append(self.new_marker)
