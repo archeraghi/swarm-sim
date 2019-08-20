@@ -81,14 +81,6 @@ class World:
         self.csv_round.success()
         self.set_end()
 
-    def get_max_round(self):
-        """
-        Return the initialized endding round number
-
-        :return: The maximum round number
-        """
-        return self.config_data.max_round
-
     def get_actual_round(self):
         """
         The actual round number
@@ -458,7 +450,6 @@ class World:
         else:
             return False
 
-
     def add_marker(self, x, y, color=black, alpha=1):
         """
         Add a tile to the world database
@@ -489,7 +480,6 @@ class World:
             logging.info("for x %f and y %f not possible to draw ", x, y)
             return False
 
-
     def remove_marker(self, id):
         """
         Removes a tile with a given tile_id from to the world database
@@ -519,7 +509,6 @@ class World:
             return True
         else:
             return False
-
 
     def remove_marker_on(self, coords):
         """

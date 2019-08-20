@@ -21,7 +21,7 @@ class Matter:
         self.__modified=False
         self.__alpha=alpha
         self.type = type
-        self.mm_limit = world.config_data.mm_limitation
+        self.memory_limitation = world.config_data.memory_limitation
         self.mm_size = mm_size
         self.modified = False
         self.created = False
@@ -90,7 +90,7 @@ class Matter:
         :return: True: Successful written into the memory; False: Unsuccessful
         """
 
-        if (self.mm_limit == True and len( self._memory) < self.mm_size) or not self.mm_limit:
+        if (self.memory_limitation == True and len( self._memory) < self.mm_size) or not self.memory_limitation:
             self._memory[key] = data
             self.world.csv_round.update_metrics(memory_write=1)
             return True
@@ -107,7 +107,7 @@ class Matter:
         :return: True: Successful written into the memory; False: Unsuccessful
         """
 
-        if (self.mm_limit == True and len( self._memory) < self.mm_size) or not self.mm_limit:
+        if (self.memory_limitation == True and len( self._memory) < self.mm_size) or not self.memory_limitation:
                 self._memory[datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-1]] = data
                 self.world.csv_round.update_metrics(memory_write=1)
                 return True

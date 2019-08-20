@@ -24,7 +24,7 @@ def swarm_sim(argv):
 
     swarm_sim_world = world.World(config_data)
 
-    while swarm_sim_world.get_actual_round() <= swarm_sim_world.get_max_round() and swarm_sim_world.get_end() is False:
+    while swarm_sim_world.get_actual_round() <= config_data.max_round and swarm_sim_world.get_end() is False:
         round_start_timestamp = time.perf_counter()
         run_solution(swarm_sim_world)
         if config_data.visualization:
