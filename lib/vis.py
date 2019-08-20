@@ -104,7 +104,6 @@ class View:
         self.bottom = self.focusPos[1] - halfZoomRec * self.height;
         self.top = self.focusPos[1] + halfZoomRec * self.height;
 
-
 class VisWindow(pyglet.window.Window):
     def __init__(self, window_size_x, window_size_y, world):
         #super().__init__(world.get_sim_x_size(), world.get_sim_y_size(), resizable=window_resizable, vsync=False, caption="Simulator")
@@ -257,17 +256,12 @@ class VisWindow(pyglet.window.Window):
     def pause(self):
         self.simulation_running = not self.simulation_running
 
-    def round(self):
-        if self.world.run_sim():
-            return True
-
     def init_tile_vertex_list(self):
         self.tile_vertex_list = pyglet.graphics.vertex_list_indexed(4 * len(self.world.tiles),
                                                                     list(range(0, 4 * len(self.world.tiles))),
                                                                     #list(range(0,8 * len(self.world.tiles))),
                                                                     'v2f', 't2f', 'c4f')
         self.update_tiles(True)
-
 
     def update_tiles(self, update_all=False):
         foreground = []
@@ -348,7 +342,6 @@ class VisWindow(pyglet.window.Window):
         else:
             pass
 
-
     def update_particle(self, i, particle):
         weird = 256 / 220
         pos = coords_to_sim(particle.coords)
@@ -398,7 +391,6 @@ class VisWindow(pyglet.window.Window):
         else:
             pass
 
-
     def update_marker(self, i, marker):
         weird = 256 / 220
         pos = coords_to_sim(marker.coords)
@@ -437,7 +429,3 @@ class VisWindow(pyglet.window.Window):
             time_elapsed = time.perf_counter() - round_start_timestamp
 
         return
-
-    def finished(self):
-        self.window_active = False
-
