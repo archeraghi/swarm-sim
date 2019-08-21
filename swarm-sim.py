@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import time
+import random
 from lib import world, config
 from lib.gnuplot_generator import gnuplot_generator
 
@@ -22,11 +23,15 @@ def swarm_sim(argv):
 
     create_dir_for_data(config_data)
 
+    random.seed(config_data.seed_value)
+
     swarm_sim_world = world.World(config_data)
 
     while swarm_sim_world.get_actual_round() <= config_data.max_round and swarm_sim_world.get_end() is False:
         round_start_timestamp = time.perf_counter()
+
         run_solution(swarm_sim_world)
+
         if config_data.visualization:
             swarm_sim_world.window.draw_world(round_start_timestamp)
             if swarm_sim_world.window.window_active is False:

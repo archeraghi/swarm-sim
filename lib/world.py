@@ -26,7 +26,6 @@ class World:
         :param seed: the seed number it is only used here for the csv file
         :param max_particles: the maximal number of particles that are allowed to be or created in this world
         """
-        random.seed(config_data.seed_value)
         self.__round_counter = 1
         self.__end = False
 
