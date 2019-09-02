@@ -109,3 +109,37 @@ def coords_to_sim(coords):
 
 def sim_to_coords(x, y):
     return x, round(y / math.sqrt(3 / 4), 0)
+
+
+def scan(matter_map_coords, hop, starting_x, starting_y):
+    hop_list = []
+    if (hop / 2 + starting_x, hop + starting_y) in matter_map_coords:
+        hop_list.append(matter_map_coords[(hop / 2 + starting_x, hop + starting_y)])
+    if (hop + starting_x, starting_y) in matter_map_coords:
+        hop_list.append(matter_map_coords[(hop + starting_x, starting_y)])
+    if (hop / 2 + starting_x, -hop + starting_y) in matter_map_coords:
+        hop_list.append(matter_map_coords[(hop / 2 + starting_x, -hop + starting_y)])
+    if (-hop / 2 + starting_x, -hop + starting_y) in matter_map_coords:
+        hop_list.append(matter_map_coords[(-hop / 2 + starting_x, -hop + starting_y)])
+    if (-hop + starting_x, starting_y) in matter_map_coords:
+        hop_list.append(matter_map_coords[(-hop + starting_x, starting_y)])
+    if (-hop / 2 + starting_x, hop + starting_y) in matter_map_coords:
+        hop_list.append(matter_map_coords[(-hop / 2 + starting_x, hop + starting_y)])
+    for i in range(1, hop):
+        if (-hop / 2 + i + starting_x, hop + starting_y) in matter_map_coords:
+            hop_list.append(matter_map_coords[(-hop / 2 + i + starting_x, hop + starting_y)])
+        if (hop / 2 + (0.5 * i) + starting_x, hop - i + starting_y) in matter_map_coords:
+            hop_list.append(
+                matter_map_coords[(hop / 2 + (0.5 * i) + starting_x, hop - i + starting_y)])
+        if (hop / 2 + (0.5 * i) + starting_x, -hop + i + starting_y) in matter_map_coords:
+            hop_list.append(
+                matter_map_coords[(hop / 2 + (0.5 * i) + starting_x, -hop + i + starting_y)])
+        if (-hop / 2 + i + starting_x, -hop + starting_y) in matter_map_coords:
+            hop_list.append(matter_map_coords[(-hop / 2 + i + starting_x, -hop + starting_y)])
+        if (-hop / 2 - (0.5 * i) + starting_x, -hop + i + starting_y) in matter_map_coords:
+            hop_list.append(
+                matter_map_coords[(-hop / 2 - (0.5 * i) + starting_x, -hop + i + starting_y)])
+        if (-hop / 2 - (0.5 * i) + starting_x, hop - i + starting_y) in matter_map_coords:
+            hop_list.append(
+                matter_map_coords[(-hop / 2 - (0.5 * i) + starting_x, hop - i + starting_y)])
+    return hop_list

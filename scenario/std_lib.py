@@ -3,8 +3,8 @@ import random
 
 def generating_random_spraded_particles (world, max_size_particle):
     for _ in range(0, max_size_particle):
-        x = random.randrange(-world.get_sim_x_size(), world.get_sim_x_size())
-        y = random.randrange(-world.get_sim_y_size(), world.get_sim_y_size())
+        x = random.randrange(-world.get_world_x_size(), world.get_world_x_size())
+        y = random.randrange(-world.get_world_y_size(), world.get_world_y_size())
         if y % 2 == 1:
             x = x + 0.5
         if (x, y) not in world.tile_map_coords:
@@ -37,3 +37,39 @@ def create_particle_in_square(world, max_size_particle, start_coords):
             world.add_particle(-x, 2 * y)
             world.add_particle(x, -2 * y)
             world.add_particle(-x, -  2 * y)
+
+
+def create_particle_in_hexagons(world, radius):
+    radius = 3
+    world.add_particle(0, 0)
+    displacement = - radius + 0.5
+    iteration = 0
+    for i in range(1, radius + 1):
+        world.add_particle(i, 0)
+        world.add_particle(-i, 0)
+    for i in range(1, radius + 1):
+        for j in range(0, (2 * radius) - iteration):
+            world.add_particle(displacement + j, i)
+            world.add_particle(displacement + j, -i)
+        iteration = iteration + 1
+        displacement = displacement + 0.5
+
+
+def create_tiles_formed_as_hexagons_border(world, radius, starting_x = 0, starting_y = 0):
+    offset_x = 0
+    if starting_y % 2 != 0:
+        offset_x = 0.5
+    world.add_tile(radius/2 + starting_x + offset_x, radius + starting_y)
+    world.add_tile(radius + starting_x + offset_x, starting_y)
+    world.add_tile(radius/2 + starting_x + offset_x, -radius  + starting_y)
+    world.add_tile(-radius/2 + starting_x + offset_x, -radius + starting_y)
+    world.add_tile(-radius + starting_x + offset_x, starting_y)
+    world.add_tile(-radius/2 + starting_x + offset_x, radius + starting_y)
+
+    for i in range(1, radius):
+        world.add_tile(-radius/2 + i + starting_x + offset_x, radius + starting_y)
+        world.add_tile(radius/2 + (0.5 * i ) + starting_x + offset_x, radius - i + starting_y)
+        world.add_tile(radius/2 + (0.5 * i) + starting_x + offset_x, -radius + i + starting_y)
+        world.add_tile(-radius/2 + i + starting_x + offset_x, -radius + starting_y)
+        world.add_tile(-radius/2 - (0.5 * i) + starting_x + offset_x, -radius + i + starting_y)
+        world.add_tile(-radius/2 - (0.5 * i) + starting_x + offset_x, radius - i + starting_y)

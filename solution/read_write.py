@@ -3,6 +3,7 @@ The particles are moving infront each other but in the different direction but w
 the start either to write to each other and then they give out the what it they received from each other.
 """
 #Standard Lib that has to be in each solution
+from solution.std_lib import *
 
 def solution(world):
     """

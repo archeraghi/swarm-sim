@@ -29,13 +29,13 @@ def swarm_sim(argv):
 
     while swarm_sim_world.get_actual_round() <= config_data.max_round and swarm_sim_world.get_end() is False:
         round_start_timestamp = time.perf_counter()
-
-        run_solution(swarm_sim_world)
-
         if config_data.visualization:
             swarm_sim_world.window.draw_world(round_start_timestamp)
             if swarm_sim_world.window.window_active is False:
                 break
+        run_solution(swarm_sim_world)
+
+
 
     generate_data(config_data, swarm_sim_world)
 

@@ -280,7 +280,7 @@ class Particle(matter.Matter):
         else:
             return False
 
-    def scan_for_matter_within(self, matter='all', hop=1):
+    def scan_for_matters_within(self, matter='all', hop=1):
         """
         Scans for particles, tiles, or marker on a given hop distance and all the matters within the hop distance
 
@@ -291,184 +291,52 @@ class Particle(matter.Matter):
         :return: A list of the founded matters
         """
 
-        hop_list = []
+        within_hop_list = []
         for i in range(1, hop + 1):
-            list = self.scan_for_matter_in(matter, i)
-            if list != None:
-                hop_list.extend(list)
-        if len(hop_list) != 0:
-            return hop_list
+            in_list = self.scan_for_matters_in(matter, i)
+            if in_list is not None:
+                within_hop_list.extend(in_list)
+        if len(within_hop_list) != 0:
+            return within_hop_list
         else:
             return None
 
-    def scan_for_matter_in(self, matter='all', hop=1):
+    def scan_for_matters_in(self, matter='all', hop=1):
         """
-        Scanning for particles, tiles, or marker on a given hop distance
+         Scanning for particles, tiles, or marker on a given hop distance
 
-        :param matter: For what matter this method should scan for. Can be either particles, tiles, markers, or (default)all
-        :param hop: The hop distance from thee actual position of the scanning particle
-        :return: A list of the founded matters
-        """
-        hop_list = []
+         :param matter: For what matter this method should scan for. Can be either particles, tiles, markers, or (default)all
+         :param hop: The hop distance from thee actual position of the scanning particle
+         :return: A list of the founded matters
+         """
+        starting_x = self.coords[0]
+        starting_y = self.coords[1]
+        scanned_list = []
         logging.info("particle on %s is scanning for %s in %i hops", str(self.coords), matter, hop)
-        cnt = 0
-        x_offset = 0
-        y_up_scan = self.coords[1] + hop
-        y_down_scan = self.coords[1] - hop
-        while cnt < hop:
-            x_scan_pos = self.coords[0] + hop - x_offset
-            x_scan_neg = self.coords[0] - hop + x_offset
-            y_scan_coord_neg = self.coords[1] - cnt
-            y_scan_coord_pos = self.coords[1] + cnt
-            if cnt == 0:
-                if matter == "particles":
-                    if (x_scan_pos, y_scan_coord_neg) in self.world.particle_map_coords:
-                        hop_list.append(self.world.particle_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.world.particle_map_coords:
-                        hop_list.append(self.world.particle_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                elif matter == "markers":
-                    if (x_scan_pos, y_scan_coord_neg) in self.world.marker_map_coords:
-                        hop_list.append(self.world.marker_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.world.marker_map_coords:
-                        hop_list.append(self.world.marker_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                elif matter == "tiles":
-                    if (x_scan_pos, y_scan_coord_neg) in self.world.tile_map_coords:
-                        hop_list.append(self.world.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.world.tile_map_coords:
-                        hop_list.append(self.world.tile_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                elif matter == "all":
 
-                    if (x_scan_pos, y_scan_coord_neg) in self.world.tile_map_coords:
-                        hop_list.append(self.world.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.world.tile_map_coords:
-                        hop_list.append(self.world.tile_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.world.marker_map_coords:
-                        hop_list.append(self.world.marker_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.world.marker_map_coords:
-                        hop_list.append(self.world.marker_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.world.particle_map_coords:
-                        hop_list.append(self.world.particle_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.world.particle_map_coords:
-                        hop_list.append(self.world.particle_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                else:
-                    logging.info("No matter specified")
-            else:
-                if matter == "particles":
-                    if (x_scan_pos, y_scan_coord_pos) in self.world.particle_map_coords:
-                        hop_list.append(self.world.particle_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.world.particle_map_coords:
-                        hop_list.append(self.world.particle_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_pos) in self.world.particle_map_coords:
-                        hop_list.append(self.world.particle_map_coords[(x_scan_neg, y_scan_coord_pos)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.world.particle_map_coords:
-                        hop_list.append(self.world.particle_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                elif matter == "markers":
-                    if (x_scan_pos, y_scan_coord_pos) in self.world.marker_map_coords:
-                        hop_list.append(self.world.marker_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.world.marker_map_coords:
-                        hop_list.append(self.world.marker_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_pos) in self.world.marker_map_coords:
-                        hop_list.append(self.world.marker_map_coords[(x_scan_neg, y_scan_coord_pos)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.world.marker_map_coords:
-                        hop_list.append(self.world.marker_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                elif matter == "tiles":
-                    if (x_scan_pos, y_scan_coord_pos) in self.world.tile_map_coords:
-                        hop_list.append(self.world.tile_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.world.tile_map_coords:
-                        hop_list.append(self.world.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.world.tile_map_coords:
-                        hop_list.append(self.world.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.world.tile_map_coords:
-                        hop_list.append(self.world.tile_map_coords[(x_scan_neg, y_scan_coord_neg)])
-                elif matter == "all":
-                    if (x_scan_pos, y_scan_coord_pos) in self.world.particle_map_coords:
-                        hop_list.append(self.world.particle_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.world.particle_map_coords:
-                        hop_list.append(self.world.particle_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_pos) in self.world.particle_map_coords:
-                        hop_list.append(self.world.particle_map_coords[(x_scan_neg, y_scan_coord_pos)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.world.particle_map_coords:
-                        hop_list.append(self.world.particle_map_coords[(x_scan_neg, y_scan_coord_neg)])
-
-                    if (x_scan_pos, y_scan_coord_pos) in self.world.marker_map_coords:
-                        hop_list.append(self.world.marker_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.world.marker_map_coords:
-                        hop_list.append(self.world.marker_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_pos) in self.world.marker_map_coords:
-                        hop_list.append(self.world.marker_map_coords[(x_scan_neg, y_scan_coord_pos)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.world.marker_map_coords:
-                        hop_list.append(self.world.marker_map_coords[(x_scan_neg, y_scan_coord_neg)])
-
-                    if (x_scan_pos, y_scan_coord_pos) in self.world.tile_map_coords:
-                        hop_list.append(self.world.tile_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.world.tile_map_coords:
-                        hop_list.append(self.world.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_pos, y_scan_coord_neg) in self.world.tile_map_coords:
-                        hop_list.append(self.world.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                    if (x_scan_neg, y_scan_coord_neg) in self.world.tile_map_coords:
-                        hop_list.append(self.world.tile_map_coords[(x_scan_neg, y_scan_coord_neg)])
-
-                else:
-                    logging.info("No matter specified")
-            cnt += 1
-            x_offset += 0.5
-
-        cnt = 0
-        x_upper_scan = self.coords[0] + hop / 2
-        offset_x = 0
-        while cnt < hop + 1:
-            x_upper_scan = x_upper_scan - offset_x
-            if matter == "particles":
-                if (x_upper_scan, y_up_scan) in self.world.particle_map_coords:
-                    hop_list.append(self.world.particle_map_coords[(x_upper_scan, y_up_scan)])
-                if (x_upper_scan, y_down_scan) in self.world.particle_map_coords:
-                    hop_list.append(self.world.particle_map_coords[(x_upper_scan, y_down_scan)])
-            elif matter == "markers":
-                if (x_upper_scan, y_up_scan) in self.world.marker_map_coords:
-                    hop_list.append(self.world.marker_map_coords[(x_upper_scan, y_up_scan)])
-                if (x_upper_scan, y_down_scan) in self.world.marker_map_coords:
-                    hop_list.append(self.world.marker_map_coords[(x_upper_scan, y_down_scan)])
-            elif matter == "tiles":
-                if (x_upper_scan, y_up_scan) in self.world.tile_map_coords:
-                    hop_list.append(self.world.tile_map_coords[(x_upper_scan, y_up_scan)])
-                if (x_upper_scan, y_down_scan) in self.world.tile_map_coords:
-                    hop_list.append(self.world.tile_map_coords[(x_upper_scan, y_down_scan)])
-            if matter == "all":
-                if hop == 0:
-                    if (0, 0) in self.world.particle_map_coords:
-                        hop_list.append(self.world.particle_map_coords[(0, 0)])
-                    if (0, 0) in self.world.marker_map_coords:
-                        hop_list.append(self.world.marker_map_coords[(0, 0)])
-                    if (0, 0) in self.world.tile_map_coords:
-                        hop_list.append(self.world.tile_map_coords[(0, 0)])
-                else:
-                    if (x_upper_scan, y_up_scan) in self.world.particle_map_coords:
-                        hop_list.append(self.world.particle_map_coords[(x_upper_scan, y_up_scan)])
-                    if (x_upper_scan, y_down_scan) in self.world.particle_map_coords:
-                        hop_list.append(self.world.particle_map_coords[(x_upper_scan, y_down_scan)])
-
-                    if (x_upper_scan, y_up_scan) in self.world.marker_map_coords:
-                        hop_list.append(self.world.marker_map_coords[(x_upper_scan, y_up_scan)])
-                    if (x_upper_scan, y_down_scan) in self.world.marker_map_coords:
-                        hop_list.append(self.world.marker_map_coords[(x_upper_scan, y_down_scan)])
-
-                    if (x_upper_scan, y_up_scan) in self.world.tile_map_coords:
-                        hop_list.append(self.world.tile_map_coords[(x_upper_scan, y_up_scan)])
-                    if (x_upper_scan, y_down_scan) in self.world.tile_map_coords:
-                        hop_list.append(self.world.tile_map_coords[(x_upper_scan, y_down_scan)])
-
-            else:
-                logging.info("No matter specified")
-            cnt += 1
-            offset_x = 1
-        if len(hop_list) > 0:
-            logging.info("Got %s in %s hops", str(len(hop_list)), str(hop))
-            return hop_list
+        if matter == "particles":
+            scanned_list = scan(self.world.particle_map_coords, hop, starting_x, starting_y)
+        elif matter == "tiles":
+            scanned_list = scan(self.world.tile_map_coords, hop, starting_x, starting_y)
+        elif matter == "markers":
+            scanned_list = scan(self.world.marker_map_coords, hop, starting_x, starting_y)
         else:
-            logging.info("Nothing in %s hops", str(hop))
+            scanned_list = scan(self.world.particle_map_coords, hop, starting_x, starting_y)
+            if scanned_list is not None:
+                scanned_list.extend(scan(self.world.tile_map_coords, hop, starting_x, starting_y))
+                scanned_list.extend(scan(self.world.marker_map_coords, hop, starting_x, starting_y))
+            else:
+                scanned_list = scan(self.world.tile_map_coords, hop, starting_x, starting_y)
+                if scanned_list is not None:
+                    scanned_list.extend(scan(self.world.marker_map_coords, hop, starting_x, starting_y))
+                else:
+                    scanned_list = scan(self.world.marker_map_coords, hop, starting_x, starting_y)
+        if scanned_list is not None:
+            return scanned_list
+        else:
             return None
 
-    def scan_for_particle_within(self, hop=1):
+    def scan_for_particles_within(self, hop=1):
         """
         Scans for particles, tiles, or marker on a given hop distance and all the matters within the hop distance
 
@@ -479,17 +347,17 @@ class Particle(matter.Matter):
         :return: A list of the founded matters
         """
 
-        hop_list = []
+        within_hop_list = []
         for i in range(1, hop + 1):
-            list = self.scan_for_particle_in( i)
-            if list != None:
-                hop_list.extend(list)
-        if len(hop_list) != 0:
-            return hop_list
+            in_list = self.scan_for_particles_in(hop=i)
+            if in_list is not None:
+                within_hop_list.extend(in_list)
+        if len(within_hop_list) != 0:
+            return within_hop_list
         else:
             return None
 
-    def scan_for_particle_in(self, hop=1):
+    def scan_for_particles_in(self, hop=1):
         """
         Scanning for particles, tiles, or marker on a given hop distance
 
@@ -497,55 +365,11 @@ class Particle(matter.Matter):
         :param hop: The hop distance from thee actual position of the scanning particle
         :return: A list of the founded matters
         """
-        hop_list = []
-        logging.info("particle on %s is scanning for particle in %i hops", str(self.coords), hop)
-        cnt = 0
-        x_offset = 0
-        y_up_scan = self.coords[1] + hop
-        y_down_scan = self.coords[1] - hop
-        while cnt < hop:
-            x_scan_pos = self.coords[0] + hop - x_offset
-            x_scan_neg = self.coords[0] - hop + x_offset
-            y_scan_coord_neg = self.coords[1] - cnt
-            y_scan_coord_pos = self.coords[1] + cnt
-            if cnt == 0:
-                # if self.coords in self.world.particle_map_coords:
-                #     hop_list.append(self.world.particle_map_coords[self.coords])
-                if (x_scan_pos, y_scan_coord_neg) in self.world.particle_map_coords:
-                    hop_list.append(self.world.particle_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                if (x_scan_neg, y_scan_coord_neg) in self.world.particle_map_coords:
-                    hop_list.append(self.world.particle_map_coords[(x_scan_neg, y_scan_coord_neg)])
-            else:
-                if (x_scan_pos, y_scan_coord_pos) in self.world.particle_map_coords:
-                    hop_list.append(self.world.particle_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                if (x_scan_pos, y_scan_coord_neg) in self.world.particle_map_coords:
-                    hop_list.append(self.world.particle_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                if (x_scan_neg, y_scan_coord_pos) in self.world.particle_map_coords:
-                    hop_list.append(self.world.particle_map_coords[(x_scan_neg, y_scan_coord_pos)])
-                if (x_scan_neg, y_scan_coord_neg) in self.world.particle_map_coords:
-                    hop_list.append(self.world.particle_map_coords[(x_scan_neg, y_scan_coord_neg)])
-            cnt += 1
-            x_offset += 0.5
 
-        cnt = 0
-        x_upper_scan = self.coords[0] + hop / 2
-        offset_x = 0
-        while cnt < hop + 1:
-            x_upper_scan = x_upper_scan - offset_x
-            if (x_upper_scan, y_up_scan) in self.world.particle_map_coords:
-                hop_list.append(self.world.particle_map_coords[(x_upper_scan, y_up_scan)])
-            if (x_upper_scan, y_down_scan) in self.world.particle_map_coords:
-                hop_list.append(self.world.particle_map_coords[(x_upper_scan, y_down_scan)])
-            cnt += 1
-            offset_x = 1
-        if len(hop_list) > 0:
-            logging.info("Got %s in %s hops", str(len(hop_list)), str(hop))
-            return hop_list
-        else:
-            logging.info("Nothing in %s hops", str(hop))
-            return None
+        scanned_list = self.scan_for_matters_in(matter='particles', hop=hop)
+        return scanned_list
 
-    def scan_for_tile_within(self,  hop=1):
+    def scan_for_tiles_within(self,  hop=1):
         """
         Scans for particles, tiles, or marker on a given hop distance and all the matters within the hop distance
 
@@ -556,17 +380,17 @@ class Particle(matter.Matter):
         :return: A list of the founded matters
         """
 
-        hop_list = []
+        within_hop_list = []
         for i in range(1, hop + 1):
-            list = self.scan_for_tile_in(i)
-            if list != None:
-                hop_list.extend(list)
-        if len(hop_list) != 0:
-            return hop_list
+            in_list = self.scan_for_tiles_in( hop=i)
+            if in_list is not None:
+                within_hop_list.extend(in_list)
+        if len(within_hop_list) != 0:
+            return within_hop_list
         else:
             return None
 
-    def scan_for_tile_in(self, hop=1):
+    def scan_for_tiles_in(self, hop=1):
         """
         Scanning for particles, tiles, or marker on a given hop distance
 
@@ -574,55 +398,10 @@ class Particle(matter.Matter):
         :param hop: The hop distance from thee actual position of the scanning particle
         :return: A list of the founded matters
         """
-        hop_list = []
-        logging.info("particle on %s is scanning for tile in %i hops", str(self.coords), hop)
-        cnt = 0
-        x_offset = 0
-        y_up_scan = self.coords[1] + hop
-        y_down_scan = self.coords[1] - hop
-        while cnt < hop:
-            x_scan_pos = self.coords[0] + hop - x_offset
-            x_scan_neg = self.coords[0] - hop + x_offset
-            y_scan_coord_neg = self.coords[1] - cnt
-            y_scan_coord_pos = self.coords[1] + cnt
-            if cnt == 0:
-                # if self.coords in self.world.tile_map_coords:
-                #     hop_list.append(self.world.tile_map_coords[self.coords])
-                if (x_scan_pos, y_scan_coord_neg) in self.world.tile_map_coords:
-                    hop_list.append(self.world.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                if (x_scan_neg, y_scan_coord_neg) in self.world.tile_map_coords:
-                    hop_list.append(self.world.tile_map_coords[(x_scan_neg, y_scan_coord_neg)])
-            else:
-                if (x_scan_pos, y_scan_coord_pos) in self.world.tile_map_coords:
-                    hop_list.append(self.world.tile_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                if (x_scan_pos, y_scan_coord_neg) in self.world.tile_map_coords:
-                    hop_list.append(self.world.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                if (x_scan_pos, y_scan_coord_neg) in self.world.tile_map_coords:
-                    hop_list.append(self.world.tile_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                if (x_scan_neg, y_scan_coord_neg) in self.world.tile_map_coords:
-                    hop_list.append(self.world.tile_map_coords[(x_scan_neg, y_scan_coord_neg)])
-            cnt += 1
-            x_offset += 0.5
+        scanned_list = self.scan_for_matters_in(matter='tiles', hop=hop)
+        return scanned_list
 
-        cnt = 0
-        x_upper_scan = self.coords[0] + hop / 2
-        offset_x = 0
-        while cnt < hop + 1:
-            x_upper_scan = x_upper_scan - offset_x
-            if (x_upper_scan, y_up_scan) in self.world.tile_map_coords:
-                hop_list.append(self.world.tile_map_coords[(x_upper_scan, y_up_scan)])
-            if (x_upper_scan, y_down_scan) in self.world.tile_map_coords:
-                hop_list.append(self.world.tile_map_coords[(x_upper_scan, y_down_scan)])
-            cnt += 1
-            offset_x = 1
-        if len(hop_list) > 0:
-            logging.info("Got %s in %s hops", str(len(hop_list)), str(hop))
-            return hop_list
-        else:
-            logging.info("Nothing in %s hops", str(hop))
-            return None
-
-    def scan_for_marker_within(self, hop=1):
+    def scan_for_markers_within(self, hop=1):
         """
         Scans for particles, tiles, or marker on a given hop distance and all the matters within the hop distance
 
@@ -633,17 +412,17 @@ class Particle(matter.Matter):
         :return: A list of the founded matters
         """
 
-        hop_list = []
+        within_hop_list = []
         for i in range(1, hop + 1):
-            list = self.scan_for_marker_in(i)
-            if list != None:
-                hop_list.extend(list)
-        if len(hop_list) != 0:
-            return hop_list
+            in_list = self.scan_for_markers_in(hop=i)
+            if in_list is not None:
+                within_hop_list.extend(in_list)
+        if len(within_hop_list) != 0:
+            return within_hop_list
         else:
             return None
 
-    def scan_for_marker_in(self, hop=1):
+    def scan_for_markers_in(self, hop=1):
         """
         Scanning for particles, tiles, or marker on a given hop distance
 
@@ -651,54 +430,8 @@ class Particle(matter.Matter):
         :param hop: The hop distance from thee actual position of the scanning particle
         :return: A list of the founded matters
         """
-        hop_list = []
-        logging.info("particle is scanning for marker in %i hops", hop)
-        cnt = 0
-        x_offset = 0
-        y_up_scan = self.coords[1] + hop
-        y_down_scan = self.coords[1] - hop
-        while cnt < hop:
-            x_scan_pos = self.coords[0] + hop - x_offset
-            x_scan_neg = self.coords[0] - hop + x_offset
-            y_scan_coord_neg = self.coords[1] - cnt
-            y_scan_coord_pos = self.coords[1] + cnt
-            if cnt == 0:
-                # if self.coords in self.world.marker_map_coords:
-                #     hop_list.append(self.world.marker_map_coords[self.coords])
-                if (x_scan_pos, y_scan_coord_neg) in self.world.marker_map_coords:
-                    hop_list.append(self.world.marker_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                if (x_scan_neg, y_scan_coord_neg) in self.world.marker_map_coords:
-                    hop_list.append(self.world.marker_map_coords[(x_scan_neg, y_scan_coord_neg)])
-            else:
-
-                if (x_scan_pos, y_scan_coord_pos) in self.world.marker_map_coords:
-                    hop_list.append(self.world.marker_map_coords[(x_scan_pos, y_scan_coord_pos)])
-                if (x_scan_pos, y_scan_coord_neg) in self.world.marker_map_coords:
-                    hop_list.append(self.world.marker_map_coords[(x_scan_pos, y_scan_coord_neg)])
-                if (x_scan_neg, y_scan_coord_pos) in self.world.marker_map_coords:
-                    hop_list.append(self.world.marker_map_coords[(x_scan_neg, y_scan_coord_pos)])
-                if (x_scan_neg, y_scan_coord_neg) in self.world.marker_map_coords:
-                    hop_list.append(self.world.marker_map_coords[(x_scan_neg, y_scan_coord_neg)])
-            cnt += 1
-            x_offset += 0.5
-
-        cnt = 0
-        x_upper_scan = self.coords[0] + hop / 2
-        offset_x = 0
-        while cnt < hop + 1:
-            x_upper_scan = x_upper_scan - offset_x
-            if (x_upper_scan, y_up_scan) in self.world.marker_map_coords:
-                hop_list.append(self.world.marker_map_coords[(x_upper_scan, y_up_scan)])
-            if (x_upper_scan, y_down_scan) in self.world.marker_map_coords:
-                hop_list.append(self.world.marker_map_coords[(x_upper_scan, y_down_scan)])
-            cnt += 1
-            offset_x = 1
-        if len(hop_list) > 0:
-            logging.info("Got %s in %s hops", str(len(hop_list)), str(hop))
-            return hop_list
-        else:
-            logging.info("Nothing in %s hops", str(hop))
-            return None
+        scanned_list = self.scan_for_matters_in(matter='markers', hop=hop)
+        return scanned_list
 
     def take_me(self, coords=0):
         """
@@ -1287,10 +1020,11 @@ class Particle(matter.Matter):
                     logging.info("particle could not be taken")
                     return False
             else:
-                pass
                 logging.info("particl is not in the world")
+                return False
         else:
             logging.info("particle cannot be  taken")
+            return False
 
     def take_particle_on(self, x=None, y=None):
         """
@@ -1335,7 +1069,8 @@ class Particle(matter.Matter):
                 try:  # cher: insert so to overcome the AttributeError
                     self.carried_particle.drop_me(self.coords)
                 except AttributeError:
-                    pass
+                    logging.info("Dropped particle: Error while dropping")
+                    return False
             self.carried_particle = None
             self.world.csv_round.update_metrics( particles_dropped=1)
             self.csv_particle_writer.write_particle(particles_dropped=1)
@@ -1357,15 +1092,13 @@ class Particle(matter.Matter):
                 try:  # cher: insert so to overcome the AttributeError
                     self.carried_particle.drop_me(coords)
                 except AttributeError:
-                    pass
-                    self.carried_particle = None
-                    logging.info("Dropped particle on %s coordinate", str(coords))
-                    self.world.csv_round.update_metrics( particles_dropped=1)
-                    self.csv_particle_writer.write_particle(particles_dropped=1)
-                    return True
-                else:
-                    logging.info("Is not possible to drop the particle on that position")
+                    logging.info("Dropped particle in: Error while dropping")
                     return False
+                self.carried_particle = None
+                logging.info("Dropped particle on %s coordinate", str(coords))
+                self.world.csv_round.update_metrics( particles_dropped=1)
+                self.csv_particle_writer.write_particle(particles_dropped=1)
+                return True
             else:
                 logging.info("Is not possible to drop the particle on that position because it is occupied")
                 return False
@@ -1380,32 +1113,24 @@ class Particle(matter.Matter):
         :param x: x coordinate
         :param y: y coordinate
         """
-        if self.carried_particle is not None:
-            if x is not None and y is not None:
-                if check_coords(x, y):
-                    coords = (x, y)
-                    if coords not in self.world.particle_map_coords:
-                        try:  # cher: insert so to overcome the AttributeError
-                            self.carried_particle.drop_me(coords)
-                        except AttributeError:
-                            pass
-                        self.carried_particle = None
-                        logging.info("Dropped particle on %s coordinate", str(coords))
-                        self.world.csv_round.update_metrics(
-                                                                   particles_dropped=1)
-                        self.csv_particle_writer.write_particle(particles_dropped=1)
-                        return True
-                    else:
-                        logging.info("Is not possible to drop the particle on that position  because it is occupied")
-                        return False
-                else:
-                    logging.info("Wrong coordinates for dropping particle")
+        if self.carried_particle is not None and x is not None and y is not None and check_coords(x, y):
+            coords = (x, y)
+            if coords not in self.world.particle_map_coords:
+                try:  # cher: insert so to overcome the AttributeError
+                    self.carried_particle.drop_me(coords)
+                except AttributeError:
+                    logging.info("Dropped particle on: Error while dropping")
                     return False
+                self.carried_particle = None
+                logging.info("Dropped particle on %s coordinate", str(coords))
+                self.world.csv_round.update_metrics(particles_dropped=1)
+                self.csv_particle_writer.write_particle(particles_dropped=1)
+                return True
             else:
-                logging.info("No coordinates for dropping particle")
+                logging.info("Is not possible to drop the particle on that position  because it is occupied")
                 return False
         else:
-            logging.info("No particle taken to drop")
+            logging.info("drop_particle_on: Wrong Inputs")
             return False
 
     def update_particle_coords(self, particle, new_coords):

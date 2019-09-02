@@ -1,6 +1,7 @@
 """
 This solution just scans for particles that are within 5 hops range and prints them out.
 """
+
 #Standard Lib that has to be in each solution
 from solution.std_lib import *
 

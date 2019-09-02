@@ -13,7 +13,7 @@ def solution(world):
     if world.get_actual_round() == 1:
         print ("Scanning for markers, tiles and particles")
         logging.info("Scanning for markers, tiles and particles")
-        all_matters_list = world.get_particle_map_coords()[(0, 0)].scan_for_matter_within()
+        all_matters_list = world.get_particle_map_coords()[(0, 0)].scan_for_matters_within()
         for list in all_matters_list:
             if list.type == 'particle':
                 print("particle at", list.coords)
