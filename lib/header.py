@@ -23,6 +23,7 @@ yellow = 6
 orange = 7
 cyan = 8
 violett = 9
+dark_green = 10
 
 
 color_map = {
@@ -30,6 +31,7 @@ color_map = {
     gray: [0.3, 0.3, 0.3],
     red: [0.8, 0.0, 0.0],
     green: [0.0, 0.8, 0.0],
+    dark_green: [0.2, 1, 0.6],
     blue: [0.0, 0.0, 0.8],
     yellow: [0.8, 0.8, 0.0],
     orange: [0.8, 0.3, 0.0],

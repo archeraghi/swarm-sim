@@ -1,5 +1,5 @@
 import random
-
+import lib.header as header
 
 def generating_random_spraded_particles (world, max_size_particle):
     for _ in range(0, max_size_particle):
@@ -39,18 +39,47 @@ def create_particle_in_square(world, max_size_particle, start_coords):
             world.add_particle(-x, -  2 * y)
 
 
-def create_particle_in_hexagons(world, radius):
-    radius = 3
-    world.add_particle(0, 0)
+def add_particles_as_hexagon(world, radius, color=header.black):
+    world.add_particle(0, 0, color)
     displacement = - radius + 0.5
     iteration = 0
     for i in range(1, radius + 1):
-        world.add_particle(i, 0)
-        world.add_particle(-i, 0)
+        world.add_particle(i, 0, color)
+        world.add_particle(-i, 0, color)
     for i in range(1, radius + 1):
         for j in range(0, (2 * radius) - iteration):
-            world.add_particle(displacement + j, i)
-            world.add_particle(displacement + j, -i)
+            world.add_particle(displacement + j, i, color)
+            world.add_particle(displacement + j, -i, color)
+        iteration = iteration + 1
+        displacement = displacement + 0.5
+
+
+def add_tiles_as_hexagon(world, radius, color=header.black):
+    world.add_tile(0, 0, color)
+    displacement = - radius + 0.5
+    iteration = 0
+    for i in range(1, radius + 1):
+        world.add_tile(i, 0, color)
+        world.add_tile(-i, 0, color)
+    for i in range(1, radius + 1):
+        for j in range(0, (2 * radius) - iteration):
+            world.add_tile(displacement + j, i, color)
+            world.add_tile(displacement + j, -i, color)
+        iteration = iteration + 1
+        displacement = displacement + 0.5
+
+
+def add_markers_as_hexagon(world, radius, color=header.black):
+    world.add_marker(0, 0, color)
+    displacement = - radius + 0.5
+    iteration = 0
+    for i in range(1, radius + 1):
+        world.add_marker(i, 0, color)
+        world.add_marker(-i, 0, color)
+    for i in range(1, radius + 1):
+        for j in range(0, (2 * radius) - iteration):
+            world.add_marker(displacement + j, i, color)
+            world.add_marker(displacement + j, -i, color)
         iteration = iteration + 1
         displacement = displacement + 0.5
 
