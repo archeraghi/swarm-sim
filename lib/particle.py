@@ -903,9 +903,10 @@ class Particle(matter.Matter):
         logging.info("is going to delete a particle with id %s", str(id))
         if self.world.remove_particle(id):
             self.csv_particle_writer.write_particle(particle_deleted=1)
-            return
+            return True
         else:
             logging.info("Could not delet particle with particle id %s", str(id))
+            return False
 
     def delete_particle_in(self, direction=None):
         """
@@ -920,8 +921,10 @@ class Particle(matter.Matter):
             if self.world.remove_particle_on(coords):
                 logging.info("Deleted particle with particle on coords %s", str(coords))
                 self.csv_particle_writer.write_particle(particle_deleted=1)
+                return True
             else:
                 logging.info("Could not delet particle on coords %s", str(coords))
+                return False
 
     def delete_particle_on(self, x=None, y=None):
         """
@@ -1140,8 +1143,12 @@ class Particle(matter.Matter):
         :param new_coords: new coorindation points
         :return: None
         """
-        particle.coords = new_coords
-        self.particle_map_coords[new_coords] = particle
+        if check_values_are_coordinates(new_coords[0], new_coords[1]):
+            particle.coords = new_coords
+            self.particle_map_coords[new_coords] = particle
+            return True
+        else:
+            return False
 
     def create_marker(self, color=black, alpha=1):
         """
@@ -1156,7 +1163,7 @@ class Particle(matter.Matter):
             self.csv_particle_writer.write_particle(marker_created=1)
             self.world.csv_round.update_markers_num(len(self.world.get_marker_list()))
             self.world.csv_round.update_metrics( marker_created=1)
-            return  new_marker
+            return new_marker
         else:
             return False
 
@@ -1237,9 +1244,10 @@ class Particle(matter.Matter):
         logging.info("is going to delete a marker with id %s", str(marker_id))
         if self.world.remove_marker(marker_id):
             self.csv_particle_writer.write_particle(marker_deleted=1)
-            return
+            return True
         else:
             logging.info("Could not delet marker with marker id %s", str(marker_id))
+            return False
 
     def delete_marker_in(self, direction=None):
         """
@@ -1257,8 +1265,10 @@ class Particle(matter.Matter):
             if self.world.remove_marker_on(coords):
                 logging.info("Deleted marker with marker on coords %s", str(coords))
                 self.csv_particle_writer.write_particle(marker_deleted=1)
+                return True
             else:
                 logging.info("Could not delet marker on coords %s", str(coords))
+                return False
 
     def delete_marker_on(self, x=None, y=None):
         """
@@ -1282,4 +1292,3 @@ class Particle(matter.Matter):
                 return False
         else:
             return False
-
