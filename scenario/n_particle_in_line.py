@@ -1,4 +1,4 @@
-from scenario.std_lib import *
+from lib.swarm_sim_header import *
 
 
 def scenario(world):

@@ -1,6 +1,6 @@
 import random
 #Standard Lib that has to be in each solution
-from solution.std_lib import *
+from lib.swarm_sim_header import *
 
 def solution(world):
 

@@ -201,7 +201,7 @@ def create_particle_in_square(world, max_size_particle, start_coords):
             world.add_particle(-x, -  2 * y)
 
 
-def add_particles_as_hexagon(world, radius, color=header.black):
+def add_particles_as_hexagon(world, radius, color=black):
     world.add_particle(0, 0, color)
     displacement = - radius + 0.5
     iteration = 0
@@ -216,7 +216,7 @@ def add_particles_as_hexagon(world, radius, color=header.black):
         displacement = displacement + 0.5
 
 
-def add_tiles_as_hexagon(world, radius, color=header.black):
+def add_tiles_as_hexagon(world, radius, color=black):
     world.add_tile(0, 0, color)
     displacement = - radius + 0.5
     iteration = 0
@@ -231,7 +231,7 @@ def add_tiles_as_hexagon(world, radius, color=header.black):
         displacement = displacement + 0.5
 
 
-def add_markers_as_hexagon(world, radius, color=header.black):
+def add_markers_as_hexagon(world, radius, color=black):
     world.add_marker(0, 0, color)
     displacement = - radius + 0.5
     iteration = 0

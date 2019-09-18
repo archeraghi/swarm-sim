@@ -2,7 +2,7 @@
 This solution is an example for creating and deleting, particles, tiles or markers
 """
 #Standard Lib that has to be in each solution
-from solution.std_lib import *
+from lib.swarm_sim_header import *
 
 def solution(world):
     if world.get_actual_round() == 1:

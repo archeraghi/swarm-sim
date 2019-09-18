@@ -3,10 +3,9 @@ This solution tests all the interfaces that are provided from swarm-world MAX Ro
 """
 
 import logging
-import random
 
 #Standard Lib that has to be in each solution
-from solution.std_lib import *
+from lib.swarm_sim_header import *
 
 def solution(world):
 
@@ -90,7 +89,7 @@ def solution(world):
 
     elif world.get_actual_round() > 20:
         for particle in world.get_particle_list():
-            particle.move_to(random.choice(direction))
+            particle.move_to(random.choice(direction_list))
             if particle.coords in world.get_tile_map_coords():
                 print("Found Tile")
                 particle.take_tile()
