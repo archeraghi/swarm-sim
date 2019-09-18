@@ -13,12 +13,10 @@ import logging, math
 from lib import csv_generator, matter
 from lib.header import *
 
-particle_counter=0
-
 
 class Particle(matter.Matter):
     """In the classe marker all the methods for the characterstic of a marker is included"""
-    def __init__(self, world, x, y, color=black, alpha=1, particle_counter = particle_counter):
+    def __init__(self, world, x, y, color=black, alpha=1, particle_counter=0):
         """Initializing the marker constructor"""
         super().__init__( world, (x, y), color, alpha,
                           type="particle", mm_size=world.config_data.particle_mm_size)
