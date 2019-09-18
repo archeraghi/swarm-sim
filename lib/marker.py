@@ -1,7 +1,7 @@
 """The marker module provides the interface to the markers. A marker is any point on
  the coordinate system of the simulators world"""
 from lib import matter
-from lib.header import *
+from lib.swarm_sim_header import *
 
 
 class Marker(matter.Matter):

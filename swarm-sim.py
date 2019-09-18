@@ -21,7 +21,7 @@ def swarm_sim(argv):
     
     read_cmd_args(argv, config_data)
 
-    create_dir_for_data(config_data)
+    create_direction_for_data(config_data)
 
     random.seed(config_data.seed_value)
 
@@ -68,33 +68,33 @@ def read_cmd_args(argv, config_data):
             config_data.local_time = str(arg)
 
 
-def create_dir_for_data(config_data):
+def create_direction_for_data(config_data):
     if config_data.multiple_sim == 1:
-        config_data.dir_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
+        config_data.direction_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
                                "_" + config_data.solution.rsplit('.', 1)[0] + "/" + \
                                str(config_data.seed_value)
 
-        config_data.dir_name = "./outputs/mulitple/" + config_data.dir_name
+        config_data.direction_name = "./outputs/mulitple/" + config_data.direction_name
 
     else:
-        config_data.dir_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
+        config_data.direction_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
                                "_" + config_data.solution.rsplit('.', 1)[0] + "_" + \
                                str(config_data.seed_value)
-        config_data.dir_name = "./outputs/" + config_data.dir_name
-    if not os.path.exists(config_data.dir_name):
-        os.makedirs(config_data.dir_name)
+        config_data.direction_name = "./outputs/" + config_data.direction_name
+    if not os.path.exists(config_data.direction_name):
+        os.makedirs(config_data.direction_name)
 
 
 def run_solution(swarm_sim_world):
     mod = importlib.import_module('solution.' + swarm_sim_world.config_data.solution)
     mod.solution(swarm_sim_world)
     swarm_sim_world.csv_round.next_line(swarm_sim_world.get_actual_round())
-    swarm_sim_world.inc_round_cnter()
+    swarm_sim_world.inc_round_counter()
 
 
 def generate_data(config_data, swarm_sim_world):
     swarm_sim_world.csv_aggregator()
-    gnuplot_generator(config_data.dir_name)
+    gnuplot_generator(config_data.direction_name)
 
 
 if __name__ == "__main__":

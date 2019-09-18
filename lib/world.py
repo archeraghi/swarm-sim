@@ -9,7 +9,7 @@ import random
 import math
 import logging
 from lib import csv_generator, particle, tile, marker, vis
-from lib.header import *
+from lib.swarm_sim_header import *
 
 
 class World:
@@ -58,7 +58,7 @@ class World:
         self.csv_round = csv_generator.CsvRoundData(scenario=config_data.scenario,
                                                     solution=config_data.solution,
                                                     seed=config_data.seed_value,
-                                                    directory=config_data.dir_name)
+                                                    directory=config_data.direction_name)
 
         mod = importlib.import_module('scenario.' + self.config_data.scenario)
         mod.scenario(self)
@@ -71,7 +71,7 @@ class World:
 
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()
-        particle_csv = csv_generator.CsvParticleFile(self.config_data.dir_name)
+        particle_csv = csv_generator.CsvParticleFile(self.config_data.direction_name)
         for particle in self.particles:
             particle_csv.write_particle(particle)
         particle_csv.csv_file.close()
@@ -88,6 +88,14 @@ class World:
         """
         return self.__round_counter
 
+    def get_max_round(self):
+        """
+        The max round number
+
+        :return: maximum round number
+        """
+        return self.config_data.max_round
+
     def set_end(self):
         """
         Allows to terminate before the max round is reached
@@ -100,7 +108,7 @@ class World:
         """
         return self.__end
 
-    def inc_round_cnter(self):
+    def inc_round_counter(self):
         """
         Increases the the round counter by
 
@@ -211,16 +219,6 @@ class World:
         :return: a dictionary with markers and their own ids
         """
         return self.marker_map_id
-
-    def get_coords_in_dir(self, coords, dir):
-        """
-        Returns the coordination data of the pointed directions
-
-        :param coords: particles actual staying coordination
-        :param dir: The direction. Options:  E, SE, SW, W, NW, or NE
-        :return: The coordinaiton of the pointed directions
-        """
-        return coords[0] + x_offset[dir], coords[1] + y_offset[dir]
 
     def get_world_x_size(self):
         """

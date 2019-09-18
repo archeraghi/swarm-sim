@@ -11,14 +11,12 @@ TODO: Erase Memory
 
 import logging, math
 from lib import csv_generator, matter
-from lib.header import *
-
-particle_counter=0
+from lib.swarm_sim_header import *
 
 
 class Particle(matter.Matter):
     """In the classe marker all the methods for the characterstic of a marker is included"""
-    def __init__(self, world, x, y, color=black, alpha=1, particle_counter = particle_counter):
+    def __init__(self, world, x, y, color=black, alpha=1, particle_counter=0):
         """Initializing the marker constructor"""
         super().__init__( world, (x, y), color, alpha,
                           type="particle", mm_size=world.config_data.particle_mm_size)
@@ -82,24 +80,24 @@ class Particle(matter.Matter):
         else:
             return False
 
-    def move_to(self, dir):
+    def move_to(self, direction):
         """
         Moves the particle to the given direction
 
-        :param dir: The direction must be either: E, SE, SW, W, NW, or NE
+        :param direction: The direction must be either: E, SE, SW, W, NW, or NE
         :return: True: Success Moving;  False: Non moving
         """
-        dir_coord = self.world.get_coords_in_dir(self.coords, dir)
-        dir, dir_coord = self.check_within_border(dir, dir_coord)
-        if check_coords(dir_coord[0], dir_coord[1]):
+        direction_coord = get_coords_in_direction(self.coords, direction)
+        direction, direction_coord = self.check_within_border(direction, direction_coord)
+        if check_coords(direction_coord[0], direction_coord[1]):
 
             if self.coords in self.world.particle_map_coords:
                 del self.world.particle_map_coords[self.coords]
 
-            if not dir_coord in self.world.particle_map_coords:
-                self.coords = dir_coord
+            if not direction_coord in self.world.particle_map_coords:
+                self.coords = direction_coord
                 self.world.particle_map_coords[self.coords] = self
-                logging.info("particle %s successfully moved to %s", str(self.get_id()), dir)
+                logging.info("particle %s successfully moved to %s", str(self.get_id()), direction)
                 self.world.csv_round.update_metrics( steps=1)
                 self.csv_particle_writer.write_particle(steps=1)
                 self.touch()
@@ -115,28 +113,28 @@ class Particle(matter.Matter):
             self.carried_particle.coords = self.coords
             self.carried_particle.touch()
 
-    def check_within_border(self, dir, dir_coord):
+    def check_within_border(self, direction, direction_coord):
         if self.world.config_data.border == 1 and \
-                (abs(dir_coord[0]) > self.world.get_sim_x_size() or abs(dir_coord[1]) > self.world.get_sim_y_size()):
-            dir = dir - 3 if dir > 2 else dir + 3
-            dir_coord = self.world.get_coords_in_dir(self.coords, dir)
-        return dir, dir_coord
+                (abs(direction_coord[0]) > self.world.get_world_x_size() or abs(direction_coord[1]) > self.world.get_world_y_size()):
+            direction = direction - 3 if direction > 2 else direction + 3
+            direction_coord = get_coords_in_direction(self.coords, direction)
+        return direction, direction_coord
 
-    def move_to_in_bounds(self, dir):
+    def move_to_in_bounds(self, direction):
         """
             Moves the particle to the given direction if it would remain in bounds.
 
-            :param dir: The direction must be either: E, SE, SW, W, NW, or NE
+            :param direction: The direction must be either: E, SE, SW, W, NW, or NE
             :return: True: Success Moving;  False: Non moving
         """
-        dir_coord = self.world.get_coords_in_dir(self.coords, dir)
-        sim_coord = coords_to_sim(dir_coord)
-        if self.world.get_sim_x_size() >=  abs(sim_coord[0]) and \
-                        self.world.get_sim_y_size() >=  abs(sim_coord[1]):
-            return self.move_to(dir)
+        direction_coord = get_coords_in_direction(self.coords, direction)
+        sim_coord = coords_to_sim(direction_coord)
+        if self.world.get_world_x_size() >=  abs(sim_coord[0]) and \
+                        self.world.get_world_y_size() >=  abs(sim_coord[1]):
+            return self.move_to(direction)
         else:
             # 'bounce' off the wall
-            n_dir = dir - 3 if dir > 2 else dir + 3
+            n_dir = direction - 3 if direction > 2 else direction + 3
             self.move_to(n_dir)
 
     def read_from_with(self, matter, key=None):
@@ -166,73 +164,73 @@ class Particle(matter.Matter):
         else:
             return None
 
-    def matter_in(self, dir=E):
+    def matter_in(self, direction=E):
         """
-        :param dir: the direction to check if a matter is there
+        :param direction: the direction to check if a matter is there
         :return: True: if a matter is there, False: if not
         """
-        if  self.world.get_coords_in_dir(self.coords, dir) in self.world.get_tile_map_coords() \
-            or self.world.get_coords_in_dir(self.coords, dir) in self.world.get_particle_map_coords() \
-            or self.world.get_coords_in_dir(self.coords, dir) in self.world.get_marker_map_coords():
+        if  get_coords_in_direction(self.coords, direction) in self.world.get_tile_map_coords() \
+            or get_coords_in_direction(self.coords, direction) in self.world.get_particle_map_coords() \
+            or get_coords_in_direction(self.coords, direction) in self.world.get_marker_map_coords():
             return True
         else:
             return False
 
-    def tile_in(self, dir=E):
+    def tile_in(self, direction=E):
         """
-        :param dir: the direction to check if a tile is there
+        :param direction: the direction to check if a tile is there
         :return: True: if a tile is there, False: if not
         """
-        if self.world.get_coords_in_dir(self.coords, dir) in self.world.get_tile_map_coords():
+        if get_coords_in_direction(self.coords, direction) in self.world.get_tile_map_coords():
             return True
         else:
             return False
 
-    def particle_in(self, dir=E):
+    def particle_in(self, direction=E):
         """
-        :param dir: the direction to check if a particle is there
+        :param direction: the direction to check if a particle is there
         :return: True: if a particle is there, False: if not
         """
-        if self.world.get_coords_in_dir(self.coords, dir) in self.world.get_particle_map_coords():
+        if get_coords_in_direction(self.coords, direction) in self.world.get_particle_map_coords():
             return True
         else:
             return False
 
-    def marker_in(self, dir=E):
+    def marker_in(self, direction=E):
         """
-        :param dir: the direction to check if a marker is there
+        :param direction: the direction to check if a marker is there
         :return: True: if a marker is there, False: if not
         """
-        if self.world.get_coords_in_dir(self.coords, dir) in self.world.get_marker_map_coords():
+        if get_coords_in_direction(self.coords, direction) in self.world.get_marker_map_coords():
             return True
         else:
             return False
 
-    def get_matter_in(self, dir=E):
-        if self.world.get_coords_in_dir(self.coords, dir) in self.world.get_tile_map_coords():
-            return self.world.get_tile_map_coords()[self.world.get_coords_in_dir(self.coords, dir)]
-        elif self.world.get_coords_in_dir(self.coords, dir) in self.world.get_particle_map_coords():
-            return self.world.get_particle_map_coords()[self.world.get_coords_in_dir(self.coords, dir)]
-        elif self.world.get_coords_in_dir(self.coords, dir) in self.world.get_marker_map_coords():
-            return self.world.get_marker_map_coords()[self.world.get_coords_in_dir(self.coords, dir)]
+    def get_matter_in(self, direction=E):
+        if get_coords_in_direction(self.coords, direction) in self.world.get_tile_map_coords():
+            return self.world.get_tile_map_coords()[get_coords_in_direction(self.coords, direction)]
+        elif get_coords_in_direction(self.coords, direction) in self.world.get_particle_map_coords():
+            return self.world.get_particle_map_coords()[get_coords_in_direction(self.coords, direction)]
+        elif get_coords_in_direction(self.coords, direction) in self.world.get_marker_map_coords():
+            return self.world.get_marker_map_coords()[get_coords_in_direction(self.coords, direction)]
         else:
             return False
 
-    def get_tile_in(self, dir=E):
-        if self.world.get_coords_in_dir(self.coords, dir) in self.world.get_tile_map_coords():
-            return self.world.get_tile_map_coords()[self.world.get_coords_in_dir(self.coords, dir)]
+    def get_tile_in(self, direction=E):
+        if get_coords_in_direction(self.coords, direction) in self.world.get_tile_map_coords():
+            return self.world.get_tile_map_coords()[get_coords_in_direction(self.coords, direction)]
         else:
             return False
 
-    def get_particle_in(self, dir=E):
-        if self.world.get_coords_in_dir(self.coords, dir) in self.world.get_particle_map_coords():
-            return self.world.get_particle_map_coords()[self.world.get_coords_in_dir(self.coords, dir)]
+    def get_particle_in(self, direction=E):
+        if get_coords_in_direction(self.coords, direction) in self.world.get_particle_map_coords():
+            return self.world.get_particle_map_coords()[get_coords_in_direction(self.coords, direction)]
         else:
             return False
 
-    def get_marker_in(self, dir=E):
-        if self.world.get_coords_in_dir(self.coords, dir) in self.world.get_marker_map_coords():
-            return self.world.get_marker_map_coords()[self.world.get_coords_in_dir(self.coords, dir)]
+    def get_marker_in(self, direction=E):
+        if get_coords_in_direction(self.coords, direction) in self.world.get_marker_map_coords():
+            return self.world.get_marker_map_coords()[get_coords_in_direction(self.coords, direction)]
         else:
             return False
 
@@ -482,17 +480,17 @@ class Particle(matter.Matter):
         else:
             return False
 
-    def create_tile_in(self, dir=None, color=gray, alpha=1):
+    def create_tile_in(self, direction=None, color=gray, alpha=1):
         """
         Creates a tile either in a given direction
 
-        :param dir: The direction on which the tile should be created. Options: E, SE, SW, W, NW, NE,
+        :param direction: The direction on which the tile should be created. Options: E, SE, SW, W, NW, NE,
         :return: New tile or False
         """
         logging.info("particle with id %s is", self.get_id())
-        logging.info("Going to create a tile in %s ", str(dir) )
-        if dir != None:
-            coords = self.world.get_coords_in_dir(self.coords, dir)
+        logging.info("Going to create a tile in %s ", str(direction) )
+        if direction != None:
+            coords = get_coords_in_direction(self.coords, direction)
             new_tile = self.world.add_tile(coords[0], coords[1], color, alpha)
             if new_tile:
                 self.world.tile_map_coords[coords[0], coords[1]].created = True
@@ -568,18 +566,18 @@ class Particle(matter.Matter):
             logging.info("Could not delet tile with tile id %s", str(id))
             return False
 
-    def delete_tile_in(self, dir=None):
+    def delete_tile_in(self, direction=None):
         """
         Deletes a tile either in a given direction
 
-        :param dir: The direction on which the tile should be deleted. Options: E, SE, SW, W, NW, NE,
+        :param direction: The direction on which the tile should be deleted. Options: E, SE, SW, W, NW, NE,
 
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
         coords = ()
-        if dir is not None:
-            coords = self.world.get_coords_in_dir(self.coords, dir)
-            logging.info("Deleting tile in %s direction", str(dir))
+        if direction is not None:
+            coords = get_coords_in_direction(self.coords, direction)
+            logging.info("Deleting tile in %s direction", str(direction))
             if coords is not None:
                 if self.world.remove_tile_on(coords):
                     logging.info("Deleted tile with tile on coords %s", str(coords))
@@ -665,15 +663,15 @@ class Particle(matter.Matter):
             logging.info("Tile cannot taken because particle is carrieng either a tile or a particle", str(id))
             return False
 
-    def take_tile_in(self, dir):
+    def take_tile_in(self, direction):
         """
         Takes a tile that is in a given direction
 
-        :param dir: The direction on which the tile should be taken. Options: E, SE, SW, W, NW, NE,
+        :param direction: The direction on which the tile should be taken. Options: E, SE, SW, W, NW, NE,
         :return: True: successful taken; False: unsuccessful taken
         """
         if self.carried_particle is None and self.carried_tile is None:
-            coords = self.world.get_coords_in_dir(self.coords, dir)
+            coords = get_coords_in_direction(self.coords, direction)
             if coords in self.world.tile_map_coords:
                 self.carried_tile = self.world.tile_map_coords[coords]
                 logging.info("Tile with tile id %s is in the world", str(self.carried_tile.get_id()))
@@ -747,14 +745,14 @@ class Particle(matter.Matter):
         else:
             return False
 
-    def drop_tile_in(self, dir):
+    def drop_tile_in(self, direction):
         """
         Drops the taken tile on a given direction
 
-         :param dir: The direction on which the tile should be dropped. Options: E, SE, SW, W, NW, NE,
+         :param direction: The direction on which the tile should be dropped. Options: E, SE, SW, W, NW, NE,
         """
         if self.carried_tile is not None:
-            coords = self.world.get_coords_in_dir(self.coords, dir)
+            coords = get_coords_in_direction(self.coords, direction)
             if coords not in self.world.tile_map_coords:
                 try:  # cher: insert so to overcome the AttributeError
                     self.carried_tile.drop_me(coords)
@@ -820,19 +818,19 @@ class Particle(matter.Matter):
         else:
             return False
 
-    def create_particle_in(self, dir=None, color=black, alpha=1):
+    def create_particle_in(self, direction=None, color=black, alpha=1):
         """
         Creates a particle either in a given direction
 
         :toDo: seperate the direction and coordinates and delete state
 
-        :param dir: The direction on which the particle should be created. Options: E, SE, SW, W, NW, NE,
+        :param direction: The direction on which the particle should be created. Options: E, SE, SW, W, NW, NE,
         :return: New Particle or False
         """
         coords = (0, 0)
-        if dir is not None:
-            coords = self.world.get_coords_in_dir(self.coords, dir)
-            logging.info("Going to create a particle in %s on position %s", str(dir), str(coords))
+        if direction is not None:
+            coords = get_coords_in_direction(self.coords, direction)
+            logging.info("Going to create a particle in %s on position %s", str(direction), str(coords))
             new_particle= self.world.add_particle(coords[0], coords[1], color, alpha)
             if new_particle:
                 self.world.particle_map_coords[coords[0], coords[1]].created = True
@@ -909,16 +907,16 @@ class Particle(matter.Matter):
         else:
             logging.info("Could not delet particle with particle id %s", str(id))
 
-    def delete_particle_in(self, dir=None):
+    def delete_particle_in(self, direction=None):
         """
         Deletes a particle either in a given direction
 
-        :param dir: The direction on which the particle should be deleted. Options: E, SE, SW, W, NW, NE,
+        :param direction: The direction on which the particle should be deleted. Options: E, SE, SW, W, NW, NE,
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-        if dir is not None:
-            coords = self.world.get_coords_in_dir(self.coords, dir)
-            logging.info("Deleting tile in %s direction", str(dir))
+        if direction is not None:
+            coords = get_coords_in_direction(self.coords, direction)
+            logging.info("Deleting tile in %s direction", str(direction))
             if self.world.remove_particle_on(coords):
                 logging.info("Deleted particle with particle on coords %s", str(coords))
                 self.csv_particle_writer.write_particle(particle_deleted=1)
@@ -998,15 +996,15 @@ class Particle(matter.Matter):
         else:
             logging.info("particle cannot taken because particle is carrieng either a particle or a particle", str(id))
 
-    def take_particle_in(self, dir):
+    def take_particle_in(self, direction):
         """
         Takes a particle that is in a given direction
 
-        :param dir: The direction on which the particle should be taken. Options: E, SE, SW, W, NW, NE,
+        :param direction: The direction on which the particle should be taken. Options: E, SE, SW, W, NW, NE,
         :return: True: successful taken; False: unsuccessful taken
         """
         if self.carried_tile is None and self.carried_particle is None:
-            coords = self.world.get_coords_in_dir(self.coords, dir)
+            coords = get_coords_in_direction(self.coords, direction)
             if coords in self.world.particle_map_coords:
                 logging.info("Take particle")
                 self.carried_particle = self.world.particle_map_coords[coords]
@@ -1080,14 +1078,14 @@ class Particle(matter.Matter):
             logging.info("No particle taken to drop")
             return False
 
-    def drop_particle_in(self, dir):
+    def drop_particle_in(self, direction):
         """
         Drops the particle tile in a given direction
 
-         :param dir: The direction on which the particle should be dropped. Options: E, SE, SW, W, NW, NE,
+         :param direction: The direction on which the particle should be dropped. Options: E, SE, SW, W, NW, NE,
         """
         if self.carried_particle is not None:
-            coords = self.world.get_coords_in_dir(self.coords, dir)
+            coords = get_coords_in_direction(self.coords, direction)
             if coords not in self.world.particle_map_coords:
                 try:  # cher: insert so to overcome the AttributeError
                     self.carried_particle.drop_me(coords)
@@ -1162,17 +1160,17 @@ class Particle(matter.Matter):
         else:
             return False
 
-    def create_marker_in(self, dir=None, color=black, alpha=1):
+    def create_marker_in(self, direction=None, color=black, alpha=1):
         """
         Creates a marker either in a given direction
-        :param dir: The direction on which the marker should be created. Options: E, SE, SW, W, NW, NE,
+        :param direction: The direction on which the marker should be created. Options: E, SE, SW, W, NW, NE,
         :return: New marker or False
 
         """
         coords = (0, 0)
-        if dir is not None:
-            coords = self.world.get_coords_in_dir(self.coords, dir)
-            logging.info("Going to create a marker in %s on position %s", str(dir), str(coords))
+        if direction is not None:
+            coords = get_coords_in_direction(self.coords, direction)
+            logging.info("Going to create a marker in %s on position %s", str(direction), str(coords))
             new_marker = self.world.add_marker(coords[0], coords[1], color, alpha)
             if new_marker:
                 logging.info("Created marker on coords %s", str(coords))
@@ -1243,19 +1241,19 @@ class Particle(matter.Matter):
         else:
             logging.info("Could not delet marker with marker id %s", str(marker_id))
 
-    def delete_marker_in(self, dir=None):
+    def delete_marker_in(self, direction=None):
         """
         Deletes a marker either in a given direction or on a given x,y coordinates
 
-        :param dir: The direction on which the marker should be deleted. Options: E, SE, SW, W, NW, NE,
+        :param direction: The direction on which the marker should be deleted. Options: E, SE, SW, W, NW, NE,
         :param x: x coordinate
         :param y: y coordinate
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
 
-        if dir is not None:
-            coords = self.world.get_coords_in_dir(self.coords, dir)
-            logging.info("Deleting tile in %s direction", str(dir))
+        if direction is not None:
+            coords = get_coords_in_direction(self.coords, direction)
+            logging.info("Deleting tile in %s direction", str(direction))
             if self.world.remove_marker_on(coords):
                 logging.info("Deleted marker with marker on coords %s", str(coords))
                 self.csv_particle_writer.write_particle(marker_deleted=1)

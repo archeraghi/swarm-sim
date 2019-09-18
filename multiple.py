@@ -43,11 +43,11 @@ def main(argv):
         elif opt in ("-n", "--maxrounds"):
             max_round = int(arg)
 
-    dir = "./outputs/mulitple/" + str(n_time) + "_" + scenario_file.rsplit('.', 1)[0] + "_" + \
+    direction = "./outputs/mulitple/" + str(n_time) + "_" + scenario_file.rsplit('.', 1)[0] + "_" + \
           solution_file.rsplit('.', 1)[0]
-    if not os.path.exists(dir):
-        os.makedirs(dir)
-    out = open(dir + "/multiprocess.txt", "w")
+    if not os.path.exists(direction):
+        os.makedirs(direction)
+    out = open(direction + "/multiprocess.txt", "w")
     child_processes = []
     process_cnt=0
     for seed in range(seed_start, seed_end+1):
@@ -64,9 +64,9 @@ def main(argv):
 
     for cp in child_processes:
         cp.wait()
-    fout = open(dir+"/all_aggregates.csv","w+")
+    fout = open(direction+"/all_aggregates.csv","w+")
     for seed in range(seed_start, seed_end+1):
-        f = open(dir+"/"+str(seed)+"/aggregate_rounds.csv")
+        f = open(direction+"/"+str(seed)+"/aggregate_rounds.csv")
         f.__next__() # skip the header
         for line in f:
             fout.write(line)

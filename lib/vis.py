@@ -106,7 +106,7 @@ class View:
 
 class VisWindow(pyglet.window.Window):
     def __init__(self, window_size_x, window_size_y, world):
-        #super().__init__(world.get_sim_x_size(), world.get_sim_y_size(), resizable=window_resizable, vsync=False, caption="Simulator")
+        #super().__init__(world.get_world_x_size(), world.get_world_y_size(), resizable=window_resizable, vsync=False, caption="Simulator")
         super().__init__(window_size_x, window_size_y , resizable=window_resizable, vsync=False, caption="Simulator")
         self.window_active = True
         glClearColor(0.0, 0.0, 0.0, 0.0)

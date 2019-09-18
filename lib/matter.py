@@ -2,7 +2,7 @@
  the coordinate system of the simulators world"""
 import uuid
 from datetime import datetime
-from lib.header import *
+from lib.swarm_sim_header import *
 
 
 class Matter:

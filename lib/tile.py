@@ -1,7 +1,7 @@
 """The tile module provides the interface for the tiles. A tile is a hexogon that can be taken or dropped
  and be connected to each other to buld up islands"""
 from lib import matter
-from lib.header import *
+from lib.swarm_sim_header import *
 
 
 class Tile(matter.Matter):
