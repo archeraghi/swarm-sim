@@ -273,7 +273,7 @@ class World:
         if alpha < 0 or alpha >1:
             alpha = 1
         if len(self.particles) < self.config_data.max_particles:
-            if check_coords(x,y) == True:
+            if check_values_are_coordinates(x,y) == True:
                 if (x,y) not in self.get_particle_map_coords():
                     self.particle_id_counter += 1
                     new_particle = particle.Particle(self, x, y, color, alpha, self.particle_id_counter)
@@ -357,7 +357,7 @@ class World:
         """
         if alpha < 0 or alpha >1:
             alpha = 1
-        if check_coords(x,y) == True:
+        if check_values_are_coordinates(x,y) == True:
             if (x,y) not in self.tile_map_coords:
                 self.new_tile=tile.Tile(self, x, y, color, alpha)
                 print("Before adding ", len(self.tiles) )
@@ -386,7 +386,7 @@ class World:
         :param y: the y coordinates on which the tile should be added
         :return: True: Successful added; False: Unsuccsessful
         """
-        if check_coords(x, y) == True:
+        if check_values_are_coordinates(x, y) == True:
             if (x, y) not in self.tile_map_coords:
                 self.new_tile = tile.Tile(self, x, y, color, alpha)
                 self.tiles.append(self.new_tile)
@@ -466,7 +466,7 @@ class World:
         """
         if alpha < 0 or alpha >1:
             alpha = 1
-        if check_coords(x, y) == True:
+        if check_values_are_coordinates(x, y) == True:
             if (x, y) not in self.marker_map_coords:
                 self.new_marker = marker.Marker(self, x, y, color, alpha)
                 self.markers.append(self.new_marker)

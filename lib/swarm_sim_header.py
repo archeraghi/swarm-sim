@@ -85,7 +85,7 @@ def direction_in_range(direction):
     return direction % 6
 
 
-def check_coords(coords_x, coords_y):
+def check_values_are_coordinates(coords_x, coords_y):
     """
     Checks if the given coordinates are matching the
     hexagon coordinates
