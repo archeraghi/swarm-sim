@@ -21,7 +21,7 @@ For Linux:
 
 - go to the main folder of the SNS-Folder and start it with:
 
-    python3.6 run.py
+    python3.6 swarm-sim.py
 
 
 For development the IDE Pycharm is recommended:
