@@ -29,7 +29,7 @@ For development the IDE Pycharm is recommended:
 https://www.jetbrains.com/help/pycharm/install-and-set-up-pycharm.html
 
 
-For Windows:
+For Windows/Linux/MacOs:
 - unzip souce code
 - install python3.6
 - install pycharm
