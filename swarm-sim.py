@@ -89,7 +89,7 @@ def run_solution(swarm_sim_world):
     mod = importlib.import_module('solution.' + swarm_sim_world.config_data.solution)
     mod.solution(swarm_sim_world)
     swarm_sim_world.csv_round.next_line(swarm_sim_world.get_actual_round())
-    swarm_sim_world.inc_round_counter()
+    swarm_sim_world.inc_round_counter_by(number=1)
 
 
 def generate_data(config_data, swarm_sim_world):

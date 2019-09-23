@@ -76,7 +76,7 @@ class World:
             particle_csv.write_particle(particle)
         particle_csv.csv_file.close()
 
-    def success_termination(self):
+    def set_successful_end(self):
         self.csv_round.success()
         self.set_end()
         
@@ -104,7 +104,7 @@ class World:
         """
         return self.config_data.max_round
 
-    def set_end(self):
+    def set_unsuccessful_end(self):
         """
         Allows to terminate before the max round is reached
         """
@@ -116,13 +116,13 @@ class World:
         """
         return self.__end
 
-    def inc_round_counter(self):
+    def inc_round_counter_by(self, number=1):
         """
         Increases the the round counter by
 
         :return:
         """
-        self.__round_counter +=  1
+        self.__round_counter +=  number
 
     def get_solution(self):
         """

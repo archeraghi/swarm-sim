@@ -40,6 +40,7 @@ class Matter:
         elif alpha > 1:
             self.__alpha = 1
         self.touch()
+
     def get_alpha(self):
         """
         Returns the alpha value of the particle

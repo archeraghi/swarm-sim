@@ -70,17 +70,6 @@ class Tile(matter.Matter):
         self.set_alpha(1)
         self.touch()
 
-    def update_tile_coords(self, tile, new_coords):
-        """
-        Upadtes the tiles new coordinates
-
-        :param tile:
-        :param new_coords: new coorindation points
-        :return: None
-        """
-        tile.coords = new_coords
-        self.tile_map_coords[tile.coords] = tile
-
     def touch(self):
         """Tells the visualization that something has been modified and that it shoud changed it"""
         self.modified = True
