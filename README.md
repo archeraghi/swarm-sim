@@ -43,7 +43,7 @@ For Windows:
     3. pandas
     4. pyglet
 - press Okey
-- wait that everything is installed
-- chose Run->run.py
+- wait until everything is installed
+- chose Run->swarm-sim.py
     - If it gives an error that it cannot find the interpretetor
        Open Run->"Edit Configuration" Chose the python3.6 as an interpretetor
