@@ -12,7 +12,7 @@ class Colors(Enum):
     yellow = 6
     orange = 7
     cyan = 8
-    violett = 9
+    violet = 9
     dark_green = 10
 
 
@@ -24,7 +24,7 @@ blue = 5
 yellow = 6
 orange = 7
 cyan = 8
-violett = 9
+violet = 9
 dark_green = 10
 
 
@@ -38,7 +38,7 @@ color_map = {
     yellow: [0.8, 0.8, 0.0],
     orange: [0.8, 0.3, 0.0],
     cyan: [0.0, 0.8, 0.8],
-    violett: [0.8, 0.2, 0.6]
+    violet: [0.8, 0.2, 0.6]
 }
 
 
