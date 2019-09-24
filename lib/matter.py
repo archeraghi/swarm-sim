@@ -12,13 +12,8 @@ class Matter:
         self.coords = coords
         self.color = color_map[color]
         self.__id = str(uuid.uuid4())
-        self.memory_delay_time=3
-        self.memory_delay=True
-        self.memory_buffer=[]
-        self._tmp_memory=[]
         self.world = world
         self._memory={}
-        self.__modified=False
         self.__alpha=alpha
         self.type = type
         self.memory_limitation = world.config_data.memory_limitation
@@ -57,9 +52,6 @@ class Matter:
         :return: The founded memory; None: When nothing is written based on the keywoard
         """
         tmp_memory = None
-        # if self.memory_delay == True:
-        #     for key in self._tmp_memory:
-        #         if key ==
         if key in self._memory:
             tmp_memory = self._memory[key]
             self.world.csv_round.update_metrics( memory_read=1)
