@@ -241,6 +241,12 @@ class World:
         """
         return self.config_data.size_y
 
+    def get_world_size(self):
+        """
+        :return: Returns the maximal (x,y) size of the world as a tupel
+        """
+        return (self.config_data.size_x, self.config_data.size_y)
+
     def get_tile_deleted(self):
         return self.__tile_deleted
 
