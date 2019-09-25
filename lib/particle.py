@@ -35,7 +35,7 @@ class Particle(matter.Matter):
 
     def has_particle(self):
         if self.carried_particle == None:
-            return False
+            return False 
         else:
             return True
 
