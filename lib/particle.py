@@ -150,19 +150,19 @@ class Particle(matter.Matter):
         else:
             tmp_memory =  matter.read_whole_memory()
 
-        if tmp_memory != None and len(tmp_memory) > 0 :
-            if matter.type == "particle":
-                self.world.csv_round.update_metrics( particle_read=1)
-                self.csv_particle_writer.write_particle(particle_read=1)
-            elif matter.type == "tile":
-                self.world.csv_round.update_metrics( tile_read=1)
-                self.csv_particle_writer.write_particle(tile_read=1)
-            elif matter.type == "marker":
-                self.world.csv_round.update_metrics( marker_read=1)
-                self.csv_particle_writer.write_particle(marker_read=1)
-            return tmp_memory
-        else:
-            return None
+        if tmp_memory != None:
+            if not(hasattr(tmp_memory, '__len__')) or len(tmp_memory) > 0:
+                if matter.type == "particle":
+                    self.world.csv_round.update_metrics( particle_read=1)
+                    self.csv_particle_writer.write_particle(particle_read=1)
+                elif matter.type == "tile":
+                    self.world.csv_round.update_metrics( tile_read=1)
+                    self.csv_particle_writer.write_particle(tile_read=1)
+                elif matter.type == "marker":
+                    self.world.csv_round.update_metrics( marker_read=1)
+                    self.csv_particle_writer.write_particle(marker_read=1)
+                return tmp_memory
+        return None
 
     def matter_in(self, direction=E):
         """
