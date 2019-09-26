@@ -32,17 +32,17 @@ print_frame_stats = False
 # simulation parameters
 rounds_per_second = 10
 
-# tile_alpha = 0.6
-particle_alpha = 1
+# tile_transparency = 0.6
+particle_transparency = 1
 
-marker_alpha = 1
-
-
-def coords_to_sim(coords):
-    return coords[0], coords[1] * math.sqrt(3/4)
+marker_transparency = 1
 
 
-def sim_to_coords(x, y):
+def coordinates_to_sim(coordinates):
+    return coordinates[0], coordinates[1] * math.sqrt(3/4)
+
+
+def sim_to_coordinates(x, y):
     return x, round(y / math.sqrt(3/4), 0)
 
 
@@ -142,7 +142,6 @@ class VisWindow(pyglet.window.Window):
         self.video_mode = False
         self.draw()
 
-
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         if buttons & mouse.LEFT:
             self.view.drag(dx, dy)
@@ -155,16 +154,16 @@ class VisWindow(pyglet.window.Window):
     def on_mouse_press(self, x, y, button, modifiers):
         if modifiers & key.MOD_CTRL:
             # get correct coordinates
-            sim_coords = window_to_sim(x, y, self.view)
-            coords_coords = sim_to_coords(sim_coords[0], sim_coords[1])
-            rounded_coords=0
-            if coords_coords[1]%2!=0:
-                rounded_coords = round(coords_coords[0],0) + 0.5
+            sim_coordinates = window_to_sim(x, y, self.view)
+            coordinates_coordinates = sim_to_coordinates(sim_coordinates[0], sim_coordinates[1])
+            rounded_coordinates=0
+            if coordinates_coordinates[1]%2!=0:
+                rounded_coordinates = round(coordinates_coordinates[0],0) + 0.5
             else:
-                rounded_coords =round(coords_coords[0], 0)
-            if (rounded_coords,coords_coords[1]) not in self.world.tile_map_coords:
+                rounded_coordinates =round(coordinates_coordinates[0], 0)
+            if (rounded_coordinates,coordinates_coordinates[1]) not in self.world.tile_map_coordinates:
                 # add tile and vertices
-                if self.world.add_tile_vis(rounded_coords, coords_coords[1]):
+                if self.world.add_tile_vis(rounded_coordinates, coordinates_coordinates[1]):
                     self.tile_vertex_list.resize(4 * len(self.world.tiles), 4 * len(self.world.tiles))
                     #self.tile_vertex_list.resize(4 * len(self.world.tiles), 8 * len(self.world.tiles))
                     self.tile_vertex_list.indices[4 * (len(self.world.tiles) - 1) : 4 * (len(self.world.tiles) - 1) + 4] = range(4 * (len(self.world.tiles) - 1), 4 * (len(self.world.tiles) - 1) + 4)
@@ -173,7 +172,7 @@ class VisWindow(pyglet.window.Window):
                     self.update_tiles(True)
             else:
                 # delete tile
-                self.world.remove_tile_on((rounded_coords,coords_coords[1]))
+                self.world.remove_tile_on((rounded_coordinates,coordinates_coordinates[1]))
                 self.tile_vertex_list.resize(4 * len(self.world.tiles), 4 * len(self.world.tiles))
                 self.update_tiles(True)
 
@@ -295,7 +294,7 @@ class VisWindow(pyglet.window.Window):
 
     def update_tile(self, i, tile):
         weird = 256 / 220
-        pos = coords_to_sim(tile.coords)
+        pos = coordinates_to_sim(tile.coordinates)
         x = pos[0]
         y = pos[1]
 
@@ -307,18 +306,18 @@ class VisWindow(pyglet.window.Window):
             texRight = 1 / 8
             texBottom = 5 / 8
             texTop = 6 / 8
-            #tile_alpha = 1
+            #tile_transparency = 1
         else:
             texLeft = 7 / 8
             texRight = 1 # 8/8
             texBottom = 4 / 8
             texTop = 5 / 8
-            #tile_alpha = 0.5
+            #tile_transparency = 0.5
 
         self.tile_vertex_list.tex_coords[8 * i: 8 * i + 8] = [texLeft, texBottom, texRight, texBottom, texRight, texTop,
                                                               texLeft, texTop]
 
-        self.tile_vertex_list.colors[16 * i: 16 * i + 16] = (tile.color + [tile.get_alpha()]) * 4
+        self.tile_vertex_list.colors[16 * i: 16 * i + 16] = (tile.color + [tile.get_transparency()]) * 4
 
     def init_particle_vertex_list(self):
         self.particle_vertex_list = self.particle_vertex_list = pyglet.graphics.vertex_list \
@@ -344,7 +343,7 @@ class VisWindow(pyglet.window.Window):
 
     def update_particle(self, i, particle):
         weird = 256 / 220
-        pos = coords_to_sim(particle.coords)
+        pos = coordinates_to_sim(particle.coordinates)
         x = pos[0]
         y = pos[1]
 
@@ -357,17 +356,17 @@ class VisWindow(pyglet.window.Window):
             texRight = 1 / 8
             texBottom = 7 / 8
             texTop = 6 / 8
-            #particle.set_alpha(0.5)
+            #particle.set_transparency(0.5)
         else:
             texLeft = 0 / 8
             texRight = 1 / 8
             texBottom = 0 / 8
             texTop = 1 / 8
-            #particle.set_alpha(1)
+            #particle.set_transparency(1)
         self.particle_vertex_list.tex_coords[8 * i: 8 * i + 8] = [texLeft, texBottom, texRight, texBottom,
                                                                   texRight, texTop, texLeft, texTop]
 
-        self.particle_vertex_list.colors[16 * i: 16 * i + 16] = (particle.color + [particle.get_alpha()]) * 4
+        self.particle_vertex_list.colors[16 * i: 16 * i + 16] = (particle.color + [particle.get_transparency()]) * 4
 
     def init_marker_vertex_list(self):
         self.marker_vertex_list = self.marker_vertex_list = pyglet.graphics.vertex_list \
@@ -393,7 +392,7 @@ class VisWindow(pyglet.window.Window):
 
     def update_marker(self, i, marker):
         weird = 256 / 220
-        pos = coords_to_sim(marker.coords)
+        pos = coordinates_to_sim(marker.coordinates)
         x = pos[0]
         y = pos[1]
 
@@ -407,7 +406,7 @@ class VisWindow(pyglet.window.Window):
         self.marker_vertex_list.tex_coords[8 * i: 8 * i + 8] = [texLeft, texBottom, texRight, texBottom,
                                                                   texRight, texTop, texLeft, texTop]
 
-        self.marker_vertex_list.colors[16 * i: 16 * i + 16] = (marker.color + [marker.get_alpha()]) * 4
+        self.marker_vertex_list.colors[16 * i: 16 * i + 16] = (marker.color + [marker.get_transparency()]) * 4
 
     def draw_world(self, round_start_timestamp):
         while not self.simulation_running:

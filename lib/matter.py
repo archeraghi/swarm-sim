@@ -7,42 +7,42 @@ from lib.swarm_sim_header import *
 
 class Matter:
     """In the classe marker all the methods for the characterstic of a marker is included"""
-    def __init__(self, world, coords, color=black, alpha=1, type=None, mm_size=100):
+    def __init__(self, world, coordinates, color=black, transparency=1, type=None, mm_size=100):
         """Initializing the marker constructor"""
-        self.coords = coords
+        self.coordinates = coordinates
         self.color = color_map[color]
         self.__id = str(uuid.uuid4())
         self.world = world
         self._memory={}
-        self.__alpha=alpha
+        self.__transparency=transparency
         self.type = type
         self.memory_limitation = world.config_data.memory_limitation
         self.mm_size = mm_size
         self.modified = False
         self.created = False
 
-    def set_alpha(self, alpha):
+    def set_transparency(self, transparency):
         """
-        Set the alpha value of the particle
+        Set the transparency value of the particle
 
-        :param alpha: The alpha of the particle
+        :param transparency: The transparency of the particle
         :return: None
         """
-        if (0 <= alpha <= 1):
-            self.__alpha = round(alpha,2)
-        elif alpha < 0:
-            self.__alpha = 0
-        elif alpha > 1:
-            self.__alpha = 1
+        if (0 <= transparency <= 1):
+            self.__transparency = round(transparency,2)
+        elif transparency < 0:
+            self.__transparency = 0
+        elif transparency > 1:
+            self.__transparency = 1
         self.touch()
 
-    def get_alpha(self):
+    def get_transparency(self):
         """
-        Returns the alpha value of the particle
+        Returns the transparency value of the particle
 
-        :return: alpha
+        :return: transparency
         """
-        return round(self.__alpha,2)
+        return round(self.__transparency,2)
 
     def read_memory_with(self, key):
         """

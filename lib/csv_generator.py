@@ -1,7 +1,7 @@
 """
 
 TODO:
-1- Order the names based on particles, markers, and tiles and alphabetic
+1- Order the names based on particles, markers, and tiles and transparencybetic
 2- A new column called round_success
 3- On demand extenstion of the metrics.
 

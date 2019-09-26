@@ -85,78 +85,78 @@ def direction_in_range(direction):
     return direction % 6
 
 
-def check_values_are_coordinates(coords_x, coords_y):
+def check_values_are_coordinates(coordinates_x, coordinates_y):
     """
     Checks if the given coordinates are matching the
     hexagon coordinates
 
-    :param coords_x: proposed x coordinate
-    :param coords_y: proposed y coordinate
+    :param coordinates_x: proposed x coordinate
+    :param coordinates_y: proposed y coordinate
     :return: True: Correct x and y coordinates; False: Incorrect coordinates
     """
 
-    if (coords_x / 0.5) % 2 == 0:
-        if coords_y % 2 != 0:
+    if (coordinates_x / 0.5) % 2 == 0:
+        if coordinates_y % 2 != 0:
             return False
         else:
             return True
     else:
-        if coords_y % 2 == 0:
+        if coordinates_y % 2 == 0:
             return False
         else:
             return True
 
 
-def coords_to_sim(coords):
-    return coords[0], coords[1] * math.sqrt(3 / 4)
+def coordinates_to_sim(coordinates):
+    return coordinates[0], coordinates[1] * math.sqrt(3 / 4)
 
 
-def sim_to_coords(x, y):
+def sim_to_coordinates(x, y):
     return x, round(y / math.sqrt(3 / 4), 0)
 
 
-def get_coords_in_direction(coords, direction):
+def get_coordinates_in_direction(coordinates, direction):
     """
     Returns the coordination data of the pointed directions
 
-    :param coords: particles actual staying coordination
+    :param coordinates: particles actual staying coordination
     :param direction: The direction. Options:  E, SE, SW, W, NW, or NE
     :return: The coordinaiton of the pointed directions
     """
-    return coords[0] + x_offset[direction], coords[1] + y_offset[direction]
+    return coordinates[0] + x_offset[direction], coordinates[1] + y_offset[direction]
 
 
-def global_scanning(matter_map_coords_dict, hop, starting_x, starting_y):
+def global_scanning(matter_map_coordinates_dict, hop, starting_x, starting_y):
     hop_list = []
-    if (hop / 2 + starting_x, hop + starting_y) in matter_map_coords_dict:
-        hop_list.append(matter_map_coords_dict[(hop / 2 + starting_x, hop + starting_y)])
-    if (hop + starting_x, starting_y) in matter_map_coords_dict:
-        hop_list.append(matter_map_coords_dict[(hop + starting_x, starting_y)])
-    if (hop / 2 + starting_x, -hop + starting_y) in matter_map_coords_dict:
-        hop_list.append(matter_map_coords_dict[(hop / 2 + starting_x, -hop + starting_y)])
-    if (-hop / 2 + starting_x, -hop + starting_y) in matter_map_coords_dict:
-        hop_list.append(matter_map_coords_dict[(-hop / 2 + starting_x, -hop + starting_y)])
-    if (-hop + starting_x, starting_y) in matter_map_coords_dict:
-        hop_list.append(matter_map_coords_dict[(-hop + starting_x, starting_y)])
-    if (-hop / 2 + starting_x, hop + starting_y) in matter_map_coords_dict:
-        hop_list.append(matter_map_coords_dict[(-hop / 2 + starting_x, hop + starting_y)])
+    if (hop / 2 + starting_x, hop + starting_y) in matter_map_coordinates_dict:
+        hop_list.append(matter_map_coordinates_dict[(hop / 2 + starting_x, hop + starting_y)])
+    if (hop + starting_x, starting_y) in matter_map_coordinates_dict:
+        hop_list.append(matter_map_coordinates_dict[(hop + starting_x, starting_y)])
+    if (hop / 2 + starting_x, -hop + starting_y) in matter_map_coordinates_dict:
+        hop_list.append(matter_map_coordinates_dict[(hop / 2 + starting_x, -hop + starting_y)])
+    if (-hop / 2 + starting_x, -hop + starting_y) in matter_map_coordinates_dict:
+        hop_list.append(matter_map_coordinates_dict[(-hop / 2 + starting_x, -hop + starting_y)])
+    if (-hop + starting_x, starting_y) in matter_map_coordinates_dict:
+        hop_list.append(matter_map_coordinates_dict[(-hop + starting_x, starting_y)])
+    if (-hop / 2 + starting_x, hop + starting_y) in matter_map_coordinates_dict:
+        hop_list.append(matter_map_coordinates_dict[(-hop / 2 + starting_x, hop + starting_y)])
     for i in range(1, hop):
-        if (-hop / 2 + i + starting_x, hop + starting_y) in matter_map_coords_dict:
-            hop_list.append(matter_map_coords_dict[(-hop / 2 + i + starting_x, hop + starting_y)])
-        if (hop / 2 + (0.5 * i) + starting_x, hop - i + starting_y) in matter_map_coords_dict:
+        if (-hop / 2 + i + starting_x, hop + starting_y) in matter_map_coordinates_dict:
+            hop_list.append(matter_map_coordinates_dict[(-hop / 2 + i + starting_x, hop + starting_y)])
+        if (hop / 2 + (0.5 * i) + starting_x, hop - i + starting_y) in matter_map_coordinates_dict:
             hop_list.append(
-                matter_map_coords_dict[(hop / 2 + (0.5 * i) + starting_x, hop - i + starting_y)])
-        if (hop / 2 + (0.5 * i) + starting_x, -hop + i + starting_y) in matter_map_coords_dict:
+                matter_map_coordinates_dict[(hop / 2 + (0.5 * i) + starting_x, hop - i + starting_y)])
+        if (hop / 2 + (0.5 * i) + starting_x, -hop + i + starting_y) in matter_map_coordinates_dict:
             hop_list.append(
-                matter_map_coords_dict[(hop / 2 + (0.5 * i) + starting_x, -hop + i + starting_y)])
-        if (-hop / 2 + i + starting_x, -hop + starting_y) in matter_map_coords_dict:
-            hop_list.append(matter_map_coords_dict[(-hop / 2 + i + starting_x, -hop + starting_y)])
-        if (-hop / 2 - (0.5 * i) + starting_x, -hop + i + starting_y) in matter_map_coords_dict:
+                matter_map_coordinates_dict[(hop / 2 + (0.5 * i) + starting_x, -hop + i + starting_y)])
+        if (-hop / 2 + i + starting_x, -hop + starting_y) in matter_map_coordinates_dict:
+            hop_list.append(matter_map_coordinates_dict[(-hop / 2 + i + starting_x, -hop + starting_y)])
+        if (-hop / 2 - (0.5 * i) + starting_x, -hop + i + starting_y) in matter_map_coordinates_dict:
             hop_list.append(
-                matter_map_coords_dict[(-hop / 2 - (0.5 * i) + starting_x, -hop + i + starting_y)])
-        if (-hop / 2 - (0.5 * i) + starting_x, hop - i + starting_y) in matter_map_coords_dict:
+                matter_map_coordinates_dict[(-hop / 2 - (0.5 * i) + starting_x, -hop + i + starting_y)])
+        if (-hop / 2 - (0.5 * i) + starting_x, hop - i + starting_y) in matter_map_coordinates_dict:
             hop_list.append(
-                matter_map_coords_dict[(-hop / 2 - (0.5 * i) + starting_x, hop - i + starting_y)])
+                matter_map_coordinates_dict[(-hop / 2 - (0.5 * i) + starting_x, hop - i + starting_y)])
     return hop_list
 
 
@@ -169,28 +169,28 @@ def generating_random_spraded_particles (world, max_size_particle):
         y = random.randrange(-world.get_world_y_size(), world.get_world_y_size())
         if y % 2 == 1:
             x = x + 0.5
-        if (x, y) not in world.tile_map_coords:
+        if (x, y) not in world.tile_map_coordinates:
             world.add_particle(x, y)
         else:
             print(" x and y ", (x, y))
     print("Max Size of created Particle", len(world.particles))
 
 
-def create_particle_in_line(world, max_size_particle, start_coords):
-    if start_coords[0] % 1 != 0:
-        start_i = int(start_coords[0] - 0.5)
+def create_particle_in_line(world, max_size_particle, start_coordinates):
+    if start_coordinates[0] % 1 != 0:
+        start_i = int(start_coordinates[0] - 0.5)
         for i in range(start_i, start_i+max_size_particle):
-            world.add_particle(i + 1.5, start_coords[1])
+            world.add_particle(i + 1.5, start_coordinates[1])
 
     else:
-        for i in range(int(start_coords[0] + 1), int(start_coords[0] + 1) + max_size_particle):
-            world.add_particle(i, start_coords[1])
+        for i in range(int(start_coordinates[0] + 1), int(start_coordinates[0] + 1) + max_size_particle):
+            world.add_particle(i, start_coordinates[1])
 
 
-def create_particle_in_square(world, max_size_particle, start_coords):
+def create_particle_in_square(world, max_size_particle, start_coordinates):
 
-    for y in range(start_coords[1], round(max_size_particle/2)):
-        for x in range(start_coords[0], round(max_size_particle/2)):
+    for y in range(start_coordinates[1], round(max_size_particle/2)):
+        for x in range(start_coordinates[0], round(max_size_particle/2)):
             world.add_particle(x + 0.5, 2 * y + 1.0)
             world.add_particle(-(x + 0.5), 2 * y + 1.0)
             world.add_particle(x + 0.5, -(2 * y + 1.0))
@@ -292,7 +292,7 @@ def move_to_dest_step_by_step(particle, destiny):
     :param destiny:
     :return: True if movement occured, False if not movment and a Matter if the next direction point has a matter on it
     """
-    next_dir = get_next_direction_to(particle.coords[0], particle.coords[1], destiny.coords[0], destiny.coords[1])
+    next_dir = get_next_direction_to(particle.coordinates[0], particle.coordinates[1], destiny.coordinates[0], destiny.coordinates[1])
     if particle.matter_in(next_dir):
         particle.get_matter_in(next_dir)
         return particle.get_matter_in(next_dir)

@@ -12,14 +12,14 @@ def solution(world):
     if world.get_actual_round() == 1:
         print ("Scanning for markers, tiles and particles")
         logging.info("Scanning for markers, tiles and particles")
-        all_matters_list = world.get_particle_map_coords()[(0, 0)].scan_for_matters_within()
+        all_matters_list = world.get_particle_map_coordinates()[(0, 0)].scan_for_matters_within()
         for list in all_matters_list:
             if list.type == 'particle':
-                print("particle at", list.coords)
+                print("particle at", list.coordinates)
             elif list.type == 'tile':
-                print("tile", list.coords)
+                print("tile", list.coordinates)
             elif list.type == 'marker':
-                print("marker", list.coords)
+                print("marker", list.coordinates)
         print ("Testing Interface: Take Drop Tiles and Particles")
         logging.info("Testing Interface: Take Drop Tiles and Particles")
 
@@ -32,9 +32,9 @@ def solution(world):
     elif world.get_actual_round() == 4 :
         print("Round 4")
         world.get_particle_list()[0].drop_tile_in(E)
-        print("Tiles coords ", world.get_tiles_list()[0].coords[0], world.get_tiles_list()[0].coords[1])
+        print("Tiles coordinates ", world.get_tiles_list()[0].coordinates[0], world.get_tiles_list()[0].coordinates[1])
     elif world.get_actual_round() == 5:
-        print("Tiles coords ", world.get_tiles_list()[0].coords[0], world.get_tiles_list()[0].coords[1])
+        print("Tiles coordinates ", world.get_tiles_list()[0].coordinates[0], world.get_tiles_list()[0].coordinates[1])
         world.get_particle_list()[0].take_particle_in(W)
     elif world.get_actual_round() == 6:
         world.get_particle_list()[0].drop_particle_in(W)
@@ -90,7 +90,7 @@ def solution(world):
     elif world.get_actual_round() > 20:
         for particle in world.get_particle_list():
             particle.move_to(random.choice(direction_list))
-            if particle.coords in world.get_tile_map_coords():
+            if particle.coordinates in world.get_tile_map_coordinates():
                 print("Found Tile")
                 particle.take_tile()
                 particle.carried_tile.set_color(3)
