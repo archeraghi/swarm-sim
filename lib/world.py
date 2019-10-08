@@ -29,28 +29,20 @@ class World:
         self.__round_counter = 1
         self.__end = False
 
-        self.init_particles=[]
         self.particle_id_counter = 0
         self.particles = []
-        self.particles_created = []
-        self.particle_rm = []
         self.particle_map_coordinates = {}
         self.particle_map_id = {}
         self.__particle_deleted=False
 
         self.tiles = []
-        self.tiles_created = []
-        self.tiles_rm = []
         self.tile_map_coordinates = {}
         self.tile_map_id = {}
         self.__tile_deleted=False
-        self.new_tile = None
 
         self.markers = []
-        self.markers_created = []
         self.marker_map_coordinates = {}
         self.marker_map_id = {}
-        self.markers_rm = []
         self.__marker_deleted = False
 
         self.config_data = config_data
@@ -284,13 +276,11 @@ class World:
                     self.particle_id_counter += 1
                     new_particle = particle.Particle(self, x, y, color, transparency, self.particle_id_counter)
                     print(new_particle.number)
-                    self.particles_created.append(new_particle)
                     self.particle_map_coordinates[new_particle.coordinates] = new_particle
                     self.particle_map_id[new_particle.get_id()] = new_particle
                     self.particles.append(new_particle)
                     new_particle.touch()
                     self.csv_round.update_particle_num(len(self.particles))
-                    self.init_particles.append(new_particle)
                     new_particle.created=True
                     logging.info("Created particle at %s", new_particle.coordinates)
                     return new_particle
@@ -365,17 +355,17 @@ class World:
             transparency = 1
         if check_values_are_coordinates(x,y) == True:
             if (x,y) not in self.tile_map_coordinates:
-                self.new_tile=tile.Tile(self, x, y, color, transparency)
+                new_tile=tile.Tile(self, x, y, color, transparency)
                 print("Before adding ", len(self.tiles) )
-                self.tiles.append(self.new_tile)
+                self.tiles.append(new_tile)
                 self.csv_round.update_tiles_num(len(self.tiles))
-                self.tile_map_coordinates[self.new_tile.coordinates] = self.new_tile
-                self.tile_map_id[self.new_tile.get_id()] = self.new_tile
+                self.tile_map_coordinates[new_tile.coordinates] = new_tile
+                self.tile_map_id[new_tile.get_id()] = new_tile
 
-                print("Afer adding ", len(self.tiles), self.new_tile.coordinates )
-                logging.info("Created tile with tile id %s on coordinates %s",str(self.new_tile.get_id()), str(self.new_tile.coordinates))
-                self.new_tile.touch()
-                return self.new_tile
+                print("Afer adding ", len(self.tiles), new_tile.coordinates )
+                logging.info("Created tile with tile id %s on coordinates %s",str(new_tile.get_id()), str(new_tile.coordinates))
+                new_tile.touch()
+                return new_tile
             else:
                 logging.info ("on x %f and y %f coordinates is a tile already", x, y)
                 return False
@@ -394,15 +384,15 @@ class World:
         """
         if check_values_are_coordinates(x, y) == True:
             if (x, y) not in self.tile_map_coordinates:
-                self.new_tile = tile.Tile(self, x, y, color, transparency)
-                self.tiles.append(self.new_tile)
+                new_tile = tile.Tile(self, x, y, color, transparency)
+                self.tiles.append(new_tile)
 
-                self.tile_map_coordinates[self.new_tile.coordinates] = self.new_tile
-                self.tile_map_id[self.new_tile.get_id()] = self.new_tile
+                self.tile_map_coordinates[new_tile.coordinates] = new_tile
+                self.tile_map_id[new_tile.get_id()] = new_tile
 
-                print("world.add_tile",self.new_tile.coordinates)
-                logging.info("Created tile with tile id %s on coordinates %s", str(self.new_tile.get_id()),
-                             str(self.new_tile.coordinates))
+                print("world.add_tile",new_tile.coordinates)
+                logging.info("Created tile with tile id %s on coordinates %s", str(new_tile.get_id()),
+                             str(new_tile.coordinates))
                 return True
             else:
                 logging.info("on x %f and y %f coordinates is a tile already", x, y)
