@@ -2,6 +2,8 @@ import math
 import random
 from enum import Enum
 
+from lib.visualization.grid_models import CubicGrid
+
 
 class Colors(Enum):
     black = 1
@@ -56,6 +58,9 @@ x_offset = [0.5, 1,  0.5,   -0.5,   -1, -0.5 ]
 y_offset = [ 1, 0, -1,   -1,    0,  1]
 
 
+grid = CubicGrid(5)
+
+
 def direction_number_to_string(direction):
     """
     :param direction: the direction that should get converted to a string
@@ -85,28 +90,6 @@ def direction_in_range(direction):
     return direction % 6
 
 
-def check_values_are_coordinates(coordinates_x, coordinates_y):
-    """
-    Checks if the given coordinates are matching the
-    hexagon coordinates
-
-    :param coordinates_x: proposed x coordinate
-    :param coordinates_y: proposed y coordinate
-    :return: True: Correct x and y coordinates; False: Incorrect coordinates
-    """
-
-    if (coordinates_x / 0.5) % 2 == 0:
-        if coordinates_y % 2 != 0:
-            return False
-        else:
-            return True
-    else:
-        if coordinates_y % 2 == 0:
-            return False
-        else:
-            return True
-
-
 def coordinates_to_sim(coordinates):
     return coordinates[0], coordinates[1] * math.sqrt(3 / 4)
 
@@ -123,40 +106,29 @@ def get_coordinates_in_direction(coordinates, direction):
     :param direction: The direction. Options:  E, SE, SW, W, NW, or NE
     :return: The coordinaiton of the pointed directions
     """
-    return coordinates[0] + x_offset[direction], coordinates[1] + y_offset[direction]
+    return coordinates[0] + direction[0], coordinates[1] + direction[1], coordinates[2] + direction[2]
 
 
-def global_scanning(matter_map_coordinates_dict, hop, starting_x, starting_y):
+def global_scanning(matter_map_coordinates_dict, hop, coordinates):
     hop_list = []
-    if (hop / 2 + starting_x, hop + starting_y) in matter_map_coordinates_dict:
-        hop_list.append(matter_map_coordinates_dict[(hop / 2 + starting_x, hop + starting_y)])
-    if (hop + starting_x, starting_y) in matter_map_coordinates_dict:
-        hop_list.append(matter_map_coordinates_dict[(hop + starting_x, starting_y)])
-    if (hop / 2 + starting_x, -hop + starting_y) in matter_map_coordinates_dict:
-        hop_list.append(matter_map_coordinates_dict[(hop / 2 + starting_x, -hop + starting_y)])
-    if (-hop / 2 + starting_x, -hop + starting_y) in matter_map_coordinates_dict:
-        hop_list.append(matter_map_coordinates_dict[(-hop / 2 + starting_x, -hop + starting_y)])
-    if (-hop + starting_x, starting_y) in matter_map_coordinates_dict:
-        hop_list.append(matter_map_coordinates_dict[(-hop + starting_x, starting_y)])
-    if (-hop / 2 + starting_x, hop + starting_y) in matter_map_coordinates_dict:
-        hop_list.append(matter_map_coordinates_dict[(-hop / 2 + starting_x, hop + starting_y)])
+
+    directions = list(grid.get_directions_dictionary().values())
+
+
+    def mult(a, s):
+        return a[0]*s, a[1]*s, a[2]*s
+
+    for d in directions:
+        check_coords = get_coordinates_in_direction(coordinates, d)
+        if check_coords in matter_map_coordinates_dict:
+            hop_list.append(matter_map_coordinates_dict[check_coords])
+
     for i in range(1, hop):
-        if (-hop / 2 + i + starting_x, hop + starting_y) in matter_map_coordinates_dict:
-            hop_list.append(matter_map_coordinates_dict[(-hop / 2 + i + starting_x, hop + starting_y)])
-        if (hop / 2 + (0.5 * i) + starting_x, hop - i + starting_y) in matter_map_coordinates_dict:
-            hop_list.append(
-                matter_map_coordinates_dict[(hop / 2 + (0.5 * i) + starting_x, hop - i + starting_y)])
-        if (hop / 2 + (0.5 * i) + starting_x, -hop + i + starting_y) in matter_map_coordinates_dict:
-            hop_list.append(
-                matter_map_coordinates_dict[(hop / 2 + (0.5 * i) + starting_x, -hop + i + starting_y)])
-        if (-hop / 2 + i + starting_x, -hop + starting_y) in matter_map_coordinates_dict:
-            hop_list.append(matter_map_coordinates_dict[(-hop / 2 + i + starting_x, -hop + starting_y)])
-        if (-hop / 2 - (0.5 * i) + starting_x, -hop + i + starting_y) in matter_map_coordinates_dict:
-            hop_list.append(
-                matter_map_coordinates_dict[(-hop / 2 - (0.5 * i) + starting_x, -hop + i + starting_y)])
-        if (-hop / 2 - (0.5 * i) + starting_x, hop - i + starting_y) in matter_map_coordinates_dict:
-            hop_list.append(
-                matter_map_coordinates_dict[(-hop / 2 - (0.5 * i) + starting_x, hop - i + starting_y)])
+        for d in directions:
+            check_coords = get_coordinates_in_direction(coordinates, mult(d,i))
+            if check_coords in matter_map_coordinates_dict:
+                hop_list.append(matter_map_coordinates_dict[check_coords])
+
     return hop_list
 
 
@@ -176,16 +148,24 @@ def generating_random_spraded_particles (world, max_size_particle):
     print("Max Size of created Particle", len(world.particles))
 
 
-def create_particle_in_line(world, max_size_particle, start_coordinates):
-    if start_coordinates[0] % 1 != 0:
-        start_i = int(start_coordinates[0] - 0.5)
-        for i in range(start_i, start_i+max_size_particle):
-            world.add_particle(i + 1.5, start_coordinates[1])
+def create_particle_in_line(world, max_size_particle, start_coordinates, direction = None):
 
-    else:
-        for i in range(int(start_coordinates[0] + 1), int(start_coordinates[0] + 1) + max_size_particle):
-            world.add_particle(i, start_coordinates[1])
+    # setting direction to first direction of grid
+    if direction is None:
+        direction = list(grid.directions.values())[0]
 
+    if not grid.is_valid_location(start_coordinates):
+        start_coordinates = (0, 0, 0)
+
+    particle_counter = 0
+    current_location = start_coordinates
+
+    while particle_counter < max_size_particle:
+        world.add_particle(*current_location)
+        current_location = (current_location[0]+direction[0],
+                            current_location[1]+direction[1],
+                            current_location[2]+direction[2])
+        particle_counter += 1
 
 def create_particle_in_square(world, max_size_particle, start_coordinates):
 

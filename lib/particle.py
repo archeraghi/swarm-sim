@@ -16,9 +16,9 @@ from lib.swarm_sim_header import *
 
 class Particle(matter.Matter):
     """In the classe marker all the methods for the characterstic of a marker is included"""
-    def __init__(self, world, x, y, color=black, transparency=1, particle_counter=0):
+    def __init__(self, world, coordinates, color=black, transparency=1, particle_counter=0):
         """Initializing the marker constructor"""
-        super().__init__( world, (x, y), color, transparency,
+        super().__init__( world, coordinates, color, transparency,
                           type="particle", mm_size=world.config_data.particle_mm_size)
         self.number = particle_counter
         self.__isCarried = False
@@ -84,12 +84,12 @@ class Particle(matter.Matter):
         """
         Moves the particle to the given directionection
 
-        :param direction: The directionection must be either: E, SE, SW, W, NW, or NE
+        :param direction: The direction is defined by loaded grid class
         :return: True: Success Moving;  False: Non moving
         """
         direction_coord = get_coordinates_in_direction(self.coordinates, direction)
         direction, direction_coord = self.check_within_border(direction, direction_coord)
-        if check_values_are_coordinates(direction_coord[0], direction_coord[1]):
+        if grid.is_valid_location(direction_coord):
 
             if self.coordinates in self.world.particle_map_coordinates:
                 del self.world.particle_map_coordinates[self.coordinates]
@@ -313,22 +313,22 @@ class Particle(matter.Matter):
         logging.info("particle on %s is scanning for %s in %i hops", str(self.coordinates), matter, hop)
 
         if matter == "particles":
-            scanned_list = global_scanning(self.world.particle_map_coordinates, hop, starting_x, starting_y)
+            scanned_list = global_scanning(self.world.particle_map_coordinates, hop, self.coordinates)
         elif matter == "tiles":
-            scanned_list = global_scanning(self.world.tile_map_coordinates, hop, starting_x, starting_y)
+            scanned_list = global_scanning(self.world.tile_map_coordinates, hop, self.coordinates)
         elif matter == "markers":
-            scanned_list = global_scanning(self.world.marker_map_coordinates, hop, starting_x, starting_y)
+            scanned_list = global_scanning(self.world.marker_map_coordinates, hop, self.coordinates)
         else:
-            scanned_list = global_scanning(self.world.particle_map_coordinates, hop, starting_x, starting_y)
+            scanned_list = global_scanning(self.world.particle_map_coordinates, hop, self.coordinates)
             if scanned_list is not None:
-                scanned_list.extend(global_scanning(self.world.tile_map_coordinates, hop, starting_x, starting_y))
-                scanned_list.extend(global_scanning(self.world.marker_map_coordinates, hop, starting_x, starting_y))
+                scanned_list.extend(global_scanning(self.world.tile_map_coordinates, hop, self.coordinates))
+                scanned_list.extend(global_scanning(self.world.marker_map_coordinates, hop, self.coordinates))
             else:
-                scanned_list = global_scanning(self.world.tile_map_coordinates, hop, starting_x, starting_y)
+                scanned_list = global_scanning(self.world.tile_map_coordinates, hop, self.coordinates)
                 if scanned_list is not None:
-                    scanned_list.extend(global_scanning(self.world.marker_map_coordinates, hop, starting_x, starting_y))
+                    scanned_list.extend(global_scanning(self.world.marker_map_coordinates, hop, self.coordinates))
                 else:
-                    scanned_list = global_scanning(self.world.marker_map_coordinates, hop, starting_x, starting_y)
+                    scanned_list = global_scanning(self.world.marker_map_coordinates, hop, self.coordinates)
         if scanned_list is not None:
             return scanned_list
         else:
@@ -470,9 +470,9 @@ class Particle(matter.Matter):
         :return: New Tile or False
         """
         logging.info("Going to create a tile on position %s", str(self.coordinates))
-        new_tile = self.world.add_tile(self.coordinates[0], self.coordinates[1], color, transparency)
+        new_tile = self.world.add_tile(self.coordinates, color, transparency)
         if new_tile:
-            self.world.tile_map_coordinates[self.coordinates[0], self.coordinates[1]].created = True
+            self.world.tile_map_coordinates[self.coordinates].created = True
             self.csv_particle_writer.write_particle(tile_created=1)
             self.world.csv_round.update_tiles_num(len(self.world.get_tiles_list()))
             self.world.csv_round.update_metrics( tile_created=1)
@@ -489,11 +489,11 @@ class Particle(matter.Matter):
         """
         logging.info("particle with id %s is", self.get_id())
         logging.info("Going to create a tile in %s ", str(direction) )
-        if direction != None:
+        if direction is not None:
             coordinates = get_coordinates_in_direction(self.coordinates, direction)
-            new_tile = self.world.add_tile(coordinates[0], coordinates[1], color, transparency)
+            new_tile = self.world.add_tile(coordinates, color, transparency)
             if new_tile:
-                self.world.tile_map_coordinates[coordinates[0], coordinates[1]].created = True
+                self.world.tile_map_coordinates[coordinates].created = True
                 logging.info("Tile is created")
                 self.world.new_tile_flag = True
                 self.csv_particle_writer.write_particle(tile_created=1)
@@ -506,22 +506,20 @@ class Particle(matter.Matter):
             logging.info("Not created tile ")
             return False
 
-    def create_tile_on(self, x=None, y=None, color=gray, transparency=1):
+    def create_tile_on(self, coordinates=None, color=gray, transparency=1):
         """
         Creates a tile either on a given x,y coordinates
 
-        :param x: x coordinate
-        :param y: y coordinate
+        :param coordinates: the coordinates
         :return: New Tile or False
         """
 
         logging.info("particle with id %s is", self.get_id())
-        if x is not None and y is not None:
-            coordinates = (x, y)
-            if check_values_are_coordinates(x,y):
+        if coordinates is not None:
+            if grid.is_valid_location(coordinates):
                 logging.info("Going to create a tile on position \(%i , %i\)", x,y )
-                if self.world.add_tile(coordinates[0], coordinates[1], color, transparency) == True:
-                    self.world.tile_map_coordinates[coordinates[0], coordinates[1]].created = True
+                if self.world.add_tile(coordinates, color, transparency):
+                    self.world.tile_map_coordinates[coordinates, coordinates[1]].created = True
                     self.world.new_tile_flag = True
                     self.csv_particle_writer.write_particle(tile_created=1)
                     self.world.csv_round.update_tiles_num(len(self.world.get_tiles_list()) )
@@ -667,7 +665,7 @@ class Particle(matter.Matter):
         """
         Takes a tile that is in a given directionection
 
-        :param direction: The directionection on which the tile should be taken. Options: E, SE, SW, W, NW, NE,
+        :param direction: The direction on which the tile should be taken.
         :return: True: successful taken; False: unsuccessful taken
         """
         if self.carried_particle is None and self.carried_tile is None:
@@ -690,17 +688,16 @@ class Particle(matter.Matter):
             logging.info("Tile cannot taken because particle is carrieng either a tile or a particle")
             return False
 
-    def take_tile_on(self, x=None, y=None):
+    def take_tile_on(self, coordinates):
         """
         Takes a tile that is in a given directionection
 
-        :param x: x coordinate
-        :param y: y coordinate
+        :param coordinates
         :return: True: successful taken; False: unsuccessful taken
         """
         if self.carried_particle is None and self.carried_tile is None:
-            if check_values_are_coordinates(x, y):
-                coordinates = (x, y)
+            if grid.is_valid_location(coordinates):
+
                 if coordinates in self.world.tile_map_coordinates:
                     self.carried_tile = self.world.tile_map_coordinates[coordinates]
                     logging.info("Tile with tile id %s is in the world", str(self.carried_tile.get_id()))
@@ -771,16 +768,14 @@ class Particle(matter.Matter):
             logging.info("No tile taken for dropping")
             return False
 
-    def drop_tile_on(self, x=None, y=None):
+    def drop_tile_on(self, coordinates):
         """
         Drops the taken tile on a given directionection
 
-        :param x: x coordinate
-        :param y: y coordinate
+        :param coordinates
         """
         if self.carried_tile is not None:
-            if check_values_are_coordinates(x, y):
-                coordinates = (x, y)
+            if grid.is_valid_location(coordinates):
                 if coordinates not in self.world.get_tile_map_coordinates():
                     try:  # cher: insert so to overcome the AttributeError
                         self.carried_tile.drop_me(coordinates)
@@ -857,8 +852,7 @@ class Particle(matter.Matter):
         """
         coordinates = (0, 0)
         if x is not None and y is not None:
-            if check_values_are_coordinates(x, y):
-                coordinates = (x, y)
+            if grid.is_valid_location(coordinates):
                 logging.info("Going to create a particle on position %s", str(coordinates))
                 new_particle = self.world.add_particle(coordinates[0], coordinates[1], color, transparency)
                 if new_particle:
@@ -926,17 +920,15 @@ class Particle(matter.Matter):
                 logging.info("Could not delet particle on coordinates %s", str(coordinates))
                 return False
 
-    def delete_particle_on(self, x=None, y=None):
+    def delete_particle_on(self, coordinates=None):
         """
         Deletes a particle either on a given x,y coordinates
 
-        :param x: x coordinate
-        :param y: y coordinate
+        :param coordinates
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-        if x is not None and y is not None:
-            if check_values_are_coordinates(x, y):
-                coordinates = (x, y)
+        if coordinates is not None:
+            if grid.is_valid_location(coordinates):
                 if self.world.remove_particle_on(coordinates):
                     logging.info("Deleted particle with particle on coordinates %s", str(coordinates))
                     self.csv_particle_writer.write_particle(particle_deleted=1)
@@ -1027,7 +1019,7 @@ class Particle(matter.Matter):
             logging.info("particle cannot be  taken")
             return False
 
-    def take_particle_on(self, x=None, y=None):
+    def take_particle_on(self, coordinates):
         """
         Takes the particle on the given coordinate if it is not taken
 
@@ -1036,8 +1028,7 @@ class Particle(matter.Matter):
         :return: True: Successful taken; False: Cannot be taken or wrong Coordinates
         """
         if self.carried_particle is None and self.carried_tile is None:
-            if check_values_are_coordinates(x, y):
-                coordinates = (x, y)
+            if grid.is_valid_location(coordinates):
                 if coordinates in self.world.particle_map_coordinates:
                     self.carried_particle = self.world.particle_map_coordinates[coordinates]
                     logging.info("Particle with id %s is in the world", str(self.carried_particle.get_id()))
@@ -1107,15 +1098,14 @@ class Particle(matter.Matter):
             logging.info("No particle taken to drop")
             return False
 
-    def drop_particle_on(self, x=None, y=None):
+    def drop_particle_on(self, coordinates=None):
         """
         Drops the particle tile on a given x and y coordination
 
         :param x: x coordinate
         :param y: y coordinate
         """
-        if self.carried_particle is not None and x is not None and y is not None and check_values_are_coordinates(x, y):
-            coordinates = (x, y)
+        if self.carried_particle is not None and coordinates is not None and grid.is_valid_location(coordinates):
             if coordinates not in self.world.particle_map_coordinates:
                 try:  # cher: insert so to overcome the AttributeError
                     self.carried_particle.drop_me(coordinates)
@@ -1143,7 +1133,7 @@ class Particle(matter.Matter):
         :param new_coordinates: new coorindation points
         :return: None
         """
-        if check_values_are_coordinates(new_coordinates[0], new_coordinates[1]):
+        if grid.is_valid_location(new_coordinates):
             particle.coordinates = new_coordinates
             self.particle_map_coordinates[new_coordinates] = particle
             return True
@@ -1190,7 +1180,7 @@ class Particle(matter.Matter):
             logging.info("Not created marker on coordinates %s", str(coordinates))
             return False
 
-    def create_marker_on(self, x=None, y=None, color=black, transparency=1):
+    def create_marker_on(self, coordinates=None, color=black, transparency=1):
         """
         Creates a marker either on a given x,y coordinates
 
@@ -1199,16 +1189,14 @@ class Particle(matter.Matter):
         :return: New marker or False
 
         """
-        coordinates = (0, 0)
-        if x is not None and y is not None:
-            if check_values_are_coordinates(x, y):
-                coordinates = (x, y)
+        if coordinates is not None:
+            if grid.is_valid_location(coordinates):
                 logging.info("Going to create a marker on position %s", str(coordinates))
                 new_marker =  self.world.add_marker(coordinates[0], coordinates[1], color, transparency)
                 if new_marker:
                     logging.info("Created marker on coordinates %s", str(coordinates))
                     self.world.csv_round.update_markers_num(len(self.world.get_marker_list()))
-                    self.world.csv_round.update_metrics( marker_created=1)
+                    self.world.csv_round.update_metrics(marker_created=1)
                     return new_marker
             else:
                 return False
@@ -1270,17 +1258,15 @@ class Particle(matter.Matter):
                 logging.info("Could not delet marker on coordinates %s", str(coordinates))
                 return False
 
-    def delete_marker_on(self, x=None, y=None):
+    def delete_marker_on(self, coordinates=None):
         """
         Deletes a particle either on a given x,y coordinates
 
-        :param x: x coordinate
-        :param y: y coordinate
+        :param coordinates: the coordinates
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-        if x is not None and y is not None:
-            if check_values_are_coordinates(x, y):
-                coordinates = (x, y)
+        if coordinates is not None:
+            if grid.is_valid_location(coordinates):
                 if self.world.remove_marker_on(coordinates):
                     logging.info("Deleted marker  oords %s", str(coordinates))
                     self.csv_particle_writer.write_particle(marker_deleted=1)

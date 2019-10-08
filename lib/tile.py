@@ -6,9 +6,9 @@ from lib.swarm_sim_header import *
 
 class Tile(matter.Matter):
     """In the classe marker all the methods for the characterstic of a marker is included"""
-    def __init__(self, world, x, y, color=gray, transparency=1):
+    def __init__(self, world, coordinates, color=gray, transparency=1):
         """Initializing the marker constructor"""
-        super().__init__( world, (x, y), color, transparency,  type="tile", mm_size=world.config_data.tile_mm_size)
+        super().__init__( world, coordinates, color, transparency,  type="tile", mm_size=world.config_data.tile_mm_size)
         self.__isCarried = False
 
     def get_tile_status(self):

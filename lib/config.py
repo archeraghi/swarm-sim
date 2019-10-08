@@ -10,9 +10,16 @@ class ConfigData:
         self.seed_value = config.getint("Simulator", "seedvalue")
         self.max_round = config.getint("Simulator", "max_round")
         self.particle_random_order = config.getboolean("Simulator", "particle_random_order")
-        self.visualization = config.getint("Simulator", "visualization")
         self.window_size_x = config.getint("Simulator", "window_size_x")
         self.window_size_y = config.getint("Simulator", "window_size_y")
+
+        self.visualization = config.getint("Visualization", "visualization")
+        try:
+            self.gui = config.get("Visualization", "gui")
+        except configparser.NoOptionError as noe:
+            print("no gui found?")
+            self.gui = "gui.py"
+
 
         self.size_x = config.getfloat("World", "size_x")
         self.size_y = config.getfloat("World", "size_y")
@@ -33,6 +40,7 @@ class ConfigData:
             self.solution = config.get("File", "solution")
         except configparser.NoOptionError as noe:
             self.solution = "solution.py"
+
 
         self.local_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')[:-1]
         self.multiple_sim = 0

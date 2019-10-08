@@ -8,8 +8,9 @@ import importlib
 import random
 import math
 import logging
-from lib import csv_generator, particle, tile, marker, vis
+from lib import csv_generator, particle, tile, marker, vis3d
 from lib.swarm_sim_header import *
+from lib.visualization.grid_models import CubicGrid
 
 
 class World:
@@ -28,6 +29,8 @@ class World:
         """
         self.__round_counter = 1
         self.__end = False
+
+        self.grid = CubicGrid(5)
 
         self.init_particles=[]
         self.particle_id_counter = 0
@@ -67,7 +70,7 @@ class World:
             random.shuffle(self.particles)
 
         if config_data.visualization:
-            self.window = vis.VisWindow(config_data.window_size_x, config_data.window_size_y, self)
+            self.window = vis3d.Visualization(self)
 
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()
@@ -265,25 +268,33 @@ class World:
     def set_marker_deleted(self):
         self.__marker_deleted = False
 
-    def add_particle(self, x, y, color=black, transparency=1):
+    def add_particle(self, x, y, z=None, color=black, transparency=1):
         """
         Add a particle to the world database
 
         :param x: The x coordinate of the particle
         :param y: The y coordinate of the particle
+        :param z: The z coordinate of the particle
         :param state: The state of the particle. Default: S for for Stopped or Not Moving. Other options
                       are the moving directions: E, SE, SW, W, NW, NE
         :param color: The color of the particle. Coloroptions: black, gray, red, green, or blue
         :return: Added Matter; False: Unsuccsessful
         """
+        if z is None and self.grid.get_dimension_count() == 3:
+            print("z coordinate is missing and grid is 3D!")
+            return False
+        if z is None:
+            coordinates = (x, y)
+        else:
+            coordinates = (x, y, z)
         if transparency < 0 or transparency >1:
             transparency = 1
         if len(self.particles) < self.config_data.max_particles:
-            if check_values_are_coordinates(x,y) == True:
-                if (x,y) not in self.get_particle_map_coordinates():
+            if self.grid.is_valid_location(coordinates):
+                if coordinates not in self.get_particle_map_coordinates():
                     self.particle_id_counter += 1
-                    new_particle = particle.Particle(self, x, y, color, transparency, self.particle_id_counter)
-                    print(new_particle.number)
+                    new_particle = particle.Particle(self, coordinates, color, transparency, self.particle_id_counter)
+                    # print(new_particle.number)
                     self.particles_created.append(new_particle)
                     self.particle_map_coordinates[new_particle.coordinates] = new_particle
                     self.particle_map_id[new_particle.get_id()] = new_particle
@@ -298,8 +309,8 @@ class World:
                     print("for x %f and y %f not not possible because Particle exist   ", x, y)
                     return False
             else:
-                 print ("for x %f and y %f not possible to draw ", x, y)
-                 return False
+                print ("for x %f and y %f not possible to draw ", x, y)
+                return False
         else:
             logging.info("Max of particles reached and no more particles can be created")
             return False
@@ -352,27 +363,35 @@ class World:
         else:
             return False
 
-    def add_tile(self, x, y, color=gray, transparency=1):
+    def add_tile(self, x, y, z=None, color=gray, transparency=1):
         """
         Adds a tile to the world database
 
         :param color:
         :param x: the x coordinates on which the tile should be added
         :param y: the y coordinates on which the tile should be added
+        :param z: the z coordinates on which the tile should be added
         :return: Successful added matter; False: Unsuccsessful
         """
+        if z is None and self.grid.get_dimension_count() == 3:
+            print("z coordinate is missing and grid is 3D!")
+            return False
+        if z is None:
+            coordinates = (x, y)
+        else:
+            coordinates = (x, y, z)
         if transparency < 0 or transparency >1:
             transparency = 1
-        if check_values_are_coordinates(x,y) == True:
-            if (x,y) not in self.tile_map_coordinates:
-                self.new_tile=tile.Tile(self, x, y, color, transparency)
-                print("Before adding ", len(self.tiles) )
+        if self.grid.is_valid_location(coordinates):
+            if coordinates not in self.tile_map_coordinates:
+                self.new_tile=tile.Tile(self, coordinates, color, transparency)
+                # print("Before adding ", len(self.tiles) )
                 self.tiles.append(self.new_tile)
                 self.csv_round.update_tiles_num(len(self.tiles))
                 self.tile_map_coordinates[self.new_tile.coordinates] = self.new_tile
                 self.tile_map_id[self.new_tile.get_id()] = self.new_tile
 
-                print("Afer adding ", len(self.tiles), self.new_tile.coordinates )
+                # print("Afer adding ", len(self.tiles), self.new_tile.coordinates )
                 logging.info("Created tile with tile id %s on coordinates %s",str(self.new_tile.get_id()), str(self.new_tile.coordinates))
                 self.new_tile.touch()
                 return self.new_tile
@@ -383,24 +402,23 @@ class World:
              logging.info ("for x %f and y %f not possible to draw ", x, y)
              return False
 
-    def add_tile_vis(self, x, y, color=gray, transparency=1):
+    def add_tile_vis(self, coordinates, color=gray, transparency=1):
         """
         Adds a tile to the world database
 
         :param color:
-        :param x: the x coordinates on which the tile should be added
-        :param y: the y coordinates on which the tile should be added
+        :param coordinates: the coordinates on which the tile should be added
         :return: True: Successful added; False: Unsuccsessful
         """
-        if check_values_are_coordinates(x, y) == True:
-            if (x, y) not in self.tile_map_coordinates:
-                self.new_tile = tile.Tile(self, x, y, color, transparency)
+        if grid.is_valid_location(coordinates) == True:
+            if coordinates not in self.tile_map_coordinates:
+                self.new_tile = tile.Tile(self, coordinates, color, transparency)
                 self.tiles.append(self.new_tile)
 
                 self.tile_map_coordinates[self.new_tile.coordinates] = self.new_tile
                 self.tile_map_id[self.new_tile.get_id()] = self.new_tile
 
-                print("world.add_tile",self.new_tile.coordinates)
+                # print("world.add_tile",self.new_tile.coordinates)
                 logging.info("Created tile with tile id %s on coordinates %s", str(self.new_tile.get_id()),
                              str(self.new_tile.coordinates))
                 return True
@@ -461,20 +479,28 @@ class World:
         else:
             return False
 
-    def add_marker(self, x, y, color=black, transparency=1):
+    def add_marker(self, x, y, z=None, color=black, transparency=1):
         """
         Add a tile to the world database
 
         :param color:
         :param x: the x coordinates on which the tile should be added
         :param y: the y coordinates on which the tile should be added
+        :param z: the z coordinates on which the tile should be added
         :return: True: Successful added; False: Unsuccsessful
         """
+        if z is None and self.grid.get_dimension_count() == 3:
+            print("z coordinate is missing and grid is 3D!")
+            return False
+        if z is None:
+            coordinates = (x, y)
+        else:
+            coordinates = (x, y, z)
         if transparency < 0 or transparency >1:
             transparency = 1
-        if check_values_are_coordinates(x, y) == True:
-            if (x, y) not in self.marker_map_coordinates:
-                self.new_marker = marker.Marker(self, x, y, color, transparency)
+        if self.grid.is_valid_location(coordinates):
+            if coordinates not in self.marker_map_coordinates:
+                self.new_marker = marker.Marker(self, coordinates, color, transparency)
                 self.markers.append(self.new_marker)
                 self.marker_map_coordinates[self.new_marker.coordinates] = self.new_marker
                 self.marker_map_id[self.new_marker.get_id()] = self.new_marker
