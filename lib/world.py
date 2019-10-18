@@ -52,15 +52,6 @@ class World:
                                                     seed=config_data.seed_value,
                                                     directory=config_data.direction_name)
 
-        mod = importlib.import_module('scenario.' + self.config_data.scenario)
-        mod.scenario(self)
-
-        if self.config_data.particle_random_order:
-            random.shuffle(self.particles)
-
-        if config_data.visualization:
-            self.window = vis.VisWindow(config_data.window_size_x, config_data.window_size_y, self)
-
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()
         particle_csv = csv_generator.CsvParticleFile(self.config_data.direction_name)

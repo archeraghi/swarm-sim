@@ -6,7 +6,7 @@ import os
 import sys
 import time
 import random
-from lib import world, config
+from lib import world, config, vis
 from lib.gnuplot_generator import gnuplot_generator
 
 
@@ -27,11 +27,16 @@ def swarm_sim(argv):
 
     swarm_sim_world = world.World(config_data)
 
+    draw_scenario(config_data, swarm_sim_world)
+
+    if config_data.visualization:
+        window = vis.VisWindow(config_data.window_size_x, config_data.window_size_y, swarm_sim_world)
+
     while swarm_sim_world.get_actual_round() <= config_data.max_round and swarm_sim_world.get_end() is False:
         round_start_timestamp = time.perf_counter()
         if config_data.visualization:
-            swarm_sim_world.window.draw_world(round_start_timestamp)
-            if swarm_sim_world.window.window_active is False:
+            window.draw_world(round_start_timestamp)
+            if window.window_active is False:
                 break
         run_solution(swarm_sim_world)
 
@@ -40,6 +45,13 @@ def swarm_sim(argv):
     generate_data(config_data, swarm_sim_world)
 
     logging.info('Finished')
+
+
+def draw_scenario(config_data, swarm_sim_world):
+    mod = importlib.import_module('scenario.' + config_data.scenario)
+    mod.scenario(swarm_sim_world)
+    if config_data.particle_random_order:
+        random.shuffle(swarm_sim_world.particles)
 
 
 def read_cmd_args(argv, config_data):
