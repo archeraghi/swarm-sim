@@ -9,7 +9,7 @@ TODO: Erase Memory
 
 """
 
-import logging, math
+import logging
 from lib import csv_generator, matter
 from lib.swarm_sim_header import *
 
@@ -82,19 +82,16 @@ class Particle(matter.Matter):
 
     def move_to(self, direction):
         """
-        Moves the particle to the given directionection
+        Moves the particle to the given direction
 
         :param direction: The direction is defined by loaded grid class
         :return: True: Success Moving;  False: Non moving
         """
         direction_coord = get_coordinates_in_direction(self.coordinates, direction)
         direction, direction_coord = self.check_within_border(direction, direction_coord)
-        if grid.is_valid_location(direction_coord):
-
-            if self.coordinates in self.world.particle_map_coordinates:
-                del self.world.particle_map_coordinates[self.coordinates]
-
+        if self.world.grid.is_valid_location(direction_coord):
             if not direction_coord in self.world.particle_map_coordinates:
+                del self.world.particle_map_coordinates[self.coordinates]
                 self.coordinates = direction_coord
                 self.world.particle_map_coordinates[self.coordinates] = self
                 logging.info("particle %s successfully moved to %s", str(self.get_id()), direction)
@@ -103,6 +100,7 @@ class Particle(matter.Matter):
                 self.touch()
                 self.check_for_carried_tile_or_particle()
                 return True
+
         return False
 
     def check_for_carried_tile_or_particle(self):

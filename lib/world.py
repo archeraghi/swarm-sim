@@ -5,34 +5,23 @@ It also have the the coordination system and stated the maximum of the x and y c
  .. todo:: What happens if the maximum y or x axis is passed? Either the start from the other side or turns back.
 """
 import importlib
-import random
-import math
 import logging
 from lib import csv_generator, particle, tile, marker, vis3d
 from lib.swarm_sim_header import *
-from lib.visualization.grid_models import CubicGrid
 
 
 class World:
     def __init__(self, config_data):
         """
         Initializing the world constructor
-        :param seed: seed number for new random numbers
-        :param max_round: the max round number for terminating the worldulator
-        :param solution: The name of the solution that is going to be used
-        :param size_x: the maximal size of the x axes
-        :param size_y: the maximal size of the y axes
-        :param world_name: the name of the world file that is used to build up the world
-        :param solution_name: the name of the solution file that is only used for the csv file
-        :param seed: the seed number it is only used here for the csv file
-        :param max_particles: the maximal number of particles that are allowed to be or created in this world
+        :param config_data: configuration data from config.ini file
         """
         self.__round_counter = 1
         self.__end = False
 
-        self.grid = CubicGrid(5)
+        self.grid = config_data.grid
 
-        self.init_particles=[]
+        self.init_particles = []
         self.particle_id_counter = 0
         self.particles = []
         self.particles_created = []
@@ -70,7 +59,9 @@ class World:
             random.shuffle(self.particles)
 
         if config_data.visualization:
-            self.window = vis3d.Visualization(self)
+            self.vis = vis3d.Visualization(self)
+            self.vis.init()
+            self.vis.start()
 
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()
@@ -326,6 +317,7 @@ class World:
         if rm_particle:
             self.particles.remove(rm_particle)
             try:
+                print("deleting a particle")
                 del self.particle_map_coordinates[rm_particle.coordinates]
                 del self.particle_map_id[id]
             except:
@@ -345,6 +337,7 @@ class World:
         :param coordinates: A tupel that includes the x and y coorindates
         :return: True: Successful removed; False: Unsuccessful
         """
+        print("removing on")
         if coordinates in self.particle_map_coordinates:
             self.particles.remove(self.particle_map_coordinates[coordinates])
             self.particle_rm.append(self.particle_map_coordinates[coordinates])
@@ -571,3 +564,4 @@ class World:
             return True
         else:
             return False
+

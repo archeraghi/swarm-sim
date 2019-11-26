@@ -5,32 +5,19 @@ This solution tests all the interfaces that are provided from swarm-world MAX Ro
 import logging
 
 #Standard Lib that has to be in each solution
+from pprint import pprint
+
 from lib.swarm_sim_header import *
+import random
 
 
 def solution(world):
+    """
+    A world is created that has particles formated in a ring structure that is up to 5 hops big
+    """
 
-    print(world.get_actual_round())
-    if world.get_actual_round() == 1:
-        logging.info("Scanning for markers, tiles and particles")
-        all_matters_list = world.get_particle_map_coordinates()[(0, 0, 0)].scan_for_matters_within()
-        for l in all_matters_list:
-            if l.type == 'particle':
-                print("particle at", l.coordinates)
-            elif l.type == 'tile':
-                print("tile", l.coordinates)
-            elif l.type == 'marker':
-                print("marker", l.coordinates)
-        logging.info("Testing Interface: Take Drop Tiles and Particles")
-
-    elif world.get_actual_round() == 2:
-        world.get_particle_list()[0].take_tile_in(list(grid.directions.values())[2])
-
-    elif world.get_actual_round() == 3:
-        world.get_particle_list()[0].drop_tile_in(list(grid.directions.values())[3])
-
-    else:
-        print("finished")
+    for particle in world.get_particle_list():
+        particle.move_to(random.choice(list(world.grid.get_directions_dictionary().values())))
 
     # elif world.get_actual_round() == 3 :
     #     print("Round 3")

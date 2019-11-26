@@ -1,6 +1,7 @@
 import configparser
 from datetime import datetime
-
+from lib.visualization.grid_models import *
+from ast import literal_eval as make_tuple
 
 class ConfigData:
 
@@ -17,9 +18,34 @@ class ConfigData:
         try:
             self.gui = config.get("Visualization", "gui")
         except configparser.NoOptionError as noe:
-            print("no gui found?")
+            print("no gui option given. setting to default \"gui.py\"")
             self.gui = "gui.py"
 
+        try:
+            self.grid_class = config.get("World", "grid_class")
+        except configparser.NoOptionError as noe:
+            raise RuntimeError("Fatal Error: no grid class defined in config.ini!")
+
+        try:
+            self.grid_size = config.getint("World", "grid_size")
+        except configparser.NoOptionError as noe:
+            raise RuntimeError("Fatal Error: no grid size defined in config.ini!")
+
+        if self.grid_class == "cubic":
+            self.grid = CubicGrid(self.grid_size)
+        elif self.grid_class == "hexagonal":
+            self.grid = HexagonalGrid(self.grid_size)
+        else:
+            raise RuntimeError("Fatal Error: unknown grid type \""+self.grid_class+"\"!")
+
+        self.particle_model_file = config.get("Visualization", "particle_model_file")
+        self.tile_model_file = config.get("Visualization", "tile_model_file")
+        self.marker_model_file = config.get("Visualization", "marker_model_file")
+
+        self.particle_color = make_tuple(config.get("Visualization", "particle_color"))
+        self.tile_color = make_tuple(config.get("Visualization", "tile_color"))
+        self.marker_color = make_tuple(config.get("Visualization", "marker_color"))
+        self.grid_color = make_tuple(config.get("Visualization", "grid_color"))
 
         self.size_x = config.getfloat("World", "size_x")
         self.size_y = config.getfloat("World", "size_y")

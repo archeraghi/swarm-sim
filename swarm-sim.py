@@ -30,14 +30,16 @@ def swarm_sim(argv):
     while swarm_sim_world.get_actual_round() <= config_data.max_round and swarm_sim_world.get_end() is False:
         round_start_timestamp = time.perf_counter()
         if config_data.visualization:
-            swarm_sim_world.window.run(round_start_timestamp)
+            swarm_sim_world.vis.run(round_start_timestamp)
         run_solution(swarm_sim_world)
 
-
+    logging.info('Finished')
 
     # generate_data(config_data, swarm_sim_world)
 
-    logging.info('Finished')
+    while True:
+        round_start_timestamp = time.perf_counter()
+        swarm_sim_world.vis.run(round_start_timestamp)
 
 
 def read_cmd_args(argv, config_data):

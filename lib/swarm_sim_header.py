@@ -58,9 +58,6 @@ x_offset = [0.5, 1,  0.5,   -0.5,   -1, -0.5 ]
 y_offset = [ 1, 0, -1,   -1,    0,  1]
 
 
-grid = CubicGrid(5)
-
-
 def direction_number_to_string(direction):
     """
     :param direction: the direction that should get converted to a string
@@ -106,6 +103,7 @@ def get_coordinates_in_direction(coordinates, direction):
     :param direction: The direction. Options:  E, SE, SW, W, NW, or NE
     :return: The coordinaiton of the pointed directions
     """
+
     return coordinates[0] + direction[0], coordinates[1] + direction[1], coordinates[2] + direction[2]
 
 
