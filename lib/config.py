@@ -1,7 +1,8 @@
 import configparser
 from datetime import datetime
-from lib.visualization.grid_models import *
 from ast import literal_eval as make_tuple
+import importlib
+
 
 class ConfigData:
 
@@ -22,21 +23,17 @@ class ConfigData:
             self.gui = "gui.py"
 
         try:
-            self.grid_class = config.get("World", "grid_class")
+            self.grid_class = config.get("Visualization", "grid_class")
         except configparser.NoOptionError as noe:
             raise RuntimeError("Fatal Error: no grid class defined in config.ini!")
 
         try:
-            self.grid_size = config.getint("World", "grid_size")
+            self.grid_size = config.getint("Visualization", "grid_size")
         except configparser.NoOptionError as noe:
             raise RuntimeError("Fatal Error: no grid size defined in config.ini!")
 
-        if self.grid_class == "cubic":
-            self.grid = CubicGrid(self.grid_size)
-        elif self.grid_class == "hexagonal":
-            self.grid = HexagonalGrid(self.grid_size)
-        else:
-            raise RuntimeError("Fatal Error: unknown grid type \""+self.grid_class+"\"!")
+        test = getattr(importlib.import_module("grids.%s" % self.grid_class), self.grid_class)
+        self.grid = test(self.grid_size)
 
         self.particle_model_file = config.get("Visualization", "particle_model_file")
         self.tile_model_file = config.get("Visualization", "tile_model_file")
@@ -46,6 +43,26 @@ class ConfigData:
         self.tile_color = make_tuple(config.get("Visualization", "tile_color"))
         self.marker_color = make_tuple(config.get("Visualization", "marker_color"))
         self.grid_color = make_tuple(config.get("Visualization", "grid_color"))
+        self.cursor_color = make_tuple(config.get("Visualization", "cursor_color"))
+        self.background_color = make_tuple(config.get("Visualization", "background_color"))
+        self.center_color = make_tuple(config.get("Visualization", "center_color"))
+        self.line_color = make_tuple(config.get("Visualization", "line_color"))
+        self.line_scaling = make_tuple(config.get("Visualization", "line_scaling"))
+        self.show_lines = config.getboolean("Visualization", "show_lines")
+        self.location_color = make_tuple(config.get("Visualization", "location_color"))
+        self.location_scaling = make_tuple(config.get("Visualization", "location_scaling"))
+        self.show_locations = config.getboolean("Visualization", "show_locations")
+        self.show_center = config.getboolean("Visualization", "show_center")
+        self.focus_color = make_tuple(config.get("Visualization", "focus_color"))
+        self.show_focus = config.getboolean("Visualization", "show_focus")
+
+        self.look_at = make_tuple(config.get("Visualization", "look_at"))
+        self.phi = config.getint("Visualization", "phi")
+        self.theta = config.getint("Visualization", "theta")
+        self.radius = config.getint("Visualization", "radius")
+        self.fov = config.getint("Visualization", "fov")
+        self.cursor_offset = config.getint("Visualization", "cursor_offset")
+        self.render_distance = config.getint("Visualization", "render_distance")
 
         self.size_x = config.getfloat("World", "size_x")
         self.size_y = config.getfloat("World", "size_y")

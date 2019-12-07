@@ -2,47 +2,21 @@
  the coordinate system of the simulators world"""
 import uuid
 from datetime import datetime
-from lib.swarm_sim_header import *
 
 
 class Matter:
     """In the classe marker all the methods for the characterstic of a marker is included"""
-    def __init__(self, world, coordinates, color=black, transparency=1, type=None, mm_size=100):
+    def __init__(self, world, coordinates, color, type=None, mm_size=100):
         """Initializing the marker constructor"""
         self.coordinates = coordinates
-        self.color = color_map[color]
+        self.color = color
         self.__id = str(uuid.uuid4())
         self.world = world
-        self._memory={}
-        self.__transparency=transparency
+        self._memory = {}
         self.type = type
         self.memory_limitation = world.config_data.memory_limitation
         self.mm_size = mm_size
-        self.modified = False
         self.created = False
-
-    def set_transparency(self, transparency):
-        """
-        Set the transparency value of the particle
-
-        :param transparency: The transparency of the particle
-        :return: None
-        """
-        if (0 <= transparency <= 1):
-            self.__transparency = round(transparency,2)
-        elif transparency < 0:
-            self.__transparency = 0
-        elif transparency > 1:
-            self.__transparency = 1
-        self.touch()
-
-    def get_transparency(self):
-        """
-        Returns the transparency value of the particle
-
-        :return: transparency
-        """
-        return round(self.__transparency,2)
 
     def read_memory_with(self, key):
         """
@@ -128,28 +102,10 @@ class Matter:
         :param color: marker color
         :return: None
         """
-        if type (color) == int:
-            self.color = color_map[color]
-        else:
-            self.color = color
-        self.touch()
+        self.color = color
 
     def get_color(self):
         """
-        Sets the marker color
-
-        :param color: marker color
-        :return: None
+        :return: color
         """
-        for color, code in color_map.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
-         if code == self.color:
-           return(color)
-
-    def touch(self):
-        """Tells the visualization that something has been modified and that it shoud changed it"""
-        self.modified = True
-
-    def untouch(self):
-        """Tells the visualization that something has been modified and that it shoud changed it"""
-        self.modified = False
-
+        return self.color

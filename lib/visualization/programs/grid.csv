@@ -1,0 +1,17 @@
+PROGRAM,VBO,ATTRIBUTE,TYPE,STRIDE,OFFSET,LENGTH
+offset color,0,position,vec3,0,0,n
+.,0,normal,vec3,0,n,n
+.,1,offset,vec3,0,0,m
+.,2,color,vec4,0,0,m
+offset color carry,0,position,vec3,0,0,n
+.,0,normal,vec3,0,n,n
+.,1,offset,vec3,0,0,m
+.,3,color,vec4,0,0,m.
+.,3,carry,float,0,0,m
+grid,0,pos,vec3,0,0,n+l
+.,0,norm,vec3,0,n+l,n
+.,1,offset,vec3,0,0,m
+.,,,,,,
+.,,,,,,
+.,,,,,,
+.,,,,,,
