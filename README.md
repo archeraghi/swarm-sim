@@ -49,7 +49,9 @@ For Windows/Linux/MacOs:
     1. pip3
     2. numpy
     3. pandas
-    4. pyglet
+    4. PyOpenGL
+    5. Pillow
+    6. PyQt5 (in version 5.10.1 for older Systems like Ubuntu 14.04)
 - press Okey
 - wait until everything is installed
 - chose Run->swarm-sim.py
