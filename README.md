@@ -13,7 +13,15 @@ For Linux:
 
     3. sudo pip3 install pandas
 
-    4. sudo pip3 install pyglet
+    4. sudo pip3 install PyOpenGL
+    
+    5. sudo pip3 install Pillow
+    
+    6. sudo pip3 install PyQt5
+    
+for older Systems (e.g. Ubuntu 14.04) install the PyQt5 version 5.10.1
+
+    6. sudo pip3 install PyQt5==5.10.1
 
 - install Gnuplot:
 
