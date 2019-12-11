@@ -1,18 +1,18 @@
 // vertex shader for the OffsetColorProgram
 
-#version 330
+#version 150
 
 // VBO 0 - per vertex
 // vector of a face
-in vec3 position;
+attribute vec3 position;
 // normal vector of the vector/face
-in vec3 normal;
+attribute vec3 normal;
 
 // VBO 1 - per instance
 // position offset of the model
-in vec3 offset;
+attribute vec3 offset;
 // color of the model
-in vec4 color;
+attribute vec4 color;
 
 // uniforms
 // projection matrix
@@ -33,7 +33,7 @@ uniform vec3 light_direction;
 uniform vec4 light_color;
 
 // varying color for fragment shader
-out vec4 v_color;
+varying vec4 v_color;
 
 
 void main(void)

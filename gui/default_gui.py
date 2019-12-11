@@ -28,6 +28,8 @@ def create_gui(world, vis: Visualization):
     tabbar.setMinimumWidth(200)
     tabbar.addTab(sim_tab(vis, world), "Simulation")
     tabbar.addTab(vis_tab(vis), "Visualization")
+    tabbar.addTab(grid_tab(vis), "Grid")
+    tabbar.addTab(matter_tab(vis), "Matter")
 
     return tabbar
 
@@ -94,22 +96,175 @@ def vis_tab(vis: Visualization):
     layout.addLayout(get_drag_sens_slider(vis))
     layout.addLayout(get_zoom_sens_slider(vis))
     layout.addLayout(get_rota_sens_slider(vis))
+    reset_position_button = QPushButton("reset position")
+    reset_position_button.clicked.connect(vis.reset_camera_position)
+    layout.addWidget(reset_position_button, alignment=Qt.AlignBaseline)
+    layout.addStretch(0)
+    tab.setLayout(layout)
+    return tab
+
+
+def grid_tab(vis: Visualization):
+    tab = QTabBar()
+    layout = QVBoxLayout()
     layout.addLayout(get_grid_width_slider(vis))
     layout.addLayout(get_grid_lines_scale_slider(vis))
     layout.addLayout(get_grid_locations_scale_slider(vis))
     layout.addLayout(get_show_checkboxes(vis))
     layout.addLayout(recalculate_grid(vis))
     layout.addLayout(get_color_picker(vis))
-
     layout.addStretch(0)
-
-    reset_position_button = QPushButton("reset position")
-    reset_position_button.clicked.connect(vis.reset_camera_position)
-    layout.addWidget(reset_position_button, alignment=Qt.AlignBaseline)
-
     tab.setLayout(layout)
     return tab
 
+
+def matter_tab(vis):
+    tab = QTabBar()
+    layout = QVBoxLayout()
+    layout.addLayout(get_particle_scaler(vis))
+    layout.addLayout(get_marker_scaler(vis))
+    layout.addLayout(get_tile_scaler(vis))
+    layout.addStretch(0)
+    tab.setLayout(layout)
+    return tab
+
+
+def get_particle_scaler(vis):
+    def x_scaler_change(value):
+        current_scaling = vis.get_particle_scaling()
+        print(current_scaling)
+        new_scaling = (value/10.0, current_scaling[1], current_scaling[2])
+        print(new_scaling)
+        vis.set_particle_scaling(new_scaling)
+
+    def y_scaler_change(value):
+        current_scaling = vis.get_particle_scaling()
+        new_scaling = (current_scaling[0], value/10.0, current_scaling[2])
+        vis.set_particle_scaling(new_scaling)
+
+    def z_scaler_change(value):
+        current_scaling = vis.get_particle_scaling()
+        new_scaling = (current_scaling[0], current_scaling[1], value/10.0)
+        vis.set_particle_scaling(new_scaling)
+
+    x_desc = QLabel("x scale:")
+    y_desc = QLabel("y scale:")
+    z_desc = QLabel("z scale:")
+    x_scaler = create_slider(2, 2, 20, 1, 10, x_scaler_change)
+    y_scaler = create_slider(2, 2, 20, 1, 10, y_scaler_change)
+    z_scaler = create_slider(2, 2, 20, 1, 10, z_scaler_change)
+
+    hbox1 = QHBoxLayout()
+    hbox1.addWidget(x_desc, alignment=Qt.AlignBaseline)
+    hbox1.addWidget(x_scaler, alignment=Qt.AlignBaseline)
+
+    hbox2 = QHBoxLayout()
+    hbox2.addWidget(y_desc, alignment=Qt.AlignBaseline)
+    hbox2.addWidget(y_scaler, alignment=Qt.AlignBaseline)
+
+    hbox3 = QHBoxLayout()
+    hbox3.addWidget(z_desc, alignment=Qt.AlignBaseline)
+    hbox3.addWidget(z_scaler, alignment=Qt.AlignBaseline)
+
+    vbox = QVBoxLayout()
+    vbox.addWidget(QLabel("particle scaling:"), alignment=Qt.AlignBaseline)
+    vbox.addLayout(hbox1)
+    vbox.addLayout(hbox2)
+    vbox.addLayout(hbox3)
+
+    return vbox
+
+
+def get_tile_scaler(vis):
+    def x_scaler_change(value):
+        current_scaling = vis.get_tile_scaling()
+        print(current_scaling)
+        new_scaling = (value/10.0, current_scaling[1], current_scaling[2])
+        print(new_scaling)
+        vis.set_tile_scaling(new_scaling)
+
+    def y_scaler_change(value):
+        current_scaling = vis.get_tile_scaling()
+        new_scaling = (current_scaling[0], value/10.0, current_scaling[2])
+        vis.set_tile_scaling(new_scaling)
+
+    def z_scaler_change(value):
+        current_scaling = vis.get_tile_scaling()
+        new_scaling = (current_scaling[0], current_scaling[1], value/10.0)
+        vis.set_tile_scaling(new_scaling)
+
+    x_desc = QLabel("x scale:")
+    y_desc = QLabel("y scale:")
+    z_desc = QLabel("z scale:")
+    x_scaler = create_slider(2, 2, 20, 1, 10, x_scaler_change)
+    y_scaler = create_slider(2, 2, 20, 1, 10, y_scaler_change)
+    z_scaler = create_slider(2, 2, 20, 1, 10, z_scaler_change)
+
+    hbox1 = QHBoxLayout()
+    hbox1.addWidget(x_desc, alignment=Qt.AlignBaseline)
+    hbox1.addWidget(x_scaler, alignment=Qt.AlignBaseline)
+
+    hbox2 = QHBoxLayout()
+    hbox2.addWidget(y_desc, alignment=Qt.AlignBaseline)
+    hbox2.addWidget(y_scaler, alignment=Qt.AlignBaseline)
+
+    hbox3 = QHBoxLayout()
+    hbox3.addWidget(z_desc, alignment=Qt.AlignBaseline)
+    hbox3.addWidget(z_scaler, alignment=Qt.AlignBaseline)
+
+    vbox = QVBoxLayout()
+    vbox.addWidget(QLabel("tile scaling:"), alignment=Qt.AlignBaseline)
+    vbox.addLayout(hbox1)
+    vbox.addLayout(hbox2)
+    vbox.addLayout(hbox3)
+
+    return vbox
+
+
+def get_marker_scaler(vis):
+    def x_scaler_change(value):
+        current_scaling = vis.get_marker_scaling()
+        print(current_scaling)
+        new_scaling = (value/10.0, current_scaling[1], current_scaling[2])
+        print(new_scaling)
+        vis.set_marker_scaling(new_scaling)
+
+    def y_scaler_change(value):
+        current_scaling = vis.get_marker_scaling()
+        new_scaling = (current_scaling[0], value/10.0, current_scaling[2])
+        vis.set_marker_scaling(new_scaling)
+
+    def z_scaler_change(value):
+        current_scaling = vis.get_marker_scaling()
+        new_scaling = (current_scaling[0], current_scaling[1], value/10.0)
+        vis.set_marker_scaling(new_scaling)
+
+    x_desc = QLabel("x scale:")
+    y_desc = QLabel("y scale:")
+    z_desc = QLabel("z scale:")
+    x_scaler = create_slider(2, 2, 20, 1, 10, x_scaler_change)
+    y_scaler = create_slider(2, 2, 20, 1, 10, y_scaler_change)
+    z_scaler = create_slider(2, 2, 20, 1, 10, z_scaler_change)
+
+    hbox1 = QHBoxLayout()
+    hbox1.addWidget(x_desc, alignment=Qt.AlignBaseline)
+    hbox1.addWidget(x_scaler, alignment=Qt.AlignBaseline)
+
+    hbox2 = QHBoxLayout()
+    hbox2.addWidget(y_desc, alignment=Qt.AlignBaseline)
+    hbox2.addWidget(y_scaler, alignment=Qt.AlignBaseline)
+
+    hbox3 = QHBoxLayout()
+    hbox3.addWidget(z_desc, alignment=Qt.AlignBaseline)
+    hbox3.addWidget(z_scaler, alignment=Qt.AlignBaseline)
+
+    vbox = QVBoxLayout()
+    vbox.addWidget(QLabel("marker scaling:"), alignment=Qt.AlignBaseline)
+    vbox.addLayout(hbox1)
+    vbox.addLayout(hbox2)
+    vbox.addLayout(hbox3)
+
+    return vbox
 
 def get_fov_slider(vis: Visualization):
     hbox = QVBoxLayout()
@@ -331,12 +486,12 @@ def get_show_checkboxes(vis):
 
 def get_grid_lines_scale_slider(vis):
     vbox = QVBoxLayout()
-    desc = QLabel("grid lines scale (%f):" % vis.get_grid_line_scaling()[0])
+    desc = QLabel("grid lines scale (%d%%):" % int(vis.get_grid_line_scaling()[0]*100))
     vbox.addWidget(desc, alignment=Qt.AlignBaseline)
 
     def set_scale(value):
         vis.set_grid_line_scaling([value/50.0, value/50.0, value/50.0])
-        desc.setText("grid lines scale (%f):" % float(value/50.0))
+        desc.setText("grid lines scale (%d%%):" % (int(value*2.0)))
 
     vbox.addWidget(create_slider(10, 2, 50, 10, int(vis.get_grid_line_scaling()[0]*50), set_scale),
                    alignment=Qt.AlignBaseline)
@@ -345,12 +500,12 @@ def get_grid_lines_scale_slider(vis):
 
 def get_grid_locations_scale_slider(vis):
     vbox = QVBoxLayout()
-    desc = QLabel("grid locations model scale (%f%%):" % vis.get_grid_location_scaling()[0])
+    desc = QLabel("grid locations model scale (%d%%):" % int(vis.get_grid_location_scaling()[0]*500))
     vbox.addWidget(desc, alignment=Qt.AlignBaseline)
 
     def set_scale(value):
         vis.set_grid_location_scaling([value/1000.0, value/1000.0, value/1000.0])
-        desc.setText("grid locations model scale (%f%%):" % float(value/1000.0))
+        desc.setText("grid locations model scale (%d%%):" % (int(value/2.0)))
 
     vbox.addWidget(create_slider(10, 2, 200, 10, int(vis.get_grid_location_scaling()[0]*1000.0), set_scale),
                    alignment=Qt.AlignBaseline)

@@ -388,3 +388,21 @@ class Visualization:
     def recalculate_grid(self, size):
         self._viewer.programs["grid"].update_offsets(self._world.grid.get_box(size))
         self._viewer.glDraw()
+
+    def get_particle_scaling(self):
+        return self._viewer.programs["particle"].get_model_scaling()
+
+    def set_particle_scaling(self, scaling):
+        self._viewer.programs["particle"].set_model_scaling(scaling)
+
+    def get_tile_scaling(self):
+        return self._viewer.programs["tile"].get_model_scaling()
+
+    def set_tile_scaling(self, scaling):
+        self._viewer.programs["tile"].set_model_scaling(scaling)
+
+    def get_marker_scaling(self):
+        return self._viewer.programs["marker"].get_model_scaling()
+
+    def set_marker_scaling(self, scaling):
+        self._viewer.programs["marker"].set_model_scaling(scaling)

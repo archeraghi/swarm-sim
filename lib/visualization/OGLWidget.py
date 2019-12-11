@@ -20,12 +20,12 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :param world: the world class
         :param camera: a camera for the visualization
         """
-        fmt = QtOpenGL.QGLFormat()
-        fmt.setVersion(3, 3)
-        # needs to be in compatibility profile, because of glLineWidth
-        fmt.setProfile(QtOpenGL.QGLFormat.CompatibilityProfile)
-        fmt.setSampleBuffers(True)
-        super(OGLWidget, self).__init__(fmt, None)
+        # fmt = QtOpenGL.QGLFormat()
+        # fmt.setVersion(3, 3)
+        # # needs to be in compatibility profile, because of glLineWidth
+        # fmt.setProfile(QtOpenGL.QGLFormat.CompatibilityProfile)
+        # fmt.setSampleBuffers(True)
+        super(OGLWidget, self).__init__()
 
         self.debug = False
         self.world = world
@@ -178,6 +178,8 @@ class OGLWidget(QtOpenGL.QGLWidget):
         """
         if height == 0:
             height = 1
+        if width == 0:
+            width = 1
         self.camera.set_viewport(width, height)
 
         # set the openGL viewport
