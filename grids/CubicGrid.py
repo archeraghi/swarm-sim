@@ -28,13 +28,13 @@ class CubicGrid(Grid):
                     locations.append((x, y, z))
         return locations
 
-    def is_valid_location(self, location):
-        if location[0] % 1 == 0 and location[1] % 1 == 0 and location[2] % 1 == 0:
+    def are_valid_coordinates(self, coordinates):
+        if coordinates[0] % 1 == 0 and coordinates[1] % 1 == 0 and coordinates[2] % 1 == 0:
             return True
         else:
             return False
 
-    def get_nearest_location(self, coordinates):
+    def get_nearest_valid_coordinates(self, coordinates):
         return (round(coordinates[0]),
                 round(coordinates[1]),
                 round(coordinates[2]))

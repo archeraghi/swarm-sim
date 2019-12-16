@@ -15,10 +15,9 @@ from lib.swarm_sim_header import *
 
 
 class Particle(matter.Matter):
-    """In the classe marker all the methods for the characterstic of a marker is included"""
 
     def __init__(self, world, coordinates, color, particle_counter=0):
-        """Initializing the marker constructor"""
+        """Initializing the particle constructor"""
         super().__init__(world, coordinates, color,
                          type="particle", mm_size=world.config_data.particle_mm_size)
         self.number = particle_counter
@@ -70,13 +69,13 @@ class Particle(matter.Matter):
         else:
             return False
 
-    def check_on_marker(self):
+    def check_on_location(self):
         """
-        Checks if the particle is on a marker
+        Checks if the particle is on a location
 
-        :return: True: On a marker; False: Not on a marker
+        :return: True: On a location; False: Not on a location
         """
-        if self.coordinates in self.world.marker_map_coordinates:
+        if self.coordinates in self.world.location_map_coordinates:
             return True
         else:
             return False
@@ -90,7 +89,7 @@ class Particle(matter.Matter):
         """
         direction_coord = get_coordinates_in_direction(self.coordinates, direction)
         direction, direction_coord = self.check_within_border(direction, direction_coord)
-        if self.world.grid.is_valid_location(direction_coord):
+        if self.world.grid.are_valid_coordinates(direction_coord):
             if direction_coord not in self.world.particle_map_coordinates:
                 if self.coordinates in self.world.particle_map_coordinates:
                     del self.world.particle_map_coordinates[self.coordinates]
@@ -123,9 +122,9 @@ class Particle(matter.Matter):
 
     def read_from_with(self, target, key=None):
         """
-        Read the memories from the matters (particle, tile, or marker object) memories with a given keyword
+        Read the memories from the matters (particle, tile, or location object) memories with a given keyword
 
-        :param target: The matter can be either a particle, tile, or marker
+        :param target: The matter can be either a particle, tile, or location
         :param key: A string keyword to searcg for the data in the memory
         :return: The matters memory; None
         """
@@ -142,9 +141,9 @@ class Particle(matter.Matter):
                 elif target.type == "tile":
                     self.world.csv_round.update_metrics(tile_read=1)
                     self.csv_particle_writer.write_particle(tile_read=1)
-                elif target.type == "marker":
-                    self.world.csv_round.update_metrics(marker_read=1)
-                    self.csv_particle_writer.write_particle(marker_read=1)
+                elif target.type == "location":
+                    self.world.csv_round.update_metrics(location_read=1)
+                    self.csv_particle_writer.write_particle(location_read=1)
                 return tmp_memory
         return None
 
@@ -157,7 +156,7 @@ class Particle(matter.Matter):
                 or get_coordinates_in_direction(self.coordinates, direction) \
                 in self.world.get_particle_map_coordinates() \
                 or get_coordinates_in_direction(self.coordinates, direction) \
-                in self.world.get_marker_map_coordinates():
+                in self.world.get_location_map_coordinates():
             return True
         else:
             return False
@@ -182,12 +181,12 @@ class Particle(matter.Matter):
         else:
             return False
 
-    def marker_in(self, direction):
+    def location_in(self, direction):
         """
-        :param direction: the direction to check if a marker is there
-        :return: True: if a marker is there, False: if not
+        :param direction: the direction to check if a location is there
+        :return: True: if a location is there, False: if not
         """
-        if get_coordinates_in_direction(self.coordinates, direction) in self.world.get_marker_map_coordinates():
+        if get_coordinates_in_direction(self.coordinates, direction) in self.world.get_location_map_coordinates():
             return True
         else:
             return False
@@ -197,8 +196,8 @@ class Particle(matter.Matter):
             return self.world.get_tile_map_coordinates()[get_coordinates_in_direction(self.coordinates, direction)]
         elif get_coordinates_in_direction(self.coordinates, direction) in self.world.get_particle_map_coordinates():
             return self.world.get_particle_map_coordinates()[get_coordinates_in_direction(self.coordinates, direction)]
-        elif get_coordinates_in_direction(self.coordinates, direction) in self.world.get_marker_map_coordinates():
-            return self.world.get_marker_map_coordinates()[get_coordinates_in_direction(self.coordinates, direction)]
+        elif get_coordinates_in_direction(self.coordinates, direction) in self.world.get_location_map_coordinates():
+            return self.world.get_location_map_coordinates()[get_coordinates_in_direction(self.coordinates, direction)]
         else:
             return False
 
@@ -214,15 +213,15 @@ class Particle(matter.Matter):
         else:
             return False
 
-    def get_marker_in(self, direction):
-        if get_coordinates_in_direction(self.coordinates, direction) in self.world.get_marker_map_coordinates():
-            return self.world.get_marker_map_coordinates()[get_coordinates_in_direction(self.coordinates, direction)]
+    def get_location_in(self, direction):
+        if get_coordinates_in_direction(self.coordinates, direction) in self.world.get_location_map_coordinates():
+            return self.world.get_location_map_coordinates()[get_coordinates_in_direction(self.coordinates, direction)]
         else:
             return False
 
-    def get_marker(self):
-        if self.coordinates in self.world.marker_map_coordinates:
-            return self.world.get_marker_map_coordinates()[self.coordinates]
+    def get_location(self):
+        if self.coordinates in self.world.location_map_coordinates:
+            return self.world.get_location_map_coordinates()[self.coordinates]
         else:
             return False
 
@@ -234,9 +233,9 @@ class Particle(matter.Matter):
 
     def write_to_with(self, target, key=None, data=None):
         """
-        Writes data with given a keyword direction on the matters (particle, tile, or marker object) memory
+        Writes data with given a keyword direction on the matters (particle, tile, or location object) memory
 
-        :param target: The matter can be either a particle, tile, or marker
+        :param target: The matter can be either a particle, tile, or location
         :param key: A string keyword so to order the data that is written into the memory
         :param data: The data that should be stored into the memory
         :return: True: Successful written into the memory; False: Unsuccessful
@@ -253,9 +252,9 @@ class Particle(matter.Matter):
                 elif target.type == "tile":
                     self.world.csv_round.update_metrics(tile_write=1)
                     self.csv_particle_writer.write_particle(tile_write=1)
-                elif target.type == "marker":
-                    self.world.csv_round.update_metrics(marker_write=1)
-                    self.csv_particle_writer.write_particle(marker_write=1)
+                elif target.type == "location":
+                    self.world.csv_round.update_metrics(location_write=1)
+                    self.csv_particle_writer.write_particle(location_write=1)
                 return True
             else:
                 return False
@@ -264,12 +263,12 @@ class Particle(matter.Matter):
 
     def scan_for_matters_within(self, matter_type='all', hop=1):
         """
-        Scans for particles, tiles, or marker on a given hop distance and all the matters within the hop distance
+        Scans for particles, tiles, or locations on a given hop distance and all the matters within the hop distance
 
         :todo: If nothing then everything should be scanned
 
         :param matter_type: For what matter this method should scan for.
-                            Can be either particles, tiles, markers, or (default) all
+                            Can be either particles, tiles, locations, or (default) all
         :param hop: The hop distance from the actual position of the scanning particle
         :return: A list of the founded matters
         """
@@ -286,10 +285,10 @@ class Particle(matter.Matter):
 
     def scan_for_matters_in(self, matter_type='all', hop=1):
         """
-         Scanning for particles, tiles, or marker on a given hop distance
+         Scanning for particles, tiles, or locations on a given hop distance
 
          :param matter_type: For what matter this method should scan for.
-                             Can be either particles, tiles, markers, or (default) all
+                             Can be either particles, tiles, locations, or (default) all
          :param hop: The hop distance from thee actual position of the scanning particle
          :return: A list of the founded matters
          """
@@ -300,17 +299,17 @@ class Particle(matter.Matter):
             scanned_list = scan_in(self.world.particle_map_coordinates, self.coordinates, hop, self.world.grid)
         elif matter_type == "tiles":
             scanned_list = scan_in(self.world.tile_map_coordinates, self.coordinates, hop, self.world.grid)
-        elif matter_type == "markers":
-            scanned_list = scan_in(self.world.marker_map_coordinates, self.coordinates, hop, self.world.grid)
+        elif matter_type == "locations":
+            scanned_list = scan_in(self.world.location_map_coordinates, self.coordinates, hop, self.world.grid)
         else:
             scanned_list = scan_in(self.world.particle_map_coordinates, self.coordinates, hop, self.world.grid)
             scanned_list.extend(scan_in(self.world.tile_map_coordinates, self.coordinates, hop, self.world.grid))
-            scanned_list.extend(scan_in(self.world.marker_map_coordinates, self.coordinates, hop, self.world.grid))
+            scanned_list.extend(scan_in(self.world.location_map_coordinates, self.coordinates, hop, self.world.grid))
         return scanned_list
 
     def scan_for_particles_within(self, hop=1):
         """
-        Scans for particles, tiles, or marker on a given hop distance and all the matters within the hop distance
+        Scans for particles on a given hop distance and all the matters within the hop distance
 
         :todo: If nothing then everything should be scanned
 
@@ -321,7 +320,7 @@ class Particle(matter.Matter):
 
     def scan_for_particles_in(self, hop=1):
         """
-        Scanning for particles, tiles, or marker on a given hop distance
+        Scanning for particles on a given hop distance
 
         :param hop: The hop distance from thee actual position of the scanning particle
         :return: A list of the founded matters
@@ -331,7 +330,7 @@ class Particle(matter.Matter):
 
     def scan_for_tiles_within(self, hop=1):
         """
-        Scans for particles, tiles, or marker on a given hop distance and all the matters within the hop distance
+        Scans for tiles on a given hop distance and all the matters within the hop distance
 
         :todo: If nothing then everything should be scanned
 
@@ -343,16 +342,16 @@ class Particle(matter.Matter):
 
     def scan_for_tiles_in(self, hop=1):
         """
-        Scanning for particles, tiles, or marker on a given hop distance
+        Scanning for tiles on a given hop distance
 
         :param hop: The hop distance from thee actual position of the scanning particle
         :return: A list of the founded matters
         """
         return scan_in(self.world.tile_map_coordinates, self.coordinates, hop, self.world.grid)
 
-    def scan_for_markers_within(self, hop=1):
+    def scan_for_locations_within(self, hop=1):
         """
-        Scans for particles, tiles, or marker on a given hop distance and all the matters within the hop distance
+        Scans for particles, tiles, or location on a given hop distance and all the matters within the hop distance
 
         :todo: If nothing then everything should be scanned
 
@@ -360,16 +359,16 @@ class Particle(matter.Matter):
         :return: A list of the founded matters
         """
 
-        return scan_within(self.world.marker_map_coordinates, self.coordinates, hop, self.world.grid)
+        return scan_within(self.world.location_map_coordinates, self.coordinates, hop, self.world.grid)
 
-    def scan_for_markers_in(self, hop=1):
+    def scan_for_locations_in(self, hop=1):
         """
-        Scanning for particles, tiles, or marker on a given hop distance
+        Scanning for particles, tiles, or location on a given hop distance
 
         :param hop: The hop distance from thee actual position of the scanning particle
         :return: A list of the founded matters
         """
-        return scan_in(self.world.marker_map_coordinates, self.coordinates, hop, self.world.grid)
+        return scan_in(self.world.location_map_coordinates, self.coordinates, hop, self.world.grid)
 
     def take_me(self, coordinates):
         """
@@ -454,7 +453,7 @@ class Particle(matter.Matter):
 
         logging.info("particle with id %s is", self.get_id())
         if coordinates is not None:
-            if self.world.grid.is_valid_location(coordinates):
+            if self.world.grid.are_valid_coordinates(coordinates):
                 logging.info("Going to create a tile on position %s" % str(coordinates))
                 if self.world.add_tile(coordinates):
                     self.world.tile_map_coordinates[coordinates, coordinates[1]].created = True
@@ -595,7 +594,7 @@ class Particle(matter.Matter):
         :param coordinates of the tile
         :return: True: successful taken; False: unsuccessful taken
         """
-        if self.world.grid.is_valid_location(coordinates):
+        if self.world.grid.are_valid_coordinates(coordinates):
             if coordinates in self.world.tile_map_coordinates:
                 return self.take_tile_with(self.world.tile_map_coordinates[coordinates].get_id())
             else:
@@ -636,7 +635,7 @@ class Particle(matter.Matter):
         :param coordinates
         """
         if self.carried_tile is not None:
-            if self.world.grid.is_valid_location(coordinates):
+            if self.world.grid.are_valid_coordinates(coordinates):
                 if coordinates not in self.world.get_tile_map_coordinates():
                     try:  # cher: insert so to overcome the AttributeError
                         self.carried_tile.drop_me(coordinates)
@@ -710,7 +709,7 @@ class Particle(matter.Matter):
         :return: New Particle or False
         """
         if coordinates is not None:
-            if self.world.grid.is_valid_location(coordinates):
+            if self.world.grid.are_valid_coordinates(coordinates):
                 logging.info("Going to create a particle on position %s" % str(coordinates))
                 new_particle = self.world.add_particle(coordinates)
                 if new_particle:
@@ -786,7 +785,7 @@ class Particle(matter.Matter):
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
         if coordinates is not None:
-            if self.world.grid.is_valid_location(coordinates):
+            if self.world.grid.are_valid_coordinates(coordinates):
                 if self.world.remove_particle_on(coordinates):
                     logging.info("Deleted particle with particle on coordinates %s" % str(coordinates))
                     self.csv_particle_writer.write_particle(particle_deleted=1)
@@ -833,7 +832,7 @@ class Particle(matter.Matter):
         :return: True: Successful taken; False: Cannot be taken or wrong Coordinates
         """
 
-        if self.world.grid.is_valid_location(coordinates):
+        if self.world.grid.are_valid_coordinates(coordinates):
             if coordinates in self.world.particle_map_coordinates:
                 return self.take_particle_with(self.world.particle_map_coordinates[coordinates].get_id())
             else:
@@ -883,7 +882,7 @@ class Particle(matter.Matter):
         :param coordinates:
         """
         if self.carried_particle is not None and coordinates is not None:
-            if self.world.grid.is_valid_location(coordinates):
+            if self.world.grid.are_valid_coordinates(coordinates):
                 if coordinates not in self.world.particle_map_coordinates:
                     try:  # cher: insert so to overcome the AttributeError
                         self.carried_particle.drop_me(coordinates)
@@ -913,7 +912,7 @@ class Particle(matter.Matter):
         :param new_coordinates: new coorindation points
         :return: None
         """
-        if self.world.grid.is_valid_location(new_coordinates):
+        if self.world.grid.are_valid_coordinates(new_coordinates):
             particle.coordinates = new_coordinates
             self.world.particle_map_coordinates[new_coordinates] = particle
             self.world.vis.particle_changed(particle)
@@ -921,117 +920,117 @@ class Particle(matter.Matter):
         else:
             return False
 
-    def create_marker(self):
+    def create_location(self):
         """
-         Creates a marker on the particles actual position
+         Creates a location on the particles actual position
 
-        :return: New marker or False
+        :return: New location or False
         """
 
         logging.info("Going to create on position %s" % str(self.coordinates))
-        new_marker = self.world.add_marker(self.coordinates)
-        if new_marker:
-            self.csv_particle_writer.write_particle(marker_created=1)
-            self.world.csv_round.update_markers_num(len(self.world.get_marker_list()))
-            self.world.csv_round.update_metrics(marker_created=1)
-            return new_marker
+        new_location = self.world.add_location(self.coordinates)
+        if new_location:
+            self.csv_particle_writer.write_particle(location_created=1)
+            self.world.csv_round.update_locations_num(len(self.world.get_location_list()))
+            self.world.csv_round.update_metrics(location_created=1)
+            return new_location
         else:
             return False
 
-    def create_marker_in(self, direction=None):
+    def create_location_in(self, direction=None):
         """
-        Creates a marker either in a given direction
-        :param direction: The direction on which the marker should be created. Options: E, SE, SW, W, NW, NE,
-        :return: New marker or False
+        Creates a location either in a given direction
+        :param direction: The direction on which the location should be created.
+        :return: New location or False
 
         """
         if direction is not None:
             coordinates = get_coordinates_in_direction(self.coordinates, direction)
-            logging.info("Going to create a marker in %s on position %s" % (str(direction), str(coordinates)))
-            new_marker = self.world.add_marker(coordinates)
-            if new_marker:
-                logging.info("Created marker on coordinates %s" % str(coordinates))
-                self.world.csv_round.update_markers_num(len(self.world.get_marker_list()))
-                self.world.csv_round.update_metrics(marker_created=1)
-                return new_marker
+            logging.info("Going to create a location in %s on position %s" % (str(direction), str(coordinates)))
+            new_location = self.world.add_location(coordinates)
+            if new_location:
+                logging.info("Created location on coordinates %s" % str(coordinates))
+                self.world.csv_round.update_locations_num(len(self.world.get_location_list()))
+                self.world.csv_round.update_metrics(location_created=1)
+                return new_location
             else:
                 return False
         else:
-            logging.info("Marker not created. Invalid direction (None)")
+            logging.info("Location not created. Invalid direction (None)")
             return False
 
-    def create_marker_on(self, coordinates=None):
+    def create_location_on(self, coordinates=None):
         """
-        Creates a marker either on a given x,y coordinates
+        Creates a location either on a given x,y coordinates
 
-        :return: New marker or False
+        :return: New location or False
 
         """
         if coordinates is not None:
-            if self.world.grid.is_valid_location(coordinates):
-                logging.info("Going to create a marker on position %s", str(coordinates))
-                new_marker = self.world.add_marker(coordinates)
-                if new_marker:
-                    logging.info("Created marker on coordinates %s", str(coordinates))
-                    self.world.csv_round.update_markers_num(len(self.world.get_marker_list()))
-                    self.world.csv_round.update_metrics(marker_created=1)
-                    return new_marker
+            if self.world.grid.are_valid_coordinates(coordinates):
+                logging.info("Going to create a location on position %s", str(coordinates))
+                new_location = self.world.add_location(coordinates)
+                if new_location:
+                    logging.info("Created location on coordinates %s", str(coordinates))
+                    self.world.csv_round.update_locations_num(len(self.world.get_location_list()))
+                    self.world.csv_round.update_metrics(location_created=1)
+                    return new_location
             else:
                 return False
         else:
-            logging.info("Marker not created. invalid coordinates (None)")
+            logging.info("Location not created. invalid coordinates (None)")
             return False
 
-    def delete_marker_with(self, marker_id):
+    def delete_location_with(self, location_id):
         """
-        Deletes a marker with a given marker-id
-        :param marker_id: The id of the marker that should be deleted
+        Deletes a location with a given location-id
+        :param location_id: The id of the location that should be deleted
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-        logging.info("Particle %s is going to delete marker with marker id %s" % (self.get_id(), marker_id))
-        if self.world.remove_marker(marker_id):
-            self.csv_particle_writer.write_particle(marker_deleted=1)
+        logging.info("Particle %s is going to delete location with location id %s" % (self.get_id(), location_id))
+        if self.world.remove_location(location_id):
+            self.csv_particle_writer.write_particle(location_deleted=1)
             return True
         else:
-            logging.info("Could not delete marker with marker id %s", str(marker_id))
+            logging.info("Could not delete location with location id %s", str(location_id))
             return False
 
-    def delete_marker(self):
+    def delete_location(self):
         """
-        Deletes a marker on current position
+        Deletes a location on current position
 
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-        logging.info("Particle %s is going to delete a marker on current position" % self.get_id())
-        if self.coordinates in self.world.get_marker_map_coordinates():
-            if self.world.remove_marker_on(self.coordinates):
-                self.csv_particle_writer.write_particle(marker_deleted=1)
+        logging.info("Particle %s is going to delete a location on current position" % self.get_id())
+        if self.coordinates in self.world.get_location_map_coordinates():
+            if self.world.remove_location_on(self.coordinates):
+                self.csv_particle_writer.write_particle(location_deleted=1)
                 return True
         else:
-            logging.info("Could not delete marker")
+            logging.info("Could not delete location")
             return False
 
-    def delete_marker_in(self, direction=None):
+    def delete_location_in(self, direction=None):
         """
-        Deletes a marker in a given direction
+        Deletes a location in a given direction
 
-        :param direction: The direction on which the marker should be deleted. Options: E, SE, SW, W, NW, NE,
+        :param direction: The direction on which the location should be deleted.
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
         if direction is not None:
             coordinates = get_coordinates_in_direction(self.coordinates, direction)
             logging.info("Deleting tile in %s direction", str(direction))
-            if self.world.remove_marker_on(coordinates):
-                logging.info("Deleted marker with marker on coordinates %s", str(coordinates))
-                self.csv_particle_writer.write_particle(marker_deleted=1)
+            if self.world.remove_location_on(coordinates):
+                logging.info("Deleted location with location on coordinates %s", str(coordinates))
+                self.csv_particle_writer.write_particle(location_deleted=1)
                 return True
             else:
-                logging.info("Could not delete marker on coordinates %s", str(coordinates))
+                logging.info("Could not delete location on coordinates %s", str(coordinates))
                 return False
         else:
             logging.info("invalid direction %d", str(direction))
 
-    def delete_marker_on(self, coordinates=None):
+    def delete_location_on(self, coordinates=None):
         """
         Deletes a particle either on a given x,y coordinates
 
@@ -1039,13 +1038,13 @@ class Particle(matter.Matter):
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
         if coordinates is not None:
-            if self.world.grid.is_valid_location(coordinates):
-                if self.world.remove_marker_on(coordinates):
-                    logging.info("Deleted marker on coordinates %s", str(coordinates))
-                    self.csv_particle_writer.write_particle(marker_deleted=1)
+            if self.world.grid.are_valid_coordinates(coordinates):
+                if self.world.remove_location_on(coordinates):
+                    logging.info("Deleted location on coordinates %s", str(coordinates))
+                    self.csv_particle_writer.write_particle(location_deleted=1)
                     return True
                 else:
-                    logging.info("Could not delete marker on coordinates %s", str(coordinates))
+                    logging.info("Could not delete location on coordinates %s", str(coordinates))
                     return False
             else:
                 return False

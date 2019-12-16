@@ -2,7 +2,8 @@ import OpenGL.GL as gl
 from abc import ABC, abstractmethod
 import numpy as np
 
-from lib.visualization.utils import eeprint, load_obj_file, eprint
+from lib.swarm_sim_header import eeprint, eprint
+from lib.visualization.utils import load_obj_file
 
 
 class Program(ABC):

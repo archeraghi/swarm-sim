@@ -2,10 +2,12 @@ import importlib
 from threading import Thread
 
 from PyQt5.QtWidgets import QApplication, QSplitter, QWidget
+
+from lib.swarm_sim_header import eprint
 from lib.visualization.OGLWidget import OGLWidget
 import time
 from lib.visualization.camera import Camera
-from lib.visualization.utils import eprint, LoadingWindow
+from lib.visualization.utils import LoadingWindow
 
 
 def close(_):
@@ -109,8 +111,8 @@ class Visualization:
         self._viewer.particle_update_flag = True
         self._viewer.tile_offset_data = {}
         self._viewer.tile_update_flag = True
-        self._viewer.marker_offset_data = {}
-        self._viewer.marker_update_flag = True
+        self._viewer.location_offset_data = {}
+        self._viewer.location_update_flag = True
         self._viewer.update_data()
         self._camera.reset()
         self._viewer.update_scene()
@@ -242,24 +244,24 @@ class Visualization:
         self._viewer.tile_update_flag = True
         self._viewer.tile_offset_data[tile] = (tile.coordinates, tile.color, 1.0 if tile.get_tile_status() else 0.0)
 
-    def remove_marker(self, marker):
+    def remove_location(self, location):
         """
-        removes a marker from the visualization.
-        :param marker: the marker (not the id, the instance) to be deleted
+        removes a location from the visualization.
+        :param location: the location (not the id, the instance) to be deleted
         :return:
         """
-        self._viewer.marker_update_flag = True
-        if marker in self._viewer.marker_offset_data:
-            del self._viewer.marker_offset_data[marker]
+        self._viewer.location_update_flag = True
+        if location in self._viewer.location_offset_data:
+            del self._viewer.location_offset_data[location]
 
-    def marker_changed(self, marker):
+    def location_changed(self, location):
         """
-        updates the offset and color data of the marker in the visualization.
-        :param marker: the marker ( not the id, the instance) to be deleted
+        updates the offset and color data of the location in the visualization.
+        :param location: the location ( not the id, the instance) to be deleted
         :return:
         """
-        self._viewer.marker_update_flag = True
-        self._viewer.marker_offset_data[marker] = (marker.coordinates, marker.color)
+        self._viewer.location_update_flag = True
+        self._viewer.location_offset_data[location] = (location.coordinates, location.color)
 
     def update_visualization_data(self):
         self._viewer.update_data()
@@ -315,7 +317,7 @@ class Visualization:
         return self._viewer.background
 
     def set_background_color(self, color):
-        self._viewer.set_background(color)
+        self._viewer.set_background_color(color)
 
     def get_grid_line_color(self):
         return self._viewer.programs["grid"].get_line_color()
@@ -337,18 +339,20 @@ class Visualization:
         self._viewer.programs["grid"].set_line_scaling(scaling)
         self._viewer.glDraw()
 
-    def get_grid_location_color(self):
+    def get_grid_coordinates_color(self):
         return self._viewer.programs["grid"].get_model_color()
 
-    def set_grid_location_color(self, color):
+    def set_grid_coordinates_color(self, color):
         self._viewer.programs["grid"].set_model_color(color)
         self._viewer.glDraw()
 
-    def get_grid_location_scaling(self):
+    def get_grid_coordinates_scaling(self):
         return self._viewer.programs["grid"].get_model_scaling()
 
-    def set_grid_location_scaling(self, scaling):
+    def set_grid_coordinates_scaling(self, scaling):
+        print(2)
         self._viewer.programs["grid"].set_model_scaling(scaling)
+        print(2)
         self._viewer.glDraw()
 
     def get_render_distance(self):
@@ -366,11 +370,11 @@ class Visualization:
         self._viewer.programs["grid"].show_lines = show_lines
         self._viewer.glDraw()
 
-    def get_show_locations(self):
-        return self._viewer.programs["grid"].show_locations
+    def get_show_coordinates(self):
+        return self._viewer.programs["grid"].show_coordinates
 
-    def set_show_locations(self, show_locations: bool):
-        self._viewer.programs["grid"].show_locations = show_locations
+    def set_show_coordinates(self, show_coordinates: bool):
+        self._viewer.programs["grid"].show_coordinates = show_coordinates
         self._viewer.glDraw()
 
     def get_show_center(self):
@@ -404,8 +408,8 @@ class Visualization:
     def set_tile_scaling(self, scaling):
         self._viewer.programs["tile"].set_model_scaling(scaling)
 
-    def get_marker_scaling(self):
-        return self._viewer.programs["marker"].get_model_scaling()
+    def get_location_scaling(self):
+        return self._viewer.programs["location"].get_model_scaling()
 
-    def set_marker_scaling(self, scaling):
-        self._viewer.programs["marker"].set_model_scaling(scaling)
+    def set_location_scaling(self, scaling):
+        self._viewer.programs["location"].set_model_scaling(scaling)

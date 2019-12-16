@@ -1,10 +1,58 @@
-from PyQt5.QtGui import QColor, QIntValidator
+from PyQt5.QtGui import QColor, QIntValidator, QFont
 from PyQt5.QtWidgets import (QVBoxLayout, QPushButton, QColorDialog, QRadioButton, QLabel, QTabWidget,
-                             QSlider, QHBoxLayout, QCheckBox, QTabBar, QTextEdit, QLineEdit, QStyle)
+                             QSlider, QHBoxLayout, QCheckBox, QTabBar, QLineEdit, QComboBox)
 from PyQt5.QtCore import Qt
 from OpenGL.GL import glGetFloatv, GL_LINE_WIDTH_RANGE
+
+from lib.swarm_sim_header import eprint
 from lib.vis3d import Visualization
-from lib.visualization.utils import eprint
+
+
+def create_gui(world, vis: Visualization):
+
+    tabbar = QTabWidget()
+    tabbar.setMinimumWidth(200)
+    tabbar.addTab(sim_tab(vis, world), "Simulation")
+    tabbar.addTab(vis_tab(vis), "Visualization")
+    tabbar.addTab(grid_tab(vis), "Grid")
+    tabbar.addTab(matter_tab(vis), "Matter")
+    tabbar.addTab(help_tab(), "Help")
+
+    return tabbar
+
+
+def key_handler(key, world, vis):
+    if key == Qt.Key_Space:
+        vis.start_stop()
+
+
+def help_tab():
+    vcontrols = QLabel("view controls:")
+    lmd = QLabel("\tmouse dragging with left mouse button:\n\t\trotation (only in 3D)")
+    rmd = QLabel("\tmouse dragging with right mouse button:\n\t\tdragging the view")
+    mw = QLabel("\tscrolling:\n\t\tzooming")
+    ccontrols = QLabel("\ncursor controls:")
+    sc = QLabel("\tholding 'CTRL':\n\t\tshow cursor")
+    mcc = QLabel("\tleft mouse button click while holding 'CTRL':\n\t\tadding/removing matter at cursors position")
+    mwc = QLabel("\tscrolling while holding 'CTRL':\n\t\tmoving the cursor in the relative z-direction")
+    scontrols = QLabel("\nsimulation controls:")
+    sss = QLabel("\tspacebar:\n\t\tstart / stop the simulation")
+    vbox = QVBoxLayout()
+    vbox.addWidget(vcontrols)
+    vbox.addWidget(lmd)
+    vbox.addWidget(rmd)
+    vbox.addWidget(mw)
+    vbox.addWidget(ccontrols)
+    vbox.addWidget(sc)
+    vbox.addWidget(mcc)
+    vbox.addWidget(mwc)
+    vbox.addWidget(scontrols)
+    vbox.addWidget(sss)
+    vbox.addStretch(0)
+    tabbar = QTabBar()
+    tabbar.setLayout(vbox)
+
+    return tabbar
 
 
 def create_slider(tick_interval: int, tick_position: int, max_position: int, min_position: int,
@@ -21,22 +69,6 @@ def create_slider(tick_interval: int, tick_position: int, max_position: int, min
     slider.valueChanged.connect(callback)
     return slider
 
-
-def create_gui(world, vis: Visualization):
-
-    tabbar = QTabWidget()
-    tabbar.setMinimumWidth(200)
-    tabbar.addTab(sim_tab(vis, world), "Simulation")
-    tabbar.addTab(vis_tab(vis), "Visualization")
-    tabbar.addTab(grid_tab(vis), "Grid")
-    tabbar.addTab(matter_tab(vis), "Matter")
-
-    return tabbar
-
-
-def key_handler(key, world, vis):
-    if key == Qt.Key_Space:
-        vis.start_stop()
 
 
 def sim_tab(vis, world):
@@ -109,7 +141,7 @@ def grid_tab(vis: Visualization):
     layout = QVBoxLayout()
     layout.addLayout(get_grid_width_slider(vis))
     layout.addLayout(get_grid_lines_scale_slider(vis))
-    layout.addLayout(get_grid_locations_scale_slider(vis))
+    layout.addLayout(get_grid_coordinates_scale_slider(vis))
     layout.addLayout(get_show_checkboxes(vis))
     layout.addLayout(recalculate_grid(vis))
     layout.addLayout(get_color_picker(vis))
@@ -121,13 +153,33 @@ def grid_tab(vis: Visualization):
 def matter_tab(vis):
     tab = QTabBar()
     layout = QVBoxLayout()
+    layout.addLayout(get_matter_combo(vis))
+    layout.addStretch(1)
     layout.addLayout(get_particle_scaler(vis))
-    layout.addLayout(get_marker_scaler(vis))
+    layout.addStretch(1)
+    layout.addLayout(get_location_scaler(vis))
+    layout.addStretch(1)
     layout.addLayout(get_tile_scaler(vis))
-    layout.addStretch(0)
+    layout.addStretch(1)
     tab.setLayout(layout)
     return tab
 
+
+def get_matter_combo(vis):
+    combo = QComboBox()
+    combo.addItems(["particle", "tile", "location"])
+    combo.setCurrentIndex(1)
+
+    def on_change(value):
+        print(value)
+
+    combo.currentTextChanged.connect(on_change)
+
+    desc = QLabel("matter to create on cursor click:")
+    vbox = QVBoxLayout()
+    vbox.addWidget(desc, alignment=Qt.AlignBaseline)
+    vbox.addWidget(combo, alignment=Qt.AlignBaseline)
+    return vbox
 
 def get_particle_scaler(vis):
     def x_scaler_change(value):
@@ -221,23 +273,23 @@ def get_tile_scaler(vis):
     return vbox
 
 
-def get_marker_scaler(vis):
+def get_location_scaler(vis):
     def x_scaler_change(value):
-        current_scaling = vis.get_marker_scaling()
+        current_scaling = vis.get_location_scaling()
         print(current_scaling)
         new_scaling = (value/10.0, current_scaling[1], current_scaling[2])
         print(new_scaling)
-        vis.set_marker_scaling(new_scaling)
+        vis.set_location_scaling(new_scaling)
 
     def y_scaler_change(value):
-        current_scaling = vis.get_marker_scaling()
+        current_scaling = vis.get_location_scaling()
         new_scaling = (current_scaling[0], value/10.0, current_scaling[2])
-        vis.set_marker_scaling(new_scaling)
+        vis.set_location_scaling(new_scaling)
 
     def z_scaler_change(value):
-        current_scaling = vis.get_marker_scaling()
+        current_scaling = vis.get_location_scaling()
         new_scaling = (current_scaling[0], current_scaling[1], value/10.0)
-        vis.set_marker_scaling(new_scaling)
+        vis.set_location_scaling(new_scaling)
 
     x_desc = QLabel("x scale:")
     y_desc = QLabel("y scale:")
@@ -259,7 +311,7 @@ def get_marker_scaler(vis):
     hbox3.addWidget(z_scaler, alignment=Qt.AlignBaseline)
 
     vbox = QVBoxLayout()
-    vbox.addWidget(QLabel("marker scaling:"), alignment=Qt.AlignBaseline)
+    vbox.addWidget(QLabel("location scaling:"), alignment=Qt.AlignBaseline)
     vbox.addLayout(hbox1)
     vbox.addLayout(hbox2)
     vbox.addLayout(hbox3)
@@ -372,15 +424,15 @@ def get_color_picker(vis):
 
     lines_button.clicked.connect(lines)
 
-    locs_button = QPushButton("grid locations")
+    locs_button = QPushButton("grid coordinates")
 
     def locs():
         qcd = QColorDialog()
         qcd.setOption(QColorDialog.ShowAlphaChannel)
-        qcd.setCurrentColor(QColor.fromRgbF(*vis.get_grid_location_color()))
+        qcd.setCurrentColor(QColor.fromRgbF(*vis.get_grid_coordinates_color()))
         qcd.exec()
         if qcd.result() == 1:
-            vis.set_grid_location_color((qcd.selectedColor().getRgbF()))
+            vis.set_grid_coordinates_color((qcd.selectedColor().getRgbF()))
 
     locs_button.clicked.connect(locs)
 
@@ -432,14 +484,14 @@ def get_show_checkboxes(vis):
         vis.set_show_lines(lines_cb.isChecked())
     lines_cb.clicked.connect(lines_clicked)
 
-    locs_cb = QCheckBox()
-    locs_cb.setText("show locations")
-    locs_cb.setChecked(vis.get_show_locations())
+    coords_cb = QCheckBox()
+    coords_cb.setText("show coordinates")
+    coords_cb.setChecked(vis.get_show_coordinates())
 
-    def locs_clicked():
-        vis.set_show_locations(locs_cb.isChecked())
+    def coords_clicked():
+        vis.set_show_coordinates(coords_cb.isChecked())
 
-    locs_cb.clicked.connect(locs_clicked)
+    coords_cb.clicked.connect(coords_clicked)
 
     center_cb = QCheckBox()
     center_cb.setText("show center")
@@ -470,7 +522,7 @@ def get_show_checkboxes(vis):
 
     hbox1 = QHBoxLayout()
     hbox1.addWidget(lines_cb)
-    hbox1.addWidget(locs_cb)
+    hbox1.addWidget(coords_cb)
     hbox2 = QHBoxLayout()
     hbox2.addWidget(center_cb)
     hbox2.addWidget(focus_cb)
@@ -498,16 +550,16 @@ def get_grid_lines_scale_slider(vis):
     return vbox
 
 
-def get_grid_locations_scale_slider(vis):
+def get_grid_coordinates_scale_slider(vis):
     vbox = QVBoxLayout()
-    desc = QLabel("grid locations model scale (%d%%):" % int(vis.get_grid_location_scaling()[0]*500))
+    desc = QLabel("grid coordinates model scale (%d%%):" % int(vis.get_grid_coordinates_scaling()[0]*500))
     vbox.addWidget(desc, alignment=Qt.AlignBaseline)
 
     def set_scale(value):
-        vis.set_grid_location_scaling([value/1000.0, value/1000.0, value/1000.0])
-        desc.setText("grid locations model scale (%d%%):" % (int(value/2.0)))
+        vis.set_grid_coordinates_scaling([value/1000.0, value/1000.0, value/1000.0])
+        desc.setText("grid coordinates model scale (%d%%):" % (int(value/2.0)))
 
-    vbox.addWidget(create_slider(10, 2, 200, 10, int(vis.get_grid_location_scaling()[0]*1000.0), set_scale),
+    vbox.addWidget(create_slider(10, 2, 200, 10, int(vis.get_grid_coordinates_scaling()[0]*1000.0), set_scale),
                    alignment=Qt.AlignBaseline)
     return vbox
 

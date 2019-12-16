@@ -1,35 +1,34 @@
+from lib.swarm_sim_header import eprint
 from lib.visualization.programs.program import Program
 import OpenGL.GL as gl
 import numpy as np
 import ctypes
 
-from lib.visualization.utils import eprint
-
 
 class GridProgram(Program):
     """
-    OpenGL Program for the visualization of the grid and the included locations
+    OpenGL Program for the visualization of the grid and the included coordinates
     """
     vertex_shader_file = "lib/visualization/shader/grid_vertex.glsl"
     fragment_shader_file = "lib/visualization/shader/frag.glsl"
 
-    def __init__(self, grid, line_color, model_color, location_model_file):
+    def __init__(self, grid, line_color, model_color, coordinate_model_file):
         """
         initializes/loads/creates all necessary data/buffers/shaders for drawing the Grid
         :param grid: the grid object to be visualized
         :param line_color: color of the grid lines
-        :param model_color: color of the grid location model
-        :param location_model_file: model file of the locations
+        :param model_color: color of the grid coordinate model
+        :param coordinate_model_file: model file of the coordinates
         """
         self.grid = grid
         self.width = 1
         self.line_offset = 0
         self.line_length = 0
         self.amount = 0
-        self.show_locations = True
+        self.show_coordinates = True
         self.show_lines = True
         self.vbos = list()
-        super().__init__(self.vertex_shader_file, self.fragment_shader_file, location_model_file)
+        super().__init__(self.vertex_shader_file, self.fragment_shader_file, coordinate_model_file)
         self.set_line_color(line_color)
         self.set_model_color(model_color)
 
@@ -85,7 +84,7 @@ class GridProgram(Program):
         if self.show_lines:
             self._drawing_lines(True)
             gl.glDrawArraysInstanced(gl.GL_LINES, self.line_offset, self.line_length, self.amount)
-        if self.show_locations:
+        if self.show_coordinates:
             self._drawing_lines(False)
             gl.glDrawArraysInstanced(gl.GL_TRIANGLES, 0, self.size, self.amount)
 

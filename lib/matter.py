@@ -1,13 +1,13 @@
-"""The marker module provides the interface to the markers. A marker is any point on
- the coordinate system of the simulators world"""
+
 import uuid
 from datetime import datetime
 
+from lib.swarm_sim_header import eprint
+
 
 class Matter:
-    """In the classe marker all the methods for the characterstic of a marker is included"""
     def __init__(self, world, coordinates, color, type=None, mm_size=100):
-        """Initializing the marker constructor"""
+        """Initializing the matter constructor"""
         self.coordinates = coordinates
         self.color = color
         self.__id = str(uuid.uuid4())
@@ -37,7 +37,7 @@ class Matter:
 
     def read_whole_memory(self):
         """
-        Reads all  markers own memory based on a give keywoard
+        Reads all  matters own memory based on a give keywoard
 
         :param key: Keywoard
         :return: The founded memory; None: When nothing is written based on the keywoard
@@ -90,19 +90,22 @@ class Matter:
 
     def get_id(self):
         """
-        Gets the marker id
-        :return: marker id
+        Gets the matter id
+        :return: matter id
         """
         return self.__id
 
     def set_color(self, color):
         """
-        Sets the marker color
+        Sets the matter color
 
-        :param color: marker color
+        :param color: matter color
         :return: None
         """
-        self.color = color
+        if len(color) != 4:
+            eprint("invalid color format!\ncolor has to be in rgba format => (float, float, float, float)")
+        else:
+            self.color = color
 
     def get_color(self):
         """

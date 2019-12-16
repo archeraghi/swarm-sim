@@ -1,7 +1,8 @@
 import numpy as np
 
+from lib.swarm_sim_header import eprint
 from lib.visualization.utils import (get_perspetive_projection_matrix, get_orthographic_projection_matrix,
-                                     get_look_at_matrix, get_translation_matrix, eprint)
+                                     get_look_at_matrix, get_translation_matrix)
 
 
 class Camera:

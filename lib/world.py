@@ -1,5 +1,5 @@
 """The world module provides the interface of the simulation world. In the simulation world
-all the data of the particles, tiles, and markers are stored.
+all the data of the particles, tiles, and locations are stored.
 It also have the the coordination system and stated the maximum of the x and y coordinate.
 
  .. todo:: What happens if the maximum y or x axis is passed? Either the start from the other side or turns back.
@@ -9,7 +9,7 @@ import logging
 import random
 import threading
 
-from lib import csv_generator, particle, tile, marker, vis3d
+from lib import csv_generator, particle, tile, location, vis3d
 
 
 class World:
@@ -41,13 +41,13 @@ class World:
         self.new_tile = None
         self.__tile_deleted = False
 
-        self.markers = []
-        self.marker_map_coordinates = {}
-        self.marker_map_id = {}
-        self.markers_created = []
-        self.markers_rm = []
-        self.__marker_deleted = False
-        self.new_marker = None
+        self.locations = []
+        self.location_map_coordinates = {}
+        self.location_map_id = {}
+        self.locations_created = []
+        self.locations_rm = []
+        self.__location_deleted = False
+        self.new_location = None
 
         self.config_data = config_data
         self.grid = config_data.grid
@@ -74,7 +74,7 @@ class World:
 
     def reset(self):
         """
-        resets everything (particles, tiles, markers) except for the logging in system.log and in the csv file...
+        resets everything (particles, tiles, locations) except for the logging in system.log and in the csv file...
         reloads the scenario.
         :return:
         """
@@ -99,13 +99,13 @@ class World:
         self.__tile_deleted = False
         self.new_tile = None
 
-        self.markers = []
-        self.markers_created = []
-        self.marker_map_coordinates = {}
-        self.marker_map_id = {}
-        self.markers_rm = []
-        self.__marker_deleted = False
-        self.new_marker = None
+        self.locations = []
+        self.locations_created = []
+        self.location_map_coordinates = {}
+        self.location_map_id = {}
+        self.locations_rm = []
+        self.__location_deleted = False
+        self.new_location = None
 
         if self.config_data.visualization:
             self.vis.reset()
@@ -244,37 +244,37 @@ class World:
         """
         return self.tile_map_id
 
-    def get_amount_of_markers(self):
+    def get_amount_of_locations(self):
         """
-        Returns the actual number of markers in the world
+        Returns the actual number of locations in the world
 
-        :return: The actual number of markers
+        :return: The actual number of locations
         """
-        return len(self.markers)
+        return len(self.locations)
 
-    def get_marker_list(self):
+    def get_location_list(self):
         """
-        Returns the actual number of markers in the world
+        Returns the actual number of locations in the world
 
-        :return: The actual number of markers
+        :return: The actual number of locations
         """
-        return self.markers
+        return self.locations
 
-    def get_marker_map_coordinates(self):
+    def get_location_map_coordinates(self):
         """
-        Get a dictionary with all markers mapped with their actual coordinates
+        Get a dictionary with all locations mapped with their actual coordinates
 
-        :return: a dictionary with markers and their coordinates
+        :return: a dictionary with locations and their coordinates
         """
-        return self.marker_map_coordinates
+        return self.location_map_coordinates
 
-    def get_marker_map_id(self):
+    def get_location_map_id(self):
         """
-        Get a dictionary with all markers mapped with their own ids
+        Get a dictionary with all locations mapped with their own ids
 
-        :return: a dictionary with markers and their own ids
+        :return: a dictionary with locations and their own ids
         """
-        return self.marker_map_id
+        return self.location_map_id
 
     def get_world_x_size(self):
         """
@@ -301,8 +301,8 @@ class World:
     def get_particle_deleted(self):
         return self.__particle_deleted
 
-    def get_marker_deleted(self):
-        return self.__marker_deleted
+    def get_location_deleted(self):
+        return self.__location_deleted
 
     def set_tile_deleted(self):
         self.__tile_deleted = False
@@ -310,8 +310,8 @@ class World:
     def set_particle_deleted(self):
         self.__particle_deleted = False
 
-    def set_marker_deleted(self):
-        self.__marker_deleted = False
+    def set_location_deleted(self):
+        self.__location_deleted = False
 
     def add_particle(self, coordinates, color=None):
         """
@@ -326,7 +326,7 @@ class World:
             coordinates = (coordinates[0], coordinates[1], 0.0)
 
         if len(self.particles) < self.config_data.max_particles:
-            if self.grid.is_valid_location(coordinates):
+            if self.grid.are_valid_coordinates(coordinates):
                 if coordinates not in self.get_particle_map_coordinates():
                     if color is None:
                         color = self.config_data.particle_color
@@ -399,7 +399,7 @@ class World:
         if len(coordinates) == 2:
             coordinates = (coordinates[0], coordinates[1], 0.0)
 
-        if self.grid.is_valid_location(coordinates):
+        if self.grid.are_valid_coordinates(coordinates):
             if coordinates not in self.tile_map_coordinates:
                 if color is None:
                     color = self.config_data.tile_color
@@ -463,7 +463,7 @@ class World:
         else:
             return False
 
-    def add_marker(self, coordinates, color=None):
+    def add_location(self, coordinates, color=None):
         """
         Add a tile to the world database
 
@@ -475,66 +475,66 @@ class World:
         if len(coordinates) == 2:
             coordinates = (coordinates[0], coordinates[1], 0.0)
 
-        if self.grid.is_valid_location(coordinates):
-            if coordinates not in self.marker_map_coordinates:
+        if self.grid.are_valid_coordinates(coordinates):
+            if coordinates not in self.location_map_coordinates:
                 if color is None:
-                    color = self.config_data.marker_color
-                self.new_marker = marker.Marker(self, coordinates, color)
-                self.markers.append(self.new_marker)
+                    color = self.config_data.location_color
+                self.new_location = location.Location(self, coordinates, color)
+                self.locations.append(self.new_location)
                 if self.vis is not None:
-                    self.vis.marker_changed(self.new_marker)
-                self.marker_map_coordinates[self.new_marker.coordinates] = self.new_marker
-                self.marker_map_id[self.new_marker.get_id()] = self.new_marker
-                self.csv_round.update_markers_num(len(self.markers))
-                logging.info("Created marker with id %s on coordinates %s",
-                             str(self.new_marker.get_id()), str(self.new_marker.coordinates))
-                self.new_marker.created = True
-                return self.new_marker
+                    self.vis.location_changed(self.new_location)
+                self.location_map_coordinates[self.new_location.coordinates] = self.new_location
+                self.location_map_id[self.new_location.get_id()] = self.new_location
+                self.csv_round.update_locations_num(len(self.locations))
+                logging.info("Created location with id %s on coordinates %s",
+                             str(self.new_location.get_id()), str(self.new_location.coordinates))
+                self.new_location.created = True
+                return self.new_location
             else:
-                logging.info("there is already a marker on %s" % str(coordinates))
+                logging.info("there is already a location on %s" % str(coordinates))
                 return False
         else:
             logging.info("%s is not a valid location!" % str(coordinates))
             return False
 
-    def remove_marker(self, marker_id):
+    def remove_location(self, location_id):
         """
         Removes a tile with a given tile_id from to the world database
 
-        :param marker_id: The markers id that should be removed
+        :param location_id: The locations id that should be removed
         :return:  True: Successful removed; False: Unsuccessful
         """
-        if marker_id in self.marker_map_id:
-            rm_marker = self.marker_map_id[marker_id]
-            if rm_marker in self.markers:
-                self.markers.remove(rm_marker)
+        if location_id in self.location_map_id:
+            rm_location = self.location_map_id[location_id]
+            if rm_location in self.locations:
+                self.locations.remove(rm_location)
             if self.vis is not None:
-                self.vis.remove_marker(rm_marker)
-            self.markers_rm.append(rm_marker)
-            logging.info("Deleted marker with marker id %s on %s", str(marker_id), str(rm_marker.coordinates))
+                self.vis.remove_location(rm_location)
+            self.locations_rm.append(rm_location)
+            logging.info("Deleted location with location id %s on %s", str(location_id), str(rm_location.coordinates))
             try:
-                del self.marker_map_coordinates[rm_marker.coordinates]
+                del self.location_map_coordinates[rm_location.coordinates]
             except KeyError:
                 pass
             try:
-                del self.marker_map_id[marker_id]
+                del self.location_map_id[location_id]
             except KeyError:
                 pass
-            self.csv_round.update_markers_num(len(self.markers))
-            self.csv_round.update_metrics(marker_deleted=1)
-            self.__marker_deleted = True
+            self.csv_round.update_locations_num(len(self.locations))
+            self.csv_round.update_metrics(location_deleted=1)
+            self.__location_deleted = True
             return True
         else:
             return False
 
-    def remove_marker_on(self, coordinates):
+    def remove_location_on(self, coordinates):
         """
-        Removes a marker on a give coordinates from to the world database
+        Removes a location on a give coordinates from to the world database
 
         :param coordinates: A tuple that includes the x and y coordinates
         :return: True: Successful removed; False: Unsuccessful
         """
-        if coordinates in self.marker_map_coordinates:
-            return self.remove_marker(self.marker_map_coordinates[coordinates].get_id())
+        if coordinates in self.location_map_coordinates:
+            return self.remove_location(self.location_map_coordinates[coordinates].get_id())
         else:
             return False

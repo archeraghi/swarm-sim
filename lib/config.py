@@ -37,11 +37,11 @@ class ConfigData:
 
         self.particle_model_file = config.get("Visualization", "particle_model_file")
         self.tile_model_file = config.get("Visualization", "tile_model_file")
-        self.marker_model_file = config.get("Visualization", "marker_model_file")
+        self.location_model_file = config.get("Visualization", "location_model_file")
 
         self.particle_color = make_tuple(config.get("Visualization", "particle_color"))
         self.tile_color = make_tuple(config.get("Visualization", "tile_color"))
-        self.marker_color = make_tuple(config.get("Visualization", "marker_color"))
+        self.location_color = make_tuple(config.get("Visualization", "location_color"))
         self.grid_color = make_tuple(config.get("Visualization", "grid_color"))
         self.cursor_color = make_tuple(config.get("Visualization", "cursor_color"))
         self.background_color = make_tuple(config.get("Visualization", "background_color"))
@@ -49,9 +49,9 @@ class ConfigData:
         self.line_color = make_tuple(config.get("Visualization", "line_color"))
         self.line_scaling = make_tuple(config.get("Visualization", "line_scaling"))
         self.show_lines = config.getboolean("Visualization", "show_lines")
-        self.location_color = make_tuple(config.get("Visualization", "location_color"))
-        self.location_scaling = make_tuple(config.get("Visualization", "location_scaling"))
-        self.show_locations = config.getboolean("Visualization", "show_locations")
+        self.coordinates_color = make_tuple(config.get("Visualization", "coordinates_color"))
+        self.coordinates_scaling = make_tuple(config.get("Visualization", "coordinates_scaling"))
+        self.show_coordinates = config.getboolean("Visualization", "show_coordinates")
         self.show_center = config.getboolean("Visualization", "show_center")
         self.focus_color = make_tuple(config.get("Visualization", "focus_color"))
         self.show_focus = config.getboolean("Visualization", "show_focus")
@@ -72,7 +72,7 @@ class ConfigData:
         self.memory_limitation = config.getboolean("Matter", "memory_limitation")
         self.particle_mm_size = config.getint("Matter", "particle_mm_size")
         self.tile_mm_size = config.getint("Matter", "tile_mm_size")
-        self.marker_mm_size = config.getint("Matter", "marker_mm_size")
+        self.location_mm_size = config.getint("Matter", "location_mm_size")
 
         try:
             self.scenario = config.get("File", "scenario")

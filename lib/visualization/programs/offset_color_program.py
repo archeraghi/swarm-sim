@@ -1,9 +1,9 @@
 import OpenGL.GL as gl
+
+from lib.swarm_sim_header import eprint
 from lib.visualization.programs.program import Program
 import numpy as np
 import ctypes
-
-from lib.visualization.utils import eprint
 
 
 class OffsetColorProgram(Program):

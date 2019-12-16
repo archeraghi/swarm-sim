@@ -32,15 +32,15 @@ class CCPGrid(Grid):
         for x in range(-int(width / 2), int(width / 2)):
             for y in range(-int(width / 2), int(width / 2)):
                 for z in range(-int(width / 2), int(width / 2)):
-                    if self.is_valid_location((x, y, z)):
+                    if self.are_valid_coordinates((x, y, z)):
                         locations.append((x, y, z))
 
         return locations
 
-    def is_valid_location(self, location):
-        x = location[0]
-        y = location[1]
-        z = location[2]
+    def are_valid_coordinates(self, coordinates):
+        x = coordinates[0]
+        y = coordinates[1]
+        z = coordinates[2]
         if y % 2.0 == 0:
             if x % 2.0 == z % 2.0 == 0 or x % 2.0 == z % 2.0 == 1:
                 return True
@@ -49,7 +49,7 @@ class CCPGrid(Grid):
                 return True
         return False
 
-    def get_nearest_location(self, coordinates):
+    def get_nearest_valid_coordinates(self, coordinates):
         x = round(coordinates[0])
         y = round(coordinates[1])
         z = round(coordinates[2])

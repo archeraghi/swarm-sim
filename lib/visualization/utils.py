@@ -1,4 +1,3 @@
-import sys
 
 import numpy as np
 from PyQt5.QtGui import QCloseEvent
@@ -79,16 +78,6 @@ def get_perspetive_projection_matrix(fov, aspect, znear, zfar):
     pers_matrix[2, 3] = -1.0
 
     return pers_matrix
-
-
-def eeprint(*args, sep=' ', end='\n'):
-    print(*args, sep, end, file=sys.stderr)
-    exit(-1)
-
-
-def eprint(*args, sep=' ', end='\n'):
-    print(*args, sep, end, file=sys.stderr)
-
 
 def load_obj_file(file_path: str):
     """

@@ -33,18 +33,18 @@ class TriangularGrid(Grid):
 
         return locs
 
-    def is_valid_location(self, location):
-        if not location[2] == 0.0:
+    def are_valid_coordinates(self, coordinates):
+        if not coordinates[2] == 0.0:
             return False
-        if location[1] % 2.0 == 0.0:
-            if location[0] % 1.0 == 0.0:
+        if coordinates[1] % 2.0 == 0.0:
+            if coordinates[0] % 1.0 == 0.0:
                 return True
         else:
-            if location[0] % 1.0 == 0.5:
+            if coordinates[0] % 1.0 == 0.5:
                 return True
         return False
 
-    def get_nearest_location(self, coordinates):
+    def get_nearest_valid_coordinates(self, coordinates):
         nearest_y = round(coordinates[1])
         if nearest_y % 2 == 0:
             nearest_x = round(coordinates[0])

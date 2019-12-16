@@ -14,20 +14,20 @@ class Grid(ABC):
         pass
 
     @abstractmethod
-    def is_valid_location(self, location):
+    def are_valid_coordinates(self, coordinates):
         """
-        checks if given location is a valid location for matter in this grid
-        :param location: (float, float, float)
-        :return: true = location is valid, false = location invalid
+        checks if given coordinates are valid for this grid
+        :param coordinates: (float, float, float)
+        :return: true = coordinates are valid, false = coordinates invalid
         """
         pass
 
     @abstractmethod
-    def get_nearest_location(self, coordinates):
+    def get_nearest_valid_coordinates(self, coordinates):
         """
-        calculates the nearest location to given coordinates
+        calculates the nearest valid coordinates to given coordinates
         :param coordinates: (float, float, float)
-        :return: valid location
+        :return: valid coordinates
         """
         pass
 
@@ -71,7 +71,7 @@ class Grid(ABC):
     @abstractmethod
     def get_box(self, width):
         """
-        calculates locations in a box
+        calculates all valid coordinates in a box
         :return: list of 3d coordinates: [(x_start_l0, y_start_l0), (x_end_l0, y_end_l0), (x_start_l1, y_start_l1), ...)
         """
         pass
@@ -88,19 +88,19 @@ class Grid(ABC):
     def get_distance(self, start, end):
         """
         the metric or distance function for this grid
-        :param start: location, (float, float, float) tuple, start of path
-        :param end: location, (float, float, float) tuple, end of path
+        :param start: coordinates, (float, float, float) tuple, start of path
+        :param end: coordinates, (float, float, float) tuple, end of path
         :return: integer, minimal amount of steps between start and end
         """
         pass
 
     @staticmethod
-    def get_location_in_direction(position, direction):
+    def get_coordinates_in_direction(position, direction):
         """
         calculates a new position from current position and direction
-        :param position: location, (float, float, float) tuple, current position
-        :param direction: location, (float, float, float) tuple, direction
-        :return: location, (float, float, float) tuple, new position
+        :param position: coordinates, (float, float, float) tuple, current position
+        :param direction: coordinates, (float, float, float) tuple, direction
+        :return: coordinates, (float, float, float) tuple, new position
         """
         new_pos = []
         for i in range(len(position)):
@@ -110,7 +110,7 @@ class Grid(ABC):
     def get_center(self):
         """
         returns the center of the grid. usually (0,0,0)
-        :return: location, (float, float, float) tuple
+        :return: coordinates, (float, float, float) tuple
         """
         return 0.0, 0.0, 0.0
 
@@ -121,75 +121,75 @@ class Grid(ABC):
         """
         return 1.0, 1.0, 1.0
 
-    def get_adjacent_locations(self, location):
+    def get_adjacent_coordinates(self, coordinates):
         """
-        calculates a set of adjacent locations of the given location
-        :param location: the location of which the neighboring locations should be calculated
-        :return: a set of locations
+        calculates a set of adjacent coordinates of the given coordinates
+        :param coordinates: the coordinates of which the neighboring coordinates should be calculated
+        :return: a set of coordinates
         """
         n = set()
         for d in self.get_directions_list():
-            n.add(self.get_location_in_direction(location, d))
+            n.add(self.get_coordinates_in_direction(coordinates, d))
         return n
 
-    def _get_adjacent_locations_not_in_set(self, location, not_in_set):
+    def _get_adjacent_coordinates_not_in_set(self, coordinates, not_in_set):
         """
-        the same as 'get_neighboring_locations', but doesn't return locations which are in the given 'not_in_set'.
-        :param location: the location of which the neighboring locations should be calculated
-        :param not_in_set: set of locations, which should not be included in the result
-        :return: a set of locations
+        the same as 'get_neighboring_coordinates', but doesn't return coordinates which are in the given 'not_in_set'.
+        :param coordinates: the coordinates of which the neighboring coordinates should be calculated
+        :param not_in_set: set of coordinates, which should not be included in the result
+        :return: a set of coordinates
         """
         result = set()
         for d in self.get_directions_list():
-            n = self.get_location_in_direction(location, d)
+            n = self.get_coordinates_in_direction(coordinates, d)
             if n not in not_in_set:
                 result.add(n)
         return result
 
-    def get_n_sphere(self, location, radius):
+    def get_n_sphere(self, coordinates, radius):
         """
         calculates the n-sphere of this grid
-        :param location: center of the circle/sphere
+        :param coordinates: center of the circle/sphere
         :param radius: radius of the circle/sphere
-        :return: set of locations
+        :return: set of coordinates
         """
         result = set()
-        ns = self.get_adjacent_locations(location)
+        ns = self.get_adjacent_coordinates(coordinates)
         current_ns = ns
         result.update(ns)
 
         for i in range(radius):
             tmp = set()
             for n in current_ns:
-                ns = self._get_adjacent_locations_not_in_set(n, result)
+                ns = self._get_adjacent_coordinates_not_in_set(n, result)
                 tmp.update(ns)
                 result.update(ns)
             current_ns = tmp
 
         return result
 
-    def get_n_sphere_border(self, location, radius):
+    def get_n_sphere_border(self, coordinates, radius):
         """
         calculates the border of an n-sphere around the center with the given radius
-        :param location: center of the ring
+        :param coordinates: center of the ring
         :param radius: radius of the ring
-        :return: set of locations
+        :return: set of coordinates
         """
         if radius == 0:
             r = set()
-            r.add(location)
+            r.add(coordinates)
             return r
 
         seen = set()
-        ns = self.get_adjacent_locations(location)
+        ns = self.get_adjacent_coordinates(coordinates)
         current_ns = ns
         seen.update(ns)
-        seen.add(location)
+        seen.add(coordinates)
 
         for i in range(radius-1):
             tmp = set()
             for n in current_ns:
-                ns = self._get_adjacent_locations_not_in_set(n, seen)
+                ns = self._get_adjacent_coordinates_not_in_set(n, seen)
                 seen.update(ns)
                 tmp.update(ns)
             current_ns = tmp

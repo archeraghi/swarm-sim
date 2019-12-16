@@ -3,13 +3,13 @@ import inspect
 import OpenGL.GL as gl
 from PIL import Image
 from PyQt5 import QtOpenGL, QtGui, QtCore
+
+from lib.swarm_sim_header import eprint
 from lib.visualization.programs.offset_color_carry_program import OffsetColorCarryProgram
 from lib.visualization.programs.offset_color_program import OffsetColorProgram
 from lib.visualization.programs.grid_program import GridProgram
 import numpy as np
 import time
-
-from lib.visualization.utils import eprint
 
 
 class OGLWidget(QtOpenGL.QGLWidget):
@@ -53,8 +53,8 @@ class OGLWidget(QtOpenGL.QGLWidget):
         self.particle_update_flag = False
         self.tile_offset_data = {}
         self.tile_update_flag = False
-        self.marker_offset_data = {}
-        self.marker_update_flag = False
+        self.location_offset_data = {}
+        self.location_update_flag = False
 
     def update_scene(self):
         """
@@ -72,7 +72,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
     def update_data(self):
         """
-        updates the offset, color and carry data for particles, tiles and markers.
+        updates the offset, color and carry data for particles, tiles and locations.
         is called mainly by the run method in Visualization once per round.
         :return:
         """
@@ -101,16 +101,16 @@ class OGLWidget(QtOpenGL.QGLWidget):
                 self.programs["tile"].update_colors(tmp[1].tolist())
                 self.programs["tile"].update_carried(tmp[2].tolist())
 
-        if self.marker_update_flag:
-            self.marker_update_flag = False
+        if self.location_update_flag:
+            self.location_update_flag = False
 
-            tmp = np.array(list(self.marker_offset_data.values())).transpose()
+            tmp = np.array(list(self.location_offset_data.values())).transpose()
             if len(tmp) == 0:
-                self.programs["marker"].update_offsets([])
-                self.programs["marker"].update_colors([])
+                self.programs["location"].update_offsets([])
+                self.programs["location"].update_colors([])
             else:
-                self.programs["marker"].update_offsets(tmp[0].tolist())
-                self.programs["marker"].update_colors(tmp[1].tolist())
+                self.programs["location"].update_offsets(tmp[0].tolist())
+                self.programs["location"].update_colors(tmp[1].tolist())
 
     def initializeGL(self):
         """
@@ -127,29 +127,35 @@ class OGLWidget(QtOpenGL.QGLWidget):
         gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
         gl.glClearColor(*self.background, 1.0)
 
+        print(1)
         # initialize the openGL programs
         self.programs["particle"] = OffsetColorCarryProgram(self.world.config_data.particle_model_file)
         self.programs["particle"].set_world_scaling(self.world.grid.get_scaling())
+        print(1)
 
         self.programs["tile"] = OffsetColorCarryProgram(self.world.config_data.tile_model_file)
         self.programs["tile"].set_world_scaling(self.world.grid.get_scaling())
 
-        self.programs["marker"] = OffsetColorProgram(self.world.config_data.marker_model_file)
-        self.programs["marker"].set_world_scaling(self.world.grid.get_scaling())
+        print(1)
+        self.programs["location"] = OffsetColorProgram(self.world.config_data.location_model_file)
+        print(1)
+        self.programs["location"].set_world_scaling(self.world.grid.get_scaling())
+        print(1)
 
         self.programs["grid"] = GridProgram(self.world.grid, self.world.config_data.line_color,
-                                            self.world.config_data.location_color,
+                                            self.world.config_data.coordinates_color,
                                             self.world.config_data.tile_model_file)
         self.programs["grid"].set_world_scaling(self.world.grid.get_scaling())
         self.programs["grid"].set_line_scaling(self.world.config_data.line_scaling)
         self.programs["grid"].show_lines = self.world.config_data.show_lines
-        self.programs["grid"].set_model_scaling(self.world.config_data.location_scaling)
-        self.programs["grid"].show_locations = self.world.config_data.show_locations
+        self.programs["grid"].set_model_scaling(self.world.config_data.coordinates_scaling)
+        self.programs["grid"].show_coordinates = self.world.config_data.show_coordinates
         self.programs["grid"].update_offsets(self.world.grid.get_box(self.world.grid.size))
 
-        # showing locations in 2D is not really necessary, since all locations are easy to spot and there's no depth
+        # showing coordinates in 2D is not really necessary, since all coordinates are easy to spot on the grid
+        # and there's no depth
         if self.world.grid.get_dimension_count() == 2:
-            self.programs["grid"].show_locations = False
+            self.programs["grid"].show_coordinates = False
 
         self.programs["center"] = OffsetColorProgram(self.world.config_data.particle_model_file)
         self.programs["center"].set_world_scaling(self.world.grid.get_scaling())
@@ -158,7 +164,6 @@ class OGLWidget(QtOpenGL.QGLWidget):
         self.programs["center"].update_colors(self.world.config_data.center_color)
 
         self.programs["focus"] = OffsetColorProgram(self.world.config_data.particle_model_file)
-        #self.programs["focus"].set_world_scaling(self.world.grid.get_scaling())
         self.programs["focus"].set_model_scaling((0.3, 0.3, 0.3))
         self.programs["focus"].update_offsets(self.camera.get_look_at())
         self.programs["focus"].update_colors(self.world.config_data.focus_color)
@@ -220,7 +225,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         updates the position of the cursor
         :return:
         """
-        self.programs["cursor"].update_offsets(self.world.grid.get_nearest_location(self.camera.cursor_position))
+        self.programs["cursor"].update_offsets(self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position))
 
     def rotate_light(self, angle):
         """
@@ -244,7 +249,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         # draw
         self.programs["particle"].draw()
         self.programs["tile"].draw()
-        self.programs["marker"].draw()
+        self.programs["location"].draw()
         self.programs["grid"].draw()
 
         # center
@@ -267,7 +272,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         """
         # starting dragging
         if self.ctrl and int(a0.buttons()) & QtCore.Qt.LeftButton:
-            nl = self.world.grid.get_nearest_location(self.camera.cursor_position)
+            nl = self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position)
             if nl in self.world.tile_map_coordinates:
                 self.world.remove_tile_on(nl)
             else:
@@ -407,5 +412,5 @@ class OGLWidget(QtOpenGL.QGLWidget):
                    "Please create it in the running directory before taking screenshots.")
 
     def set_background_color(self, color):
-        gl.glClearColor(*color)
+        gl.glClearColor(*color, 1.0)
         self.glDraw()
