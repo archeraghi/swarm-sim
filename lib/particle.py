@@ -274,7 +274,7 @@ class Particle(matter.Matter):
         """
 
         within_hop_list = []
-        for i in range(1, hop + 1):
+        for i in range(hop + 1):
             in_list = self.scan_for_matters_in(matter_type, i)
             if in_list is not None:
                 within_hop_list.extend(in_list)
@@ -302,7 +302,8 @@ class Particle(matter.Matter):
         elif matter_type == "locations":
             scanned_list = scan_in(self.world.location_map_coordinates, self.coordinates, hop, self.world.grid)
         else:
-            scanned_list = scan_in(self.world.particle_map_coordinates, self.coordinates, hop, self.world.grid)
+            scanned_list = []
+            scanned_list.extend(scan_in(self.world.particle_map_coordinates, self.coordinates, hop, self.world.grid))
             scanned_list.extend(scan_in(self.world.tile_map_coordinates, self.coordinates, hop, self.world.grid))
             scanned_list.extend(scan_in(self.world.location_map_coordinates, self.coordinates, hop, self.world.grid))
         return scanned_list
@@ -456,7 +457,7 @@ class Particle(matter.Matter):
             if self.world.grid.are_valid_coordinates(coordinates):
                 logging.info("Going to create a tile on position %s" % str(coordinates))
                 if self.world.add_tile(coordinates):
-                    self.world.tile_map_coordinates[coordinates, coordinates[1]].created = True
+                    self.world.tile_map_coordinates[coordinates].created = True
                     self.world.new_tile_flag = True
                     self.csv_particle_writer.write_particle(tile_created=1)
                     self.world.csv_round.update_tiles_num(len(self.world.get_tiles_list()))
@@ -713,7 +714,7 @@ class Particle(matter.Matter):
                 logging.info("Going to create a particle on position %s" % str(coordinates))
                 new_particle = self.world.add_particle(coordinates)
                 if new_particle:
-                    self.world.particle_map_coordinates[coordinates[0], coordinates[1]].created = True
+                    self.world.particle_map_coordinates[coordinates].created = True
                     logging.info("Created particle on coordinates %s" % str(coordinates))
                     self.world.csv_round.update_particle_num(len(self.world.get_particle_list()))
                     self.world.csv_round.update_metrics(particle_created=1)
@@ -784,19 +785,22 @@ class Particle(matter.Matter):
         :param coordinates
         :return: True: Deleting successful; False: Deleting unsuccessful
         """
-        if coordinates is not None:
-            if self.world.grid.are_valid_coordinates(coordinates):
-                if self.world.remove_particle_on(coordinates):
-                    logging.info("Deleted particle with particle on coordinates %s" % str(coordinates))
-                    self.csv_particle_writer.write_particle(particle_deleted=1)
-                    return True
-                else:
-                    logging.info("Could not delet particle on coordinates %s" % str(coordinates))
-                    return False
-            else:
-                return False
-        else:
+        if coordinates is None:
+            logging.info("coordinates are 'None'...")
             return False
+
+        if not self.world.grid.are_valid_coordinates(coordinates):
+            logging.info("invalid coordinates")
+            return False
+
+        if self.world.remove_particle_on(coordinates):
+            logging.info("Deleted particle with particle on coordinates %s" % str(coordinates))
+            self.csv_particle_writer.write_particle(particle_deleted=1)
+            return True
+        else:
+            logging.info("Could not delete particle on coordinates %s" % str(coordinates))
+            return False
+
 
     def take_particle_with(self, particle_id):
         """
@@ -805,24 +809,27 @@ class Particle(matter.Matter):
         :param particle_id:  The id of the particle that should be taken
         :return: True: successful taken; False: unsuccessful taken
         """
-        if self.carried_tile is None and self.carried_particle is None:
-            if particle_id in self.world.get_particle_map_id():
-                logging.info("particle with particle id %s is in the world" % str(particle_id))
-                self.carried_particle = self.world.particle_map_id[particle_id]
-                if self.carried_particle.take_me(self.coordinates):
-                    logging.info("particle with particle id %s  has been taken" % str(particle_id))
-                    self.carried_particle.coordinates = self.coordinates
-                    self.world.vis.particle_changed(self.carried_particle)
-                    self.world.csv_round.update_metrics(particles_taken=1)
-                    self.csv_particle_writer.write_particle(particles_taken=1)
-                    return True
-                else:
-                    logging.info("particle with particle id %s could not be taken" % str(particle_id))
-                    return False
-            else:
-                logging.info("particle with particle id %s is not in the world" % str(particle_id))
+        if self.carried_tile is not None or self.carried_particle is not None:
+            logging.info("particle %s is already carrying a particle or a tile" % str(self.get_id()))
+            return False
+
+        if particle_id not in self.world.get_particle_map_id():
+            logging.info("particle with particle id %s is not in the world" % str(particle_id))
+            return False
+
+        self.carried_particle = self.world.particle_map_id[particle_id]
+        if self.carried_particle.take_me(self.coordinates):
+            logging.info("particle with particle id %s  has been taken" % str(particle_id))
+            self.carried_particle.coordinates = self.coordinates
+            self.world.vis.particle_changed(self.carried_particle)
+            self.world.csv_round.update_metrics(particles_taken=1)
+            self.csv_particle_writer.write_particle(particles_taken=1)
+            return True
         else:
-            logging.info("particle cannot taken because particle is carrieng either a particle or a tile")
+            self.carried_particle = None
+            logging.info("particle with particle id %s could not be taken" % str(particle_id))
+            return False
+
 
     def take_particle_on(self, coordinates):
         """
@@ -832,14 +839,14 @@ class Particle(matter.Matter):
         :return: True: Successful taken; False: Cannot be taken or wrong Coordinates
         """
 
-        if self.world.grid.are_valid_coordinates(coordinates):
-            if coordinates in self.world.particle_map_coordinates:
-                return self.take_particle_with(self.world.particle_map_coordinates[coordinates].get_id())
-            else:
-                logging.info("Particle is not in the world")
-                return False
+        if not self.world.grid.are_valid_coordinates(coordinates):
+            logging.info("Coordinates are invalid")
+            return False
+
+        if coordinates in self.world.particle_map_coordinates:
+            return self.take_particle_with(self.world.particle_map_coordinates[coordinates].get_id())
         else:
-            logging.info("Coordinates are wrong")
+            logging.info("There is no particle on %s" % str(coordinates))
             return False
 
     def take_particle_in(self, direction):
@@ -900,7 +907,7 @@ class Particle(matter.Matter):
             else:
                 logging.info("invalid coordinates")
         else:
-            logging.info("drop_particle_on: Wrong Inputs")
+            logging.info("drop_particle_on: coordinates are 'None' or not carrying a particle")
             return False
 
     def update_particle_coordinates(self, particle, new_coordinates):

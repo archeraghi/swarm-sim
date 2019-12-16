@@ -171,7 +171,7 @@ def get_matter_combo(vis):
     combo.setCurrentIndex(1)
 
     def on_change(value):
-        print(value)
+        vis.set_on_cursor_click_matter_type(value)
 
     combo.currentTextChanged.connect(on_change)
 

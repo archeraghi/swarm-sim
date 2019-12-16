@@ -9,6 +9,7 @@ import time
 from lib.visualization.camera import Camera
 from lib.visualization.utils import LoadingWindow
 
+import OpenGL.GL as GL
 
 def close(_):
     exit(0)
@@ -30,7 +31,7 @@ class Visualization:
         self._viewer = None
         self._gui = None
         self._splitter = None
-        self.light_rotation = True
+        self.light_rotation = False
 
         # create the QApplication
         self._app = QApplication([])
@@ -184,7 +185,7 @@ class Visualization:
         :param round_start_timestamp: timestamp of the start of the round.
         :return:
         """
-        # draw scene
+        # update and draw scene
         self._viewer.update_data()
         self._viewer.glDraw()
         # waiting until simulation starts
@@ -193,12 +194,16 @@ class Visualization:
         time_elapsed = time.perf_counter() - round_start_timestamp
         # sleeping time - max 1/120 for a responsive GUI
         sleep_time = min(1.0 / 120, (1.0 / self._rounds_per_second) / 10.0)
-        while time_elapsed < 1 / self._rounds_per_second:
+        max_wait_time = 1 / self._rounds_per_second
+        while time_elapsed < max_wait_time:
             # waiting for 1/100 of the round_time
             time.sleep(sleep_time)
             # check if still running... if not wait (important for low rounds_per_second values)
             self._wait_while_not_running()
             time_elapsed = time.perf_counter() - round_start_timestamp
+
+        GL.glFinish()
+        end = time.perf_counter_ns()
 
     def remove_particle(self, particle):
         """
@@ -350,9 +355,7 @@ class Visualization:
         return self._viewer.programs["grid"].get_model_scaling()
 
     def set_grid_coordinates_scaling(self, scaling):
-        print(2)
         self._viewer.programs["grid"].set_model_scaling(scaling)
-        print(2)
         self._viewer.glDraw()
 
     def get_render_distance(self):
@@ -413,3 +416,8 @@ class Visualization:
 
     def set_location_scaling(self, scaling):
         self._viewer.programs["location"].set_model_scaling(scaling)
+
+    def set_on_cursor_click_matter_type(self, matter_type):
+        if matter_type == 'tile' or matter_type == 'particle' or matter_type == 'location':
+            self._viewer.cursor_type = matter_type
+            self._viewer.update_cursor_data()

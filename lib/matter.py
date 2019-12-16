@@ -95,7 +95,7 @@ class Matter:
         """
         return self.__id
 
-    def set_color(self, color):
+    def set_color(self, color: tuple):
         """
         Sets the matter color
 

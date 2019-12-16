@@ -384,7 +384,7 @@ class World:
         :return: True: Successful removed; False: Unsuccessful
         """
         if coordinates in self.particle_map_coordinates:
-            return self.remove_particle(self.particle_map_coordinates[coordinates])
+            return self.remove_particle(self.particle_map_coordinates[coordinates].get_id())
         else:
             return False
 

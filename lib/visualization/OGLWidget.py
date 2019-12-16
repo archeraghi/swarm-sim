@@ -1,6 +1,6 @@
 import inspect
 
-import OpenGL.GL as gl
+import OpenGL.GL as GL
 from PIL import Image
 from PyQt5 import QtOpenGL, QtGui, QtCore
 
@@ -20,11 +20,6 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :param world: the world class
         :param camera: a camera for the visualization
         """
-        # fmt = QtOpenGL.QGLFormat()
-        # fmt.setVersion(3, 3)
-        # # needs to be in compatibility profile, because of glLineWidth
-        # fmt.setProfile(QtOpenGL.QGLFormat.CompatibilityProfile)
-        # fmt.setSampleBuffers(True)
         super(OGLWidget, self).__init__()
 
         self.debug = False
@@ -41,6 +36,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         self.rotation_sensitivity = 5
         self.zoom_sensitivity = 100
         self.cursor_zoom_sensitivity = 200
+        self.cursor_type = 'tile'
 
         self.camera = camera
 
@@ -120,27 +116,22 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :return:
         """
         # set global openGL settings
-        gl.glEnable(gl.GL_DEPTH_TEST)
-        gl.glEnable(gl.GL_BLEND)
-        gl.glEnable(gl.GL_LINE_SMOOTH)
-        gl.glEnable(gl.GL_CULL_FACE)
-        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
-        gl.glClearColor(*self.background, 1.0)
+        GL.glEnable(GL.GL_DEPTH_TEST)
+        GL.glEnable(GL.GL_BLEND)
+        GL.glEnable(GL.GL_LINE_SMOOTH)
+        GL.glEnable(GL.GL_CULL_FACE)
+        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+        GL.glClearColor(*self.background, 1.0)
 
-        print(1)
         # initialize the openGL programs
         self.programs["particle"] = OffsetColorCarryProgram(self.world.config_data.particle_model_file)
         self.programs["particle"].set_world_scaling(self.world.grid.get_scaling())
-        print(1)
 
         self.programs["tile"] = OffsetColorCarryProgram(self.world.config_data.tile_model_file)
         self.programs["tile"].set_world_scaling(self.world.grid.get_scaling())
 
-        print(1)
         self.programs["location"] = OffsetColorProgram(self.world.config_data.location_model_file)
-        print(1)
         self.programs["location"].set_world_scaling(self.world.grid.get_scaling())
-        print(1)
 
         self.programs["grid"] = GridProgram(self.world.grid, self.world.config_data.line_color,
                                             self.world.config_data.coordinates_color,
@@ -168,11 +159,24 @@ class OGLWidget(QtOpenGL.QGLWidget):
         self.programs["focus"].update_offsets(self.camera.get_look_at())
         self.programs["focus"].update_colors(self.world.config_data.focus_color)
 
-        self.programs["cursor"] = OffsetColorProgram(self.world.config_data.tile_model_file)
-        self.programs["cursor"].set_world_scaling(self.world.grid.get_scaling())
-        self.programs["cursor"].set_model_scaling((1.1, 1.1, 1.1))
-        self.programs["center"].update_offsets([0.0, 0.0, 0.0])
-        self.programs["cursor"].update_colors(self.world.config_data.cursor_color)
+        # cursor programs.. loading in the init, so on change it doesnt has to be loaded again
+        self.programs["cursor_tile"] = OffsetColorProgram(self.world.config_data.tile_model_file)
+        self.programs["cursor_tile"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["cursor_tile"].set_model_scaling((1.1, 1.1, 1.1))
+        self.programs["cursor_tile"].update_offsets([0.0, 0.0, 0.0])
+        self.programs["cursor_tile"].update_colors(self.world.config_data.cursor_color)
+
+        self.programs["cursor_particle"] = OffsetColorProgram(self.world.config_data.particle_model_file)
+        self.programs["cursor_particle"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["cursor_particle"].set_model_scaling((1.1, 1.1, 1.1))
+        self.programs["cursor_particle"].update_offsets([0.0, 0.0, 0.0])
+        self.programs["cursor_particle"].update_colors(self.world.config_data.cursor_color)
+
+        self.programs["cursor_location"] = OffsetColorProgram(self.world.config_data.location_model_file)
+        self.programs["cursor_location"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["cursor_location"].set_model_scaling((1.1, 1.1, 1.1))
+        self.programs["cursor_location"].update_offsets([0.0, 0.0, 0.0])
+        self.programs["cursor_location"].update_colors(self.world.config_data.cursor_color)
 
     def resizeGL(self, width, height):
         """
@@ -188,7 +192,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         self.camera.set_viewport(width, height)
 
         # set the openGL viewport
-        gl.glViewport(0, 0, width, height)
+        GL.glViewport(0, 0, width, height)
 
         # update matrices
         self.update_scene()
@@ -225,7 +229,9 @@ class OGLWidget(QtOpenGL.QGLWidget):
         updates the position of the cursor
         :return:
         """
-        self.programs["cursor"].update_offsets(self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position))
+        # updating only the current cursor program
+        self.programs["cursor_"+self.cursor_type].update_offsets(
+            self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position))
 
     def rotate_light(self, angle):
         """
@@ -244,7 +250,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :return:
         """
         # clear the screen
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
         # draw
         self.programs["particle"].draw()
@@ -258,7 +264,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
         # cursor
         if self.ctrl:
-            self.programs["cursor"].draw()
+            self.programs["cursor_"+self.cursor_type].draw()
 
         if self.show_focus:
             self.programs["focus"].draw()
@@ -273,10 +279,21 @@ class OGLWidget(QtOpenGL.QGLWidget):
         # starting dragging
         if self.ctrl and int(a0.buttons()) & QtCore.Qt.LeftButton:
             nl = self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position)
-            if nl in self.world.tile_map_coordinates:
-                self.world.remove_tile_on(nl)
-            else:
-                self.world.add_tile(nl)
+            if self.cursor_type == 'tile':
+                if nl in self.world.tile_map_coordinates:
+                    self.world.remove_tile_on(nl)
+                else:
+                    self.world.add_tile(nl)
+            if self.cursor_type == 'particle':
+                if nl in self.world.particle_map_coordinates:
+                    self.world.remove_particle_on(nl)
+                else:
+                    self.world.add_particle(nl)
+            if self.cursor_type == 'location':
+                if nl in self.world.location_map_coordinates:
+                    self.world.remove_location_on(nl)
+                else:
+                    self.world.add_location(nl)
             self.update_data()
             self.glDraw()
         else:
@@ -401,8 +418,8 @@ class OGLWidget(QtOpenGL.QGLWidget):
         takes a screenshot of the OpenGLWidget. saves it with a random name in the screenshots folder.
         :return:
         """
-        gl.glReadBuffer(gl.GL_FRONT)
-        pixels = gl.glReadPixels(0, 0, self.width(), self.height(), gl.GL_RGB, gl.GL_UNSIGNED_BYTE)
+        GL.glReadBuffer(GL.GL_FRONT)
+        pixels = GL.glReadPixels(0, 0, self.width(), self.height(), GL.GL_RGB, GL.GL_UNSIGNED_BYTE)
         i = Image.frombytes('RGB', (self.width(), self.height()), pixels, 'raw')
         import os
         if os.path.exists("screenshots") and os.path.isdir("screenshots"):
@@ -412,5 +429,5 @@ class OGLWidget(QtOpenGL.QGLWidget):
                    "Please create it in the running directory before taking screenshots.")
 
     def set_background_color(self, color):
-        gl.glClearColor(*color, 1.0)
+        GL.glClearColor(*color, 1.0)
         self.glDraw()
