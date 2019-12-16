@@ -261,6 +261,9 @@ class Visualization:
         self._viewer.marker_update_flag = True
         self._viewer.marker_offset_data[marker] = (marker.coordinates, marker.color)
 
+    def update_visualization_data(self):
+        self._viewer.update_data()
+
     # setters and getters for various variables in the visualization
 
     def set_rounds_per_second(self, rounds_per_second):

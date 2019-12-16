@@ -24,25 +24,27 @@ class World:
         self.init_particles = []
         self.particle_id_counter = 0
         self.particles = []
-        self.particles_created = []
-        self.particle_rm = []
         self.particle_map_coordinates = {}
         self.particle_map_id = {}
+        self.particles_created = []
+        self.particle_rm = []
         self.__particle_deleted = False
         self.new_particle = None
 
         self.tiles = []
-        self.tiles_created = []
-        self.tiles_rm = []
         self.tile_map_coordinates = {}
         self.tile_map_id = {}
+        self.tiles_created = []
+        self.tiles_rm = []
+
         self.__tile_deleted = False
         self.new_tile = None
+        self.__tile_deleted = False
 
         self.markers = []
-        self.markers_created = []
         self.marker_map_coordinates = {}
         self.marker_map_id = {}
+        self.markers_created = []
         self.markers_rm = []
         self.__marker_deleted = False
         self.new_marker = None
@@ -114,7 +116,8 @@ class World:
             # if visualization is on, run the scenario in a separate thread and show that the program runs..
             x = threading.Thread(target=mod.scenario, args=(self,))
             self.vis.wait_for_thread(x, "loading scenario... please wait.", "Loading Scenario")
-            self.vis._viewer.update_data()
+            self.vis.update_visualization_data()
+
         else:
             # if no vis, just run the scenario on the main thread
             mod.scenario(self)
@@ -340,6 +343,7 @@ class World:
                     self.new_particle.created = True
                     logging.info("Created particle at %s", self.new_particle.coordinates)
                     return self.new_particle
+
                 else:
                     logging.info("there is already a particle on %s" % str(coordinates))
                     return False
@@ -387,7 +391,6 @@ class World:
     def add_tile(self, coordinates, color=None):
         """
         Adds a tile to the world database
-
         :param color: color of the tile (None for config default)
         :param coordinates: the coordinates on which the tile should be added
         :return: Successful added matter; False: Unsuccessful
@@ -410,6 +413,7 @@ class World:
                 logging.info("Created tile with tile id %s on coordinates %s",
                              str(self.new_tile.get_id()), str(coordinates))
                 return self.new_tile
+
             else:
                 logging.info("there is already a tile on %s " % str(coordinates))
                 return False
