@@ -1,6 +1,6 @@
 // vertex shader for the GridProgram
 
-#version 150
+#version 110
 // position vector of location model or direction line VBO 0
 attribute vec3 position;
 // normal vector of location model face VBO 0

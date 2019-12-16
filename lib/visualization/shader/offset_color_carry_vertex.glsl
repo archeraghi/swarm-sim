@@ -1,6 +1,6 @@
 // vertex shader for the OffsetColorCarryProgram
 
-#version 150
+#version 110
 
 // VBO 0 - per vertex
 // vector of a face
