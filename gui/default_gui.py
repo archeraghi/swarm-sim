@@ -97,8 +97,16 @@ def sim_tab(vis, world):
         world.reset()
     reset_button.clicked.connect(reset_sim)
 
+    save_scenario_button = QPushButton("save Scenario")
+
+    def save_scenario():
+        world.save_scenario()
+
+    save_scenario_button.clicked.connect(save_scenario)
+
     layout.addWidget(screenshot_button, alignment=Qt.AlignBaseline)
     layout.addWidget(reset_button, alignment=Qt.AlignBaseline)
+    layout.addWidget(save_scenario_button, alignment=Qt.AlignBaseline)
     layout.addStretch(0)
     layout.addWidget(start_stop_button, alignment=Qt.AlignBaseline)
     tab.setLayout(layout)
@@ -115,7 +123,7 @@ def get_rps_slider(vis):
         vis.set_rounds_per_second(value)
         desc.setText("rounds per second (%d) : " % vis.get_rounds_per_second())
 
-    hbox.addWidget(create_slider(10, 2, 60, 1, vis.get_rounds_per_second(), set_rps), alignment=Qt.AlignBaseline)
+    hbox.addWidget(create_slider(10, 2, 120, 1, vis.get_rounds_per_second(), set_rps), alignment=Qt.AlignBaseline)
     return hbox
 
 
@@ -199,12 +207,13 @@ def get_particle_scaler(vis):
         new_scaling = (current_scaling[0], current_scaling[1], value/10.0)
         vis.set_particle_scaling(new_scaling)
 
+    current_scaling = vis.get_particle_scaling()
     x_desc = QLabel("x scale:")
     y_desc = QLabel("y scale:")
     z_desc = QLabel("z scale:")
-    x_scaler = create_slider(2, 2, 20, 1, 10, x_scaler_change)
-    y_scaler = create_slider(2, 2, 20, 1, 10, y_scaler_change)
-    z_scaler = create_slider(2, 2, 20, 1, 10, z_scaler_change)
+    x_scaler = create_slider(2, 2, 20, 1, current_scaling[0]*10, x_scaler_change)
+    y_scaler = create_slider(2, 2, 20, 1, current_scaling[0]*10, y_scaler_change)
+    z_scaler = create_slider(2, 2, 20, 1, current_scaling[0]*10, z_scaler_change)
 
     hbox1 = QHBoxLayout()
     hbox1.addWidget(x_desc, alignment=Qt.AlignBaseline)
@@ -245,12 +254,13 @@ def get_tile_scaler(vis):
         new_scaling = (current_scaling[0], current_scaling[1], value/10.0)
         vis.set_tile_scaling(new_scaling)
 
+    current_scaling = vis.get_tile_scaling()
     x_desc = QLabel("x scale:")
     y_desc = QLabel("y scale:")
     z_desc = QLabel("z scale:")
-    x_scaler = create_slider(2, 2, 20, 1, 10, x_scaler_change)
-    y_scaler = create_slider(2, 2, 20, 1, 10, y_scaler_change)
-    z_scaler = create_slider(2, 2, 20, 1, 10, z_scaler_change)
+    x_scaler = create_slider(2, 2, 20, 1, current_scaling[0]*10, x_scaler_change)
+    y_scaler = create_slider(2, 2, 20, 1, current_scaling[1]*10, y_scaler_change)
+    z_scaler = create_slider(2, 2, 20, 1, current_scaling[2]*10, z_scaler_change)
 
     hbox1 = QHBoxLayout()
     hbox1.addWidget(x_desc, alignment=Qt.AlignBaseline)
@@ -291,12 +301,13 @@ def get_location_scaler(vis):
         new_scaling = (current_scaling[0], current_scaling[1], value/10.0)
         vis.set_location_scaling(new_scaling)
 
+    current_scaling = vis.get_location_scaling()
     x_desc = QLabel("x scale:")
     y_desc = QLabel("y scale:")
     z_desc = QLabel("z scale:")
-    x_scaler = create_slider(2, 2, 20, 1, 10, x_scaler_change)
-    y_scaler = create_slider(2, 2, 20, 1, 10, y_scaler_change)
-    z_scaler = create_slider(2, 2, 20, 1, 10, z_scaler_change)
+    x_scaler = create_slider(2, 2, 20, 1, current_scaling[0]*10, x_scaler_change)
+    y_scaler = create_slider(2, 2, 20, 1, current_scaling[1]*10, y_scaler_change)
+    z_scaler = create_slider(2, 2, 20, 1, current_scaling[2]*10, z_scaler_change)
 
     hbox1 = QHBoxLayout()
     hbox1.addWidget(x_desc, alignment=Qt.AlignBaseline)

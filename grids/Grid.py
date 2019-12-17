@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import numpy as np
 
 
 class Grid(ABC):
@@ -195,3 +196,33 @@ class Grid(ABC):
             current_ns = tmp
 
         return current_ns
+
+    def get_nearest_direction(self, position, target):
+        """
+        calculates the best/nearest direction for going from position to target.
+        its a general formula, there are/should be better solutions for specific grids!
+        calculates the angles of the target-position vector to the directions
+        and returns the direction with minimal angle
+        :param position: the starting position
+        :param target: the target position
+        :return: direction (float, float, float)
+        """
+
+        v = (target[0]-position[0], target[1] - position[1], target[2] - position[2])
+        v_length = np.sqrt((v[0]*v[0])+(v[1]*v[1])+(v[2]*v[2]))
+        s = self.get_scaling()
+        best = None
+        best_angle = 0
+        for d in self.get_directions_list():
+            sd = (d[0]*s[0], d[1]*s[1], d[2]*s[2])
+            d_length = np.sqrt((sd[0]*sd[0])+(sd[1]*sd[1])+(sd[2]*sd[2]))
+            if d_length*v_length != 0:
+                angle = np.arccos((v[0]*sd[0]+v[1]*sd[1]+v[2]*sd[2])/(d_length * v_length))
+                if best is None:
+                    best = d
+                    best_angle = angle
+                else:
+                    if angle < best_angle:
+                        best_angle = angle
+                        best = d
+        return best

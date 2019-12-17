@@ -8,8 +8,11 @@ import importlib
 import logging
 import random
 import threading
+import os
+import time
 
 from lib import csv_generator, particle, tile, location, vis3d
+from lib.swarm_sim_header import eprint
 
 
 class World:
@@ -124,6 +127,27 @@ class World:
 
         if self.config_data.particle_random_order:
             random.shuffle(self.particles)
+
+    def save_scenario(self):
+
+        if os.path.exists("scenario") and os.path.isdir("scenario"):
+            try:
+                f = open("scenario/scenario_%s.py" % str(time.perf_counter_ns()), "w+")
+                f.write("def solution(world):\n")
+                for p in self.particle_map_coordinates.values():
+                    f.write("\tworld.add_particle(%s, color=%s)\n" % (str(p.coordinates), str(p.get_color())))
+                for t in self.tile_map_coordinates.values():
+                    f.write("\tworld.add_tile(%s, color=%s)\n" % (str(t.coordinates), str(t.get_color())))
+                for l in self.location_map_coordinates.values():
+                    f.write("\tworld.add_location(%s, color=%s)\n" % (str(l.coordinates), str(l.get_color())))
+                f.flush()
+                f.close()
+            except IOError as e:
+                eprint(e)
+        else:
+           eprint("\"scenario\" folder doesn't exist. "
+                  "Please create it in the running directory before saving scenarios.")
+
 
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()
