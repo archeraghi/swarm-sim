@@ -92,6 +92,8 @@ def create_direction_for_data(config_data):
 
 
 def run_solution(swarm_sim_world):
+    if swarm_sim_world.config_data.particle_random_order_always:
+        random.shuffle(swarm_sim_world.particles)
     mod = importlib.import_module('solution.' + swarm_sim_world.config_data.solution)
     mod.solution(swarm_sim_world)
     swarm_sim_world.csv_round.next_line(swarm_sim_world.get_actual_round())
