@@ -13,7 +13,15 @@ For Linux:
 
     3. sudo pip3 install pandas
 
-    4. sudo pip3 install pyglet
+    4. sudo pip3 install PyOpenGL
+    
+    5. sudo pip3 install Pillow
+    
+    6. sudo pip3 install PyQt5
+    
+for older Systems (e.g. Ubuntu 14.04) install the PyQt5 version 5.10.1
+
+    6. sudo pip3 install PyQt5==5.10.1
 
 - install Gnuplot:
 
@@ -41,7 +49,9 @@ For Windows/Linux/MacOs:
     1. pip3
     2. numpy
     3. pandas
-    4. pyglet
+    4. PyOpenGL
+    5. Pillow
+    6. PyQt5 (in version 5.10.1 for older Systems like Ubuntu 14.04)
 - press Okey
 - wait until everything is installed
 - chose Run->swarm-sim.py

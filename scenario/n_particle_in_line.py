@@ -1,6 +1,8 @@
 from lib.swarm_sim_header import *
+import random
 
 
 def scenario(world):
-    max_size_particle = 10
-    create_particle_in_line(world, max_size_particle, (0,0))
+    amount = 10
+    direction = random.choice(world.grid.get_directions_list())
+    create_matter_in_line(world, world.grid.get_center(), direction, amount, 'location')
