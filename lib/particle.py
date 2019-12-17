@@ -89,18 +89,18 @@ class Particle(matter.Matter):
         """
         direction_coord = get_coordinates_in_direction(self.coordinates, direction)
         direction, direction_coord = self.check_within_border(direction, direction_coord)
-        if self.world.grid.are_valid_coordinates(direction_coord):
-            if direction_coord not in self.world.particle_map_coordinates:
-                if self.coordinates in self.world.particle_map_coordinates:
-                    del self.world.particle_map_coordinates[self.coordinates]
-                self.coordinates = direction_coord
-                self.world.particle_map_coordinates[self.coordinates] = self
-                self.world.vis.particle_changed(self)
-                logging.info("particle %s successfully moved to %s", str(self.get_id()), direction)
-                self.world.csv_round.update_metrics(steps=1)
-                self.csv_particle_writer.write_particle(steps=1)
-                self.check_for_carried_tile_or_particle()
-                return True
+        if self.world.grid.are_valid_coordinates(direction_coord) \
+        and direction_coord not in self.world.particle_map_coordinates:
+            if self.coordinates in self.world.particle_map_coordinates:
+                del self.world.particle_map_coordinates[self.coordinates]
+            self.coordinates = direction_coord
+            self.world.particle_map_coordinates[self.coordinates] = self
+            self.world.vis.particle_changed(self)
+            logging.info("particle %s successfully moved to %s", str(self.get_id()), direction)
+            self.world.csv_round.update_metrics(steps=1)
+            self.csv_particle_writer.write_particle(steps=1)
+            self.check_for_carried_tile_or_particle()
+            return True
 
         return False
 
@@ -133,18 +133,18 @@ class Particle(matter.Matter):
         else:
             tmp_memory = target.read_whole_memory()
 
-        if tmp_memory is not None:
-            if not (hasattr(tmp_memory, '__len__')) or len(tmp_memory) > 0:
-                if target.type == "particle":
-                    self.world.csv_round.update_metrics(particle_read=1)
-                    self.csv_particle_writer.write_particle(particle_read=1)
-                elif target.type == "tile":
-                    self.world.csv_round.update_metrics(tile_read=1)
-                    self.csv_particle_writer.write_particle(tile_read=1)
-                elif target.type == "location":
-                    self.world.csv_round.update_metrics(location_read=1)
-                    self.csv_particle_writer.write_particle(location_read=1)
-                return tmp_memory
+        if tmp_memory is not None \
+        and not (hasattr(tmp_memory, '__len__')) or len(tmp_memory) > 0:
+            if target.type == "particle":
+                self.world.csv_round.update_metrics(particle_read=1)
+                self.csv_particle_writer.write_particle(particle_read=1)
+            elif target.type == "tile":
+                self.world.csv_round.update_metrics(tile_read=1)
+                self.csv_particle_writer.write_particle(tile_read=1)
+            elif target.type == "location":
+                self.world.csv_round.update_metrics(location_read=1)
+                self.csv_particle_writer.write_particle(location_read=1)
+            return tmp_memory
         return None
 
     def matter_in(self, direction):

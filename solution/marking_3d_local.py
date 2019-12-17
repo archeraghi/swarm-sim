@@ -346,6 +346,9 @@ def move(world, particle, next_location):
 
 def solution(world):
 
+    if world.config_data.max_round == world.get_actual_round():
+        print("last round! (if not yet finished = max_round to small)")
+
     # communication variables
     start_communication_round = 30
     communication_frequency = 15

@@ -329,6 +329,9 @@ def solution(world):
     global visited
     global unvisited_queue
 
+    if world.config_data.max_round == world.get_actual_round():
+        print("last round! (if not yet finished = max_round to small)")
+
     done_particles = 0
 
     search_algorithm = 0

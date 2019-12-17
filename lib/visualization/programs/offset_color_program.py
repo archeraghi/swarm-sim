@@ -80,7 +80,6 @@ class OffsetColorProgram(Program):
             eprint("WARNING: invalid offset data! "
                    "Amount of coordinate components not dividable by 3 (not in xyz format?)!")
         self.amount = int(self.amount)
-        pass
 
     def update_colors(self, data):
         """
