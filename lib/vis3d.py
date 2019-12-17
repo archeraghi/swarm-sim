@@ -202,8 +202,8 @@ class Visualization:
             self._wait_while_not_running()
             time_elapsed = time.perf_counter() - round_start_timestamp
 
-        GL.glFinish()
-        end = time.perf_counter_ns()
+        #GL.glFinish()
+        #end = time.perf_counter_ns()
 
     def remove_particle(self, particle):
         """
