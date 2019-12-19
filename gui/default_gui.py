@@ -147,7 +147,6 @@ def vis_tab(vis: Visualization):
 def grid_tab(vis: Visualization):
     tab = QTabBar()
     layout = QVBoxLayout()
-    layout.addLayout(get_grid_width_slider(vis))
     layout.addLayout(get_grid_lines_scale_slider(vis))
     layout.addLayout(get_grid_coordinates_scale_slider(vis))
     layout.addLayout(get_show_checkboxes(vis))
@@ -456,20 +455,6 @@ def get_color_picker(vis):
     hbox.addWidget(bg_button, alignment=Qt.AlignBaseline)
     vbox.addLayout(hbox)
     return vbox
-
-
-def get_grid_width_slider(vis):
-    hbox = QVBoxLayout()
-    desc = QLabel("grid width (%d):" % vis.get_grid_line_width())
-    hbox.addWidget(desc, alignment=Qt.AlignBaseline)
-
-    def set_gw(value):
-        vis.set_grid_line_width(value)
-        desc.setText("grid width (%d):" % value)
-
-    hbox.addWidget(create_slider(1, 2, glGetFloatv(GL_LINE_WIDTH_RANGE)[1], 1, vis.get_grid_line_width(), set_gw),
-                   alignment=Qt.AlignBaseline)
-    return hbox
 
 
 def get_render_distance_slider(vis):

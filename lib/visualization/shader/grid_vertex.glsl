@@ -1,12 +1,10 @@
-// vertex shader for the GridProgram
-
-#version 110
+#version 330
 // position vector of location model or direction line VBO 0
-attribute vec3 position;
+in vec3 position;
 // normal vector of location model face VBO 0
-attribute vec3 normal;
+in vec3 normal;
 // offsets of the model (location & lines) VBO 1
-attribute vec3 offset;
+in vec3 offset;
 
 //projection matrix
 uniform mat4 projection;
@@ -35,7 +33,7 @@ uniform bool drawing_lines;
 
 
 // varying color for fragment shader
-varying vec4 v_color;
+out vec4 v_color;
 void main(void)
 {
    if(drawing_lines){

@@ -20,7 +20,11 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :param world: the world class
         :param camera: a camera for the visualization
         """
-        super(OGLWidget, self).__init__()
+        fmt = QtOpenGL.QGLFormat()
+        fmt.setVersion(3, 3)
+        fmt.setProfile(QtOpenGL.QGLFormat.CoreProfile)
+        fmt.setSampleBuffers(True)
+        super(OGLWidget, self).__init__(fmt)
 
         self.debug = False
         self.world = world
@@ -118,6 +122,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         # set global openGL settings
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glEnable(GL.GL_BLEND)
+        GL.glEnable(GL.GL_CULL_FACE)
         GL.glEnable(GL.GL_LINE_SMOOTH)
         GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
         GL.glClearColor(*self.background, 1.0)
