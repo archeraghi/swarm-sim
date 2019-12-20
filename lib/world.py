@@ -62,6 +62,8 @@ class World:
 
         if config_data.visualization:
             self.vis = vis3d.Visualization(self)
+        else:
+            self.vis = None
 
         mod = importlib.import_module('scenario.' + self.config_data.scenario)
 
