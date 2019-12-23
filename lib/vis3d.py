@@ -9,7 +9,6 @@ import time
 from lib.visualization.camera import Camera
 from lib.visualization.utils import LoadingWindow
 
-import OpenGL.GL as GL
 
 def close(_):
     exit(0)
@@ -202,7 +201,6 @@ class Visualization:
             self._wait_while_not_running()
             time_elapsed = time.perf_counter() - round_start_timestamp
 
-
     def remove_particle(self, particle):
         """
         removes a particle from the visualization.
@@ -383,12 +381,14 @@ class Visualization:
 
     def set_show_center(self, show_center: bool):
         self._viewer.show_center = show_center
+        self._viewer.glDraw()
 
     def get_show_focus(self):
         return self._viewer.show_focus
 
     def set_show_focus(self, show_focus: bool):
         self._viewer.show_focus = show_focus
+        self._viewer.glDraw()
 
     def take_screenshot(self):
         self._viewer.take_screenshot()
@@ -402,18 +402,21 @@ class Visualization:
 
     def set_particle_scaling(self, scaling):
         self._viewer.programs["particle"].set_model_scaling(scaling)
+        self._viewer.glDraw()
 
     def get_tile_scaling(self):
         return self._viewer.programs["tile"].get_model_scaling()
 
     def set_tile_scaling(self, scaling):
         self._viewer.programs["tile"].set_model_scaling(scaling)
+        self._viewer.glDraw()
 
     def get_location_scaling(self):
         return self._viewer.programs["location"].get_model_scaling()
 
     def set_location_scaling(self, scaling):
         self._viewer.programs["location"].set_model_scaling(scaling)
+        self._viewer.glDraw()
 
     def set_on_cursor_click_matter_type(self, matter_type):
         if matter_type == 'tile' or matter_type == 'particle' or matter_type == 'location':

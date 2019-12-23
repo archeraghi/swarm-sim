@@ -11,4 +11,5 @@ class Location(matter.Matter):
 
     def set_color(self, color):
         super().set_color(color)
-        self.world.vis.location_changed(self)
+        if self.world.vis is not None:
+            self.world.vis.location_changed(self)

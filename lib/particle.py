@@ -95,7 +95,8 @@ class Particle(matter.Matter):
                 del self.world.particle_map_coordinates[self.coordinates]
             self.coordinates = direction_coord
             self.world.particle_map_coordinates[self.coordinates] = self
-            self.world.vis.particle_changed(self)
+            if self.world.vis is not None:
+                self.world.vis.particle_changed(self)
             logging.info("particle %s successfully moved to %s", str(self.get_id()), direction)
             self.world.csv_round.update_metrics(steps=1)
             self.csv_particle_writer.write_particle(steps=1)
@@ -107,10 +108,12 @@ class Particle(matter.Matter):
     def check_for_carried_tile_or_particle(self):
         if self.carried_tile is not None:
             self.carried_tile.coordinates = self.coordinates
-            self.world.vis.tile_changed(self.carried_tile)
+            if self.world.vis is not None:
+                self.world.vis.tile_changed(self.carried_tile)
         elif self.carried_particle is not None:
             self.carried_particle.coordinates = self.coordinates
-            self.world.vis.particle_changed(self.carried_particle)
+            if self.world.vis is not None:
+                self.world.vis.particle_changed(self.carried_particle)
 
     def check_within_border(self, direction, direction_coord):
         if self.world.config_data.border == 1 and \
@@ -384,7 +387,8 @@ class Particle(matter.Matter):
                 del self.world.particle_map_coordinates[self.coordinates]
             self.__isCarried = True
             self.coordinates = coordinates
-            self.world.vis.particle_changed(self)
+            if self.world.vis is not None:
+                self.world.vis.particle_changed(self)
             return True
         else:
             return False
@@ -399,7 +403,8 @@ class Particle(matter.Matter):
         self.coordinates = coordinates
         self.world.particle_map_coordinates[coordinates] = self
         self.__isCarried = False
-        self.world.vis.particle_changed(self)
+        if self.world.vis is not None:
+            self.world.vis.particle_changed(self)
 
     def create_tile(self):
         """
@@ -561,7 +566,8 @@ class Particle(matter.Matter):
                 if self.carried_tile.take():
                     logging.info("Tile with tile id %s  has been taken", str(tile_id))
                     self.carried_tile.coordinates = self.coordinates
-                    self.world.vis.tile_changed(self.carried_tile)
+                    if self.world.vis is not None:
+                        self.world.vis.tile_changed(self.carried_tile)
                     self.world.csv_round.update_metrics(tiles_taken=1)
                     self.csv_particle_writer.write_particle(tiles_taken=1)
                     return True
@@ -821,7 +827,8 @@ class Particle(matter.Matter):
         if self.carried_particle.take_me(self.coordinates):
             logging.info("particle with particle id %s  has been taken" % str(particle_id))
             self.carried_particle.coordinates = self.coordinates
-            self.world.vis.particle_changed(self.carried_particle)
+            if self.world.vis is not None:
+                self.world.vis.particle_changed(self.carried_particle)
             self.world.csv_round.update_metrics(particles_taken=1)
             self.csv_particle_writer.write_particle(particles_taken=1)
             return True
@@ -922,7 +929,8 @@ class Particle(matter.Matter):
         if self.world.grid.are_valid_coordinates(new_coordinates):
             particle.coordinates = new_coordinates
             self.world.particle_map_coordinates[new_coordinates] = particle
-            self.world.vis.particle_changed(particle)
+            if self.world.vis is not None:
+                self.world.vis.particle_changed(particle)
             return True
         else:
             return False
@@ -1060,4 +1068,5 @@ class Particle(matter.Matter):
 
     def set_color(self, color):
         super().set_color(color)
-        self.world.vis.particle_changed(self)
+        if self.world.vis is not None:
+            self.world.vis.particle_changed(self)

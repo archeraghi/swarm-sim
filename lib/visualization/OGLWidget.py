@@ -20,7 +20,11 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :param world: the world class
         :param camera: a camera for the visualization
         """
-        super(OGLWidget, self).__init__()
+        fmt = QtOpenGL.QGLFormat()
+        fmt.setVersion(3, 3)
+        fmt.setProfile(QtOpenGL.QGLFormat.CoreProfile)
+        fmt.setSampleBuffers(True)
+        super(OGLWidget, self).__init__(fmt)
 
         self.debug = False
         self.world = world
@@ -118,20 +122,23 @@ class OGLWidget(QtOpenGL.QGLWidget):
         # set global openGL settings
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glEnable(GL.GL_BLEND)
-        GL.glEnable(GL.GL_LINE_SMOOTH)
         GL.glEnable(GL.GL_CULL_FACE)
+        GL.glEnable(GL.GL_LINE_SMOOTH)
         GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
         GL.glClearColor(*self.background, 1.0)
 
         # initialize the openGL programs
         self.programs["particle"] = OffsetColorCarryProgram(self.world.config_data.particle_model_file)
         self.programs["particle"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["particle"].set_model_scaling(self.world.config_data.particle_scaling)
 
         self.programs["tile"] = OffsetColorCarryProgram(self.world.config_data.tile_model_file)
         self.programs["tile"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["tile"].set_model_scaling(self.world.config_data.tile_scaling)
 
         self.programs["location"] = OffsetColorProgram(self.world.config_data.location_model_file)
         self.programs["location"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["location"].set_model_scaling(self.world.config_data.location_scaling)
 
         self.programs["grid"] = GridProgram(self.world.grid, self.world.config_data.line_color,
                                             self.world.config_data.coordinates_color,
@@ -246,7 +253,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         """
         The main Draw Method.
         All drawing calls originate here.
-        It will be called only when a new frame is needed. No new data -> no new frame
+        It will be called only when a new frame is needed. No change -> no new frame
         :return:
         """
         # clear the screen
@@ -254,8 +261,8 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
         # draw
         self.programs["particle"].draw()
-        self.programs["tile"].draw()
         self.programs["location"].draw()
+        self.programs["tile"].draw()
         self.programs["grid"].draw()
 
         # center

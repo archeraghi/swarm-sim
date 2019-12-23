@@ -39,7 +39,8 @@ class Tile(matter.Matter):
             if self.coordinates in self.world.tile_map_coordinates:
                 del self.world.tile_map_coordinates[self.coordinates]
             self.__isCarried = True
-            self.world.vis.tile_changed(self)
+            if self.world.vis is not None:
+                self.world.vis.tile_changed(self)
             return True
         else:
             return False
@@ -54,8 +55,10 @@ class Tile(matter.Matter):
         self.coordinates = coordinates
         self.world.tile_map_coordinates[self.coordinates] = self
         self.__isCarried = False
-        self.world.vis.tile_changed(self)
+        if self.world.vis is not None:
+            self.world.vis.tile_changed(self)
 
     def set_color(self, color):
         super().set_color(color)
-        self.world.vis.tile_changed(self)
+        if self.world.vis is not None:
+            self.world.vis.tile_changed(self)
