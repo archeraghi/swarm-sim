@@ -315,6 +315,13 @@ class World:
         """
         return self.config_data.size_y
 
+    def get_world_z_size(self):
+        """
+
+        :return: Returns the maximal z size of the world
+        """
+        return self.config_data.size_z
+
     def get_world_size(self):
         """
         :return: Returns the maximal (x,y) size of the world as a tupel

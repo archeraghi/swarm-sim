@@ -88,7 +88,7 @@ class Particle(matter.Matter):
         :return: True: Success Moving;  False: Non moving
         """
         direction_coord = get_coordinates_in_direction(self.coordinates, direction)
-        direction, direction_coord = self.check_within_border(direction, direction_coord)
+        direction_coord = self.check_within_border(direction, direction_coord)
         if self.world.grid.are_valid_coordinates(direction_coord) \
         and direction_coord not in self.world.particle_map_coordinates:
             if self.coordinates in self.world.particle_map_coordinates:
@@ -116,12 +116,22 @@ class Particle(matter.Matter):
                 self.world.vis.particle_changed(self.carried_particle)
 
     def check_within_border(self, direction, direction_coord):
-        if self.world.config_data.border == 1 and \
-                (abs(direction_coord[0]) > self.world.get_sim_x_size() or abs(
-                    direction_coord[1]) > self.world.get_sim_y_size()):
-            direction = direction - 3 if direction > 2 else direction + 3
-            direction_coord = get_coordinates_in_direction(self.coordinates, direction)
-        return direction, direction_coord
+        if self.world.config_data.border == 1:
+            if self.world.config_data.type == 1:
+                if abs(direction_coord[0]) > self.world.get_world_x_size():
+                    direction_coord = (-1 * (self.coordinates[0] - direction[0]), direction_coord[1], direction_coord[2])
+                if abs(direction_coord[1]) > self.world.get_world_y_size():
+                    direction_coord = (direction_coord[0], -1* (self.coordinates[1] - direction[1]), direction_coord[2])
+                if abs(direction_coord[2]) > self.world.get_world_z_size():
+                    direction_coord = (direction_coord[0], direction_coord[1], -1* (self.coordinates[2] - direction[2]))
+            else:
+                if abs(direction_coord[0]) > self.world.get_world_x_size():
+                    direction_coord = (self.coordinates[0], direction_coord[1], direction_coord[2])
+                if abs(direction_coord[1]) > self.world.get_world_y_size():
+                    direction_coord = (direction_coord[0], self.coordinates[1], direction_coord[2])
+                if abs(direction_coord[2]) > self.world.get_world_z_size():
+                    direction_coord = (direction_coord[0], direction_coord[1], self.coordinates[2])
+        return direction_coord
 
     def read_from_with(self, target, key=None):
         """

@@ -70,7 +70,9 @@ class ConfigData:
 
         self.size_x = config.getfloat("World", "size_x")
         self.size_y = config.getfloat("World", "size_y")
+        self.size_z = config.getfloat("World", "size_z")
         self.border = config.getboolean("World", "border")
+        self.type = config.getboolean("World", "type")
         self.max_particles = config.getint("World", "max_particles")
 
         self.memory_limitation = config.getboolean("Matter", "memory_limitation")
