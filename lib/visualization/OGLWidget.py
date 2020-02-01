@@ -450,5 +450,6 @@ class OGLWidget(QtOpenGL.QGLWidget):
             eprint("Error: couldn't create the screenshot folder.")
 
     def set_background_color(self, color):
+        self.background = color
         GL.glClearColor(*color, 1.0)
         self.glDraw()

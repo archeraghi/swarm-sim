@@ -10,7 +10,6 @@ import random
 import threading
 import os
 import datetime
-import time
 
 from lib import csv_generator, particle, tile, location, vis3d
 from lib.swarm_sim_header import eprint

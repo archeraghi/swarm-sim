@@ -447,14 +447,29 @@ def get_color_picker(vis):
 
     locs_button.clicked.connect(locs)
 
+    brd_button = QPushButton("grid border")
+
+    def brd():
+        qcd = QColorDialog()
+        qcd.setOption(QColorDialog.ShowAlphaChannel)
+        qcd.setCurrentColor(QColor.fromRgbF(*vis.get_grid_border_color()))
+        qcd.exec()
+        if qcd.result() == 1:
+            vis.set_grid_border_color((qcd.selectedColor().getRgbF()))
+
+    brd_button.clicked.connect(brd)
+
     vbox = QVBoxLayout()
     desc = QLabel("change color of:")
     vbox.addWidget(desc, alignment=Qt.AlignBaseline)
-    hbox = QHBoxLayout()
-    hbox.addWidget(lines_button, alignment=Qt.AlignBaseline)
-    hbox.addWidget(locs_button, alignment=Qt.AlignBaseline)
-    hbox.addWidget(bg_button, alignment=Qt.AlignBaseline)
-    vbox.addLayout(hbox)
+    hbox1 = QHBoxLayout()
+    hbox1.addWidget(lines_button, alignment=Qt.AlignBaseline)
+    hbox1.addWidget(locs_button, alignment=Qt.AlignBaseline)
+    hbox2 = QHBoxLayout()
+    hbox2.addWidget(bg_button, alignment=Qt.AlignBaseline)
+    hbox2.addWidget(brd_button, alignment=Qt.AlignBaseline)
+    vbox.addLayout(hbox1)
+    vbox.addLayout(hbox2)
     return vbox
 
 
