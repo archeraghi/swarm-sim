@@ -44,18 +44,11 @@ class GridProgram(Program):
         self.line_offset = len(verts)
         self.line_length = len(lines)
 
-        print(self.border_size)
         border = self._calculate_border()
-        print(1)
         self.border_offset = self.line_offset + self.line_length
-        print(1)
-        print(border)
         self.border_length = len(border)
-        print(len(verts))
         # prepare data for the gpu
-        print(1)
         gpu_data = np.array(verts + lines + border + normals, dtype=np.float32)
-        print(1)
 
         # create VBO
         self.vbos = list(gl.glGenBuffers(2))
