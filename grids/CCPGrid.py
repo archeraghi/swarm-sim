@@ -29,9 +29,9 @@ class CCPGrid(Grid):
     def get_box(self, width):
         locations = []
 
-        for x in range(-int(width / 2), int(width / 2)):
-            for y in range(-int(width / 2), int(width / 2)):
-                for z in range(-int(width / 2), int(width / 2)):
+        for x in range(-width, width+1):
+            for y in range(-width, width+1):
+                for z in range(-width, width+1):
                     if self.are_valid_coordinates((x, y, z)):
                         locations.append((x, y, z))
 

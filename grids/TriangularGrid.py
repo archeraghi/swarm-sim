@@ -24,8 +24,8 @@ class TriangularGrid(Grid):
 
     def get_box(self, width):
         locs = []
-        for y in range(-int(width/2),int(width/2)):
-            for x in range(-int(width / 2), int(width / 2)):
+        for y in range(-width, width+1):
+            for x in range(-width, width+1):
                 if y % 2 == 0:
                     locs.append((x, y, 0.0))
                 else:

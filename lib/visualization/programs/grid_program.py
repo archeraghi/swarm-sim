@@ -12,7 +12,7 @@ class GridProgram(Program):
     vertex_shader_file = "lib/visualization/shader/grid_vertex.glsl"
     fragment_shader_file = "lib/visualization/shader/frag.glsl"
 
-    def __init__(self, grid, line_color, model_color, coordinate_model_file):
+    def __init__(self, grid, line_color, model_color, coordinate_model_file, border_size):
         """
         initializes/loads/creates all necessary data/buffers/shaders for drawing the Grid
         :param grid: the grid object to be visualized
@@ -24,10 +24,14 @@ class GridProgram(Program):
         self.width = 1
         self.line_offset = 0
         self.line_length = 0
+        self.border_offset = 0
+        self.border_length = 0
         self.amount = 0
         self.show_coordinates = True
         self.show_lines = True
+        self.show_border = False
         self.vbos = list()
+        self.border_size = border_size
         super().__init__(self.vertex_shader_file, self.fragment_shader_file, coordinate_model_file)
         self.set_line_color(line_color)
         self.set_model_color(model_color)
@@ -39,8 +43,19 @@ class GridProgram(Program):
 
         self.line_offset = len(verts)
         self.line_length = len(lines)
+
+        print(self.border_size)
+        border = self._calculate_border()
+        print(1)
+        self.border_offset = self.line_offset + self.line_length
+        print(1)
+        print(border)
+        self.border_length = len(border)
+        print(len(verts))
         # prepare data for the gpu
-        gpu_data = np.array(verts + lines + normals, dtype=np.float32)
+        print(1)
+        gpu_data = np.array(verts + lines + border + normals, dtype=np.float32)
+        print(1)
 
         # create VBO
         self.vbos = list(gl.glGenBuffers(2))
@@ -52,7 +67,8 @@ class GridProgram(Program):
 
         loc = self.get_attribute_location("normal")
         gl.glEnableVertexAttribArray(loc)
-        gl.glVertexAttribPointer(loc, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, ctypes.c_void_p((len(verts) + len(lines)) * 12))
+        gl.glVertexAttribPointer(loc, 3, gl.GL_FLOAT, gl.GL_FALSE, 0,
+                                 ctypes.c_void_p((len(verts) + len(lines) + len(border)) * 12))
         gl.glBufferData(gl.GL_ARRAY_BUFFER, 12 * len(gpu_data), gpu_data, gl.GL_STATIC_DRAW)
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
 
@@ -65,13 +81,54 @@ class GridProgram(Program):
         gl.glBufferData(gl.GL_ARRAY_BUFFER, 0, np.array([], dtype=np.float32), gl.GL_DYNAMIC_DRAW)
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
 
+    def _calculate_border(self):
+        lines = []
+
+        if self.grid.get_dimension_count() == 3:
+            lines = [(-self.border_size[0], -self.border_size[1], -self.border_size[2]),
+                    (-self.border_size[0], -self.border_size[1], self.border_size[2]),
+                    (-self.border_size[0], -self.border_size[1], self.border_size[2]),
+                    (-self.border_size[0], self.border_size[1], self.border_size[2]),
+                    (-self.border_size[0], self.border_size[1], self.border_size[2]),
+                    (-self.border_size[0], self.border_size[1], -self.border_size[2]),
+                    (-self.border_size[0], self.border_size[1], -self.border_size[2]),
+                    (-self.border_size[0], -self.border_size[1], -self.border_size[2]),
+                    (self.border_size[0], -self.border_size[1], -self.border_size[2]),
+                    (self.border_size[0], -self.border_size[1], self.border_size[2]),
+                    (self.border_size[0], -self.border_size[1], self.border_size[2]),
+                    (self.border_size[0], self.border_size[1], self.border_size[2]),
+                    (self.border_size[0], self.border_size[1], self.border_size[2]),
+                    (self.border_size[0], self.border_size[1], -self.border_size[2]),
+                    (self.border_size[0], self.border_size[1], -self.border_size[2]),
+                    (self.border_size[0], -self.border_size[1], -self.border_size[2]),
+                    (-self.border_size[0], self.border_size[1], self.border_size[2]),
+                    (self.border_size[0], self.border_size[1], self.border_size[2]),
+                    (-self.border_size[0], -self.border_size[1], self.border_size[2]),
+                    (self.border_size[0], -self.border_size[1], self.border_size[2]),
+                    (-self.border_size[0], self.border_size[1], -self.border_size[2]),
+                    (self.border_size[0], self.border_size[1], -self.border_size[2]),
+                    (-self.border_size[0], -self.border_size[1], -self.border_size[2]),
+                    (self.border_size[0], -self.border_size[1], -self.border_size[2])]
+        if self.grid.get_dimension_count() <= 2:
+            lines = [(-self.border_size[0], -self.border_size[1], 0),
+                    (-self.border_size[0], self.border_size[1], 0),
+                    (-self.border_size[0], self.border_size[1], 0),
+                    (self.border_size[0], self.border_size[1], 0),
+                    (self.border_size[0], self.border_size[1], 0),
+                    (self.border_size[0], -self.border_size[1], 0),
+                    (self.border_size[0], -self.border_size[1], 0),
+                    (-self.border_size[0], -self.border_size[1], 0)]
+        return lines
+
+
     def _init_uniforms(self):
         """
         initializes the shader uniforms
         :return:
         """
         super()._init_uniforms()
-        self.set_line_color((0.0, 0.0, 0.0, 0.0))
+        self.set_line_color((0.0, 0.0, 0.0, 1.0))
+        self.set_border_color((1.0, 0.0, 0.0, 1.0))
         self.set_model_color((0.0, 0.0, 0.0, 0.0))
         self.set_line_scaling((1.0, 1.0, 1.0))
 
@@ -81,12 +138,16 @@ class GridProgram(Program):
         :return:
         """
         self.use()
+        if self.show_border:
+            self._draw_part(2)
+            gl.glDrawArrays(gl.GL_LINES, self.border_offset, self.border_length)
         if self.show_lines:
-            self._drawing_lines(True)
+            self._draw_part(0)
             gl.glDrawArraysInstanced(gl.GL_LINES, self.line_offset, self.line_length, self.amount)
         if self.show_coordinates:
-            self._drawing_lines(False)
+            self._draw_part(1)
             gl.glDrawArraysInstanced(gl.GL_TRIANGLES, 0, self.size, self.amount)
+
 
     def set_width(self, width):
         """
@@ -119,6 +180,28 @@ class GridProgram(Program):
         """
         return self.get_uniform("line_color", 4)
 
+    def set_border_color(self, color):
+        """
+        sets the border_color uniform in the grid vertex shader
+        :param color: the color (rgba)
+        :return:
+        """
+        self.use()
+
+        gpu_data = np.array(color, dtype=np.float32).flatten()
+        if len(gpu_data) != 4:
+            eprint("ERROR: length of set_border_color parameter not correct, expected 4 got %d " % len(gpu_data))
+        else:
+            loc = self.get_uniform_location("border_color")
+            gl.glUniform4f(loc, *gpu_data)
+
+    def get_border_color(self):
+        """
+        reads the border color from the vertex shader
+        :return:
+        """
+        return self.get_uniform("border_color", 4)
+
     def set_model_color(self, color):
         """
         sets the model_color uniform in the grid vertex shader
@@ -140,9 +223,9 @@ class GridProgram(Program):
         """
         return self.get_uniform("model_color", 4)
 
-    def _drawing_lines(self, line_flag: bool):
-        loc = self.get_uniform_location("drawing_lines")
-        gl.glUniform1i(loc, gl.GL_TRUE if line_flag else gl.GL_FALSE)
+    def _draw_part(self, part: int):
+        loc = self.get_uniform_location("drawing_part")
+        gl.glUniform1i(loc, part)
 
     def update_offsets(self, data):
         """

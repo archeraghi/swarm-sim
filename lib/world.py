@@ -9,6 +9,7 @@ import logging
 import random
 import threading
 import os
+import datetime
 import time
 
 from lib import csv_generator, particle, tile, location, vis3d
@@ -132,10 +133,18 @@ class World:
 
     def save_scenario(self):
 
+        # create scenario folder, if it doesn't already exist.
+        if not os.path.exists("scenario") or not os.path.isdir("scenario"):
+            os.mkdir("scenario")
+
+        # if the scenario folder exists, try to create and save the new scenario file, if it fails print the error.
         if os.path.exists("scenario") and os.path.isdir("scenario"):
+            now = datetime.datetime.now()
+            filename = str("scenario/%d-%d-%d_%d-%d-%d_scenario.py"
+                           % (now.year, now.month, now.day, now.hour, now.minute, now.second))
             try:
-                f = open("scenario/scenario_%s.py" % str(time.perf_counter_ns()), "w+")
-                f.write("def solution(world):\n")
+                f = open(filename, "w+")
+                f.write("def scenario(world):\n")
                 for p in self.particle_map_coordinates.values():
                     f.write("\tworld.add_particle(%s, color=%s)\n" % (str(p.coordinates), str(p.get_color())))
                 for t in self.tile_map_coordinates.values():
@@ -146,10 +155,12 @@ class World:
                 f.close()
             except IOError as e:
                 eprint(e)
-        else:
-           eprint("\"scenario\" folder doesn't exist. "
-                  "Please create it in the running directory before saving scenarios.")
 
+            # checks if the file exists. If not, some unknown error occured while saving.
+            if not os.path.exists(filename) or not os.path.isfile(filename):
+                eprint("Error: scenario couldn't be saved due to unknown reasons.")
+        else:
+            eprint("\"scenario\" folder couldn't be created.")
 
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()
@@ -161,7 +172,7 @@ class World:
     def set_successful_end(self):
         self.csv_round.success()
         # self.set_end()
-        
+
     def get_max_round(self):
         """
         The max round number

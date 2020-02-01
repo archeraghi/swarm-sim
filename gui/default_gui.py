@@ -14,7 +14,7 @@ def create_gui(world, vis: Visualization):
     tabbar.setMinimumWidth(200)
     tabbar.addTab(sim_tab(vis, world), "Simulation")
     tabbar.addTab(vis_tab(vis), "Visualization")
-    tabbar.addTab(grid_tab(vis), "Grid")
+    tabbar.addTab(grid_tab(world, vis), "Grid")
     tabbar.addTab(matter_tab(vis), "Matter")
     tabbar.addTab(help_tab(), "Help")
 
@@ -136,6 +136,7 @@ def vis_tab(vis: Visualization):
     layout.addLayout(get_drag_sens_slider(vis))
     layout.addLayout(get_zoom_sens_slider(vis))
     layout.addLayout(get_rota_sens_slider(vis))
+    layout.addLayout(get_vis_show_checkboxes(vis))
     reset_position_button = QPushButton("reset position")
     reset_position_button.clicked.connect(vis.reset_camera_position)
     layout.addWidget(reset_position_button, alignment=Qt.AlignBaseline)
@@ -144,12 +145,12 @@ def vis_tab(vis: Visualization):
     return tab
 
 
-def grid_tab(vis: Visualization):
+def grid_tab(world, vis: Visualization):
     tab = QTabBar()
     layout = QVBoxLayout()
     layout.addLayout(get_grid_lines_scale_slider(vis))
     layout.addLayout(get_grid_coordinates_scale_slider(vis))
-    layout.addLayout(get_show_checkboxes(vis))
+    layout.addLayout(get_show_checkboxes(world, vis))
     layout.addLayout(recalculate_grid(vis))
     layout.addLayout(get_color_picker(vis))
     layout.addStretch(0)
@@ -470,25 +471,7 @@ def get_render_distance_slider(vis):
     return vbox
 
 
-def get_show_checkboxes(vis):
-
-    lines_cb = QCheckBox()
-    lines_cb.setText("show lines")
-    lines_cb.setChecked(vis.get_show_lines())
-
-    def lines_clicked():
-        vis.set_show_lines(lines_cb.isChecked())
-    lines_cb.clicked.connect(lines_clicked)
-
-    coords_cb = QCheckBox()
-    coords_cb.setText("show coordinates")
-    coords_cb.setChecked(vis.get_show_coordinates())
-
-    def coords_clicked():
-        vis.set_show_coordinates(coords_cb.isChecked())
-
-    coords_cb.clicked.connect(coords_clicked)
-
+def get_vis_show_checkboxes(vis):
     center_cb = QCheckBox()
     center_cb.setText("show center")
     center_cb.setChecked(vis.get_show_center())
@@ -516,20 +499,48 @@ def get_show_checkboxes(vis):
 
     rl_cb.clicked.connect(rl_clicked)
 
-    hbox1 = QHBoxLayout()
-    hbox1.addWidget(lines_cb)
-    hbox1.addWidget(coords_cb)
-    hbox2 = QHBoxLayout()
-    hbox2.addWidget(center_cb)
-    hbox2.addWidget(focus_cb)
-    hbox3 = QHBoxLayout()
-    hbox3.addWidget(rl_cb)
+    hbox = QHBoxLayout()
+    hbox.addWidget(center_cb, alignment=Qt.AlignBaseline)
+    hbox.addWidget(focus_cb, alignment=Qt.AlignBaseline)
+    hbox.addWidget(rl_cb, alignment=Qt.AlignBaseline)
+    return hbox
 
-    vbox = QVBoxLayout()
-    vbox.addLayout(hbox1)
-    vbox.addLayout(hbox2)
-    vbox.addLayout(hbox3)
-    return vbox
+def get_show_checkboxes(world, vis):
+
+    lines_cb = QCheckBox()
+    lines_cb.setText("show lines")
+    lines_cb.setChecked(vis.get_show_lines())
+
+    def lines_clicked():
+        vis.set_show_lines(lines_cb.isChecked())
+    lines_cb.clicked.connect(lines_clicked)
+
+    coords_cb = QCheckBox()
+    coords_cb.setText("show coordinates")
+    coords_cb.setChecked(vis.get_show_coordinates())
+
+    def coords_clicked():
+        vis.set_show_coordinates(coords_cb.isChecked())
+
+    coords_cb.clicked.connect(coords_clicked)
+
+    if world.config_data.border:
+        border_cb = QCheckBox()
+        border_cb.setText("show border")
+        border_cb.setChecked(vis.get_show_border())
+
+        def border_clicked():
+            vis.set_show_border(border_cb.isChecked())
+
+        border_cb.clicked.connect(border_clicked)
+
+    hbox = QHBoxLayout()
+    hbox.addWidget(lines_cb, alignment=Qt.AlignBaseline)
+    hbox.addWidget(coords_cb, alignment=Qt.AlignBaseline)
+    if world.config_data.border:
+        hbox.addWidget(border_cb, alignment=Qt.AlignBaseline)
+
+    return hbox
 
 
 def get_grid_lines_scale_slider(vis):

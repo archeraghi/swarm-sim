@@ -22,9 +22,9 @@ class CubicGrid(Grid):
 
     def get_box(self, width):
         locations = []
-        for x in range(int(-width / 2), int(width / 2)):
-            for y in range(int(-width / 2), int(width / 2)):
-                for z in range(int(-width / 2), int(width / 2)):
+        for x in range(-width, width+1):
+            for y in range(-width, width+1):
+                for z in range(-width, width+1):
                     locations.append((x, y, z))
         return locations
 

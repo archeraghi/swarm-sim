@@ -9,7 +9,8 @@ from lib.visualization.programs.offset_color_carry_program import OffsetColorCar
 from lib.visualization.programs.offset_color_program import OffsetColorProgram
 from lib.visualization.programs.grid_program import GridProgram
 import numpy as np
-import time
+import os
+import datetime
 
 
 class OGLWidget(QtOpenGL.QGLWidget):
@@ -142,18 +143,19 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
         self.programs["grid"] = GridProgram(self.world.grid, self.world.config_data.line_color,
                                             self.world.config_data.coordinates_color,
-                                            self.world.config_data.tile_model_file)
+                                            self.world.config_data.tile_model_file,
+                                            (self.world.get_world_x_size(),
+                                             self.world.get_world_y_size(),
+                                             self.world.get_world_z_size()))
         self.programs["grid"].set_world_scaling(self.world.grid.get_scaling())
         self.programs["grid"].set_line_scaling(self.world.config_data.line_scaling)
         self.programs["grid"].show_lines = self.world.config_data.show_lines
         self.programs["grid"].set_model_scaling(self.world.config_data.coordinates_scaling)
         self.programs["grid"].show_coordinates = self.world.config_data.show_coordinates
+        if self.world.config_data.border:
+            self.programs["grid"].show_border = self.world.config_data.show_border
+        self.programs["grid"].set_border_color(self.world.config_data.border_color)
         self.programs["grid"].update_offsets(self.world.grid.get_box(self.world.grid.size))
-
-        # showing coordinates in 2D is not really necessary, since all coordinates are easy to spot on the grid
-        # and there's no depth
-        if self.world.grid.get_dimension_count() == 2:
-            self.programs["grid"].show_coordinates = False
 
         self.programs["center"] = OffsetColorProgram(self.world.config_data.particle_model_file)
         self.programs["center"].set_world_scaling(self.world.grid.get_scaling())
@@ -422,18 +424,30 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
     def take_screenshot(self):
         """
-        takes a screenshot of the OpenGLWidget. saves it with a random name in the screenshots folder.
+        takes a screenshot of the OpenGLWidget. saves it in the screenshots folder with .
         :return:
         """
         GL.glReadBuffer(GL.GL_FRONT)
         pixels = GL.glReadPixels(0, 0, self.width(), self.height(), GL.GL_RGB, GL.GL_UNSIGNED_BYTE)
         i = Image.frombytes('RGB', (self.width(), self.height()), pixels, 'raw')
-        import os
+
+        # if screenshot folder doesn't exist -> create it
+        if not os.path.exists("screenshots") or not os.path.isdir("screenshots"):
+            os.mkdir("screenshots")
+
+        # if the screenshot folder exists save it, else print an error.
         if os.path.exists("screenshots") and os.path.isdir("screenshots"):
-            i.save("screenshots/screenshot%s.jpg" % str(time.perf_counter_ns()), "JPEG")
+            now = datetime.datetime.now()
+            filename = str("screenshots/%d-%d-%d_%d-%d-%d_screenshot.jpg"
+                           % (now.year, now.month, now.day, now.hour, now.minute, now.second))
+            i.save(filename, "JPEG")
+
+            # checks if the file exists. If not, some unknown error occured in the Image library.
+            if not os.path.exists(filename) or not os.path.isfile(filename):
+                eprint("Error: screenshot couldn't be saved due to unknown reasons.")
+
         else:
-            eprint("\"screenshots\" folder doesn't exist. "
-                   "Please create it in the running directory before taking screenshots.")
+            eprint("Error: couldn't create the screenshot folder.")
 
     def set_background_color(self, color):
         GL.glClearColor(*color, 1.0)
