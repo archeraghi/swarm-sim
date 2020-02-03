@@ -1,10 +1,9 @@
-import inspect
-
 import OpenGL.GL as GL
 from PIL import Image
 from PyQt5 import QtOpenGL, QtGui, QtCore
 
 from lib.swarm_sim_header import eprint
+from lib.visualization.MatterInfoFrame import MatterInfoFrame
 from lib.visualization.programs.offset_color_carry_program import OffsetColorCarryProgram
 from lib.visualization.programs.offset_color_program import OffsetColorProgram
 from lib.visualization.programs.grid_program import GridProgram
@@ -26,6 +25,10 @@ class OGLWidget(QtOpenGL.QGLWidget):
         fmt.setProfile(QtOpenGL.QGLFormat.CoreProfile)
         fmt.setSampleBuffers(True)
         super(OGLWidget, self).__init__(fmt)
+
+        self.info_frame = MatterInfoFrame()
+        self.info_frame.setParent(self)
+        self.info_frame.hide()
 
         self.debug = False
         self.world = world
@@ -239,7 +242,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :return:
         """
         # updating only the current cursor program
-        self.programs["cursor_"+self.cursor_type].update_offsets(
+        self.programs["cursor_" + self.cursor_type].update_offsets(
             self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position))
 
     def rotate_light(self, angle):
@@ -273,7 +276,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
         # cursor
         if self.ctrl:
-            self.programs["cursor_"+self.cursor_type].draw()
+            self.programs["cursor_" + self.cursor_type].draw()
 
         if self.show_focus:
             self.programs["focus"].draw()
@@ -286,25 +289,26 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :return:
         """
         # starting dragging
-        if self.ctrl and int(a0.buttons()) & QtCore.Qt.LeftButton:
-            nl = self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position)
-            if self.cursor_type == 'tile':
-                if nl in self.world.tile_map_coordinates:
-                    self.world.remove_tile_on(nl)
-                else:
-                    self.world.add_tile(nl)
-            if self.cursor_type == 'particle':
-                if nl in self.world.particle_map_coordinates:
-                    self.world.remove_particle_on(nl)
-                else:
-                    self.world.add_particle(nl)
-            if self.cursor_type == 'location':
-                if nl in self.world.location_map_coordinates:
-                    self.world.remove_location_on(nl)
-                else:
-                    self.world.add_location(nl)
-            self.update_data()
-            self.glDraw()
+        if self.ctrl:
+            if int(a0.buttons()) & QtCore.Qt.LeftButton:
+                nl = self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position)
+                if self.cursor_type == 'tile':
+                    if nl in self.world.tile_map_coordinates:
+                        self.world.remove_tile_on(nl)
+                    else:
+                        self.world.add_tile(nl)
+                if self.cursor_type == 'particle':
+                    if nl in self.world.particle_map_coordinates:
+                        self.world.remove_particle_on(nl)
+                    else:
+                        self.world.add_particle(nl)
+                if self.cursor_type == 'location':
+                    if nl in self.world.location_map_coordinates:
+                        self.world.remove_location_on(nl)
+                    else:
+                        self.world.add_location(nl)
+                self.update_data()
+                self.glDraw()
         else:
             if a0.button() & QtCore.Qt.LeftButton or a0.button() & QtCore.Qt.RightButton:
                 self.drag_state = True
@@ -330,12 +334,14 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :return:
         """
         if self.ctrl:
+            self.update_info_frame()
             if self.world.grid.get_dimension_count() < 3:
                 self.camera.update_radius(a0.angleDelta().y() / self.zoom_sensitivity)
                 self.camera.set_cursor_radius(-self.camera.get_radius())
             else:
                 self.camera.update_cursor_radius(-a0.angleDelta().y() / self.cursor_zoom_sensitivity)
         else:
+            self.update_info_frame()
             self.camera.update_radius(a0.angleDelta().y() / self.zoom_sensitivity)
 
         self.update_scene()
@@ -348,13 +354,16 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :param a0: mouse move event data
         :return:
         """
+
         self.setFocus()
         self.mouse_pos = [a0.x(), a0.y()]
         if self.ctrl:
             self.camera.update_mouse_position(self.mouse_pos)
             self.update_cursor_data()
             self.glDraw()
+            self.update_info_frame()
         else:
+            self.update_info_frame()
             if self.drag_state:
                 drag_amount = [self.last_position[0] - self.mouse_pos[0], self.last_position[1] - self.mouse_pos[1]]
 
@@ -365,6 +374,32 @@ class OGLWidget(QtOpenGL.QGLWidget):
                     self.drag_view(drag_amount)
 
                 self.last_position = self.mouse_pos
+
+    def update_info_frame(self):
+        if not self.ctrl:
+            self.info_frame.hide()
+            return
+        vc = self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position)
+        matter = []
+        if vc in self.world.particle_map_coordinates:
+            matter.append(self.world.particle_map_coordinates[vc])
+            if self.world.particle_map_coordinates[vc].carried_tile is not None:
+                matter.append(self.world.particle_map_coordinates[vc].carried_tile)
+            if self.world.particle_map_coordinates[vc].carried_particle is not None:
+                matter.append(self.world.particle_map_coordinates[vc].carried_particle)
+
+        if vc in self.world.tile_map_coordinates:
+            matter.append(self.world.tile_map_coordinates[vc])
+
+        if vc in self.world.location_map_coordinates:
+            matter.append(self.world.location_map_coordinates[vc])
+
+        if len(matter) > 0:
+            self.info_frame.show()
+            self.info_frame.move(self.mouse_pos[0] + 20, self.mouse_pos[1] + 20)
+            self.info_frame.set_info(matter)
+        else:
+            self.info_frame.hide()
 
     def rotate_view(self, drag_amount):
         """
@@ -405,6 +440,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         if a0.key() == QtCore.Qt.Key_Control:
             self.ctrl = True
             self.camera.update_mouse_position(self.mouse_pos)
+            self.update_info_frame()
             self.update_cursor_data()
             self.glDraw()
         if self.keyPressEventHandler is not None:
@@ -420,6 +456,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         if a0.key() == QtCore.Qt.Key_Control:
             self.ctrl = False
             self.update_cursor_data()
+            self.update_info_frame()
             self.glDraw()
 
     def take_screenshot(self):
