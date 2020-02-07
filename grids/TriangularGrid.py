@@ -75,3 +75,27 @@ class TriangularGrid(Grid):
 
     def get_scaling(self):
         return 1.0, math.sqrt(3/4), 1.0
+        
+    
+    def get_distance(self,start,end):
+        if start[1] == end[1] and start[0] != end[0]:
+            return abs(end[0] - start[0])
+        elif (abs(end[0] - start[0]) - abs(end[1] - start[1])) * 0.5 > 0:
+            return abs(end[1] - start[1]) + (abs(end[0] - start[0]) - abs(end[1] - start[1])) * 0.5
+        return abs(end[1] - start[1])
+
+
+    def get_nearest_direction(self, start, end):
+        best_distance = None
+        best_direction  = None
+        for d in self.get_directions_list():
+            next_coords =self.get_coordinates_in_direction(start, d)
+            tmp_best_distance = self.get_distance(next_coords, end)
+            if best_distance is None:
+                best_distance = tmp_best_distance
+                best_direction = d
+            else:
+                if tmp_best_distance < best_distance:
+                    best_distance = tmp_best_distance
+                    best_direction = d
+        return best_direction
