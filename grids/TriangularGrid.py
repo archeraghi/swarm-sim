@@ -73,8 +73,8 @@ class TriangularGrid(Grid):
     def get_distance(self,start,end):
         if start[1] == end[1] and start[0] != end[0]:
             return abs(end[0] - start[0])
-        elif (abs(end[0] - start[0]) - abs(end[1] - start[1])) * 0.5 > 0:
-            return abs(end[1] - start[1]) + (abs(end[0] - start[0]) - abs(end[1] - start[1])) * 0.5
+        elif abs(end[0] - start[0]) - (abs(end[1] - start[1]) * 0.5) > 0:
+            return abs(end[1] - start[1]) + abs(end[0] - start[0]) - ( abs(end[1] - start[1]) * 0.5 )
         return abs(end[1] - start[1])
 
 
