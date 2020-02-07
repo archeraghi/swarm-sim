@@ -62,13 +62,6 @@ class TriangularGrid(Grid):
     def get_dimension_count(self):
         return 2
 
-    def get_distance(self, start, end):
-        dx = abs(start[0]-end[0])
-        dy = abs(start[1]-end[1])
-        if dx*2 >= dy:
-            return (dx*2+dy)/2
-        else:
-            return dy
 
     def get_center(self):
         return 0, 0, 0
