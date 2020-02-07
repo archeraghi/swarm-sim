@@ -68,8 +68,8 @@ class TriangularGrid(Grid):
 
     def get_scaling(self):
         return 1.0, math.sqrt(3/4), 1.0
-        
-    
+
+
     def get_distance(self,start,end):
         if start[1] == end[1] and start[0] != end[0]:
             return abs(end[0] - start[0])
