@@ -435,3 +435,6 @@ class Visualization:
         if matter_type == 'tile' or matter_type == 'particle' or matter_type == 'location':
             self._viewer.cursor_type = matter_type
             self._viewer.update_cursor_data()
+
+    def is_running(self):
+        return self._running

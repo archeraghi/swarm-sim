@@ -1,29 +1,33 @@
-from PyQt5.QtGui import QColor, QIntValidator, QFont
+from PyQt5.QtGui import QColor, QIntValidator
 from PyQt5.QtWidgets import (QVBoxLayout, QPushButton, QColorDialog, QRadioButton, QLabel, QTabWidget,
-                             QSlider, QHBoxLayout, QCheckBox, QTabBar, QLineEdit, QComboBox)
+                             QSlider, QHBoxLayout, QCheckBox, QTabBar, QLineEdit)
 from PyQt5.QtCore import Qt
-from OpenGL.GL import glGetFloatv, GL_LINE_WIDTH_RANGE
 
 from lib.swarm_sim_header import eprint
-from lib.vis3d import Visualization
+
+start_stop_button = None
+world = None
+vis = None
 
 
-def create_gui(world, vis: Visualization):
-
+def create_gui(w, v):
+    global world, vis
+    world = w
+    vis = v
     tabbar = QTabWidget()
     tabbar.setMinimumWidth(200)
-    tabbar.addTab(sim_tab(vis, world), "Simulation")
-    tabbar.addTab(vis_tab(vis), "Visualization")
-    tabbar.addTab(grid_tab(world, vis), "Grid")
-    tabbar.addTab(matter_tab(vis), "Matter")
+    tabbar.addTab(sim_tab(), "Simulation")
+    tabbar.addTab(vis_tab(), "Visualization")
+    tabbar.addTab(grid_tab(), "Grid")
+    tabbar.addTab(matter_tab(), "Matter")
     tabbar.addTab(help_tab(), "Help")
 
     return tabbar
 
 
-def key_handler(key, world, vis):
+def key_handler(key, w, v):
     if key == Qt.Key_Space:
-        vis.start_stop()
+        start_stop_button.click()
 
 
 def help_tab():
@@ -70,17 +74,26 @@ def create_slider(tick_interval: int, tick_position: int, max_position: int, min
     return slider
 
 
-
-def sim_tab(vis, world):
+def sim_tab():
     tab = QTabBar()
     layout = QVBoxLayout()
-    layout.addLayout(get_rps_slider(vis))
 
+    global start_stop_button
     # start stop button
-    start_stop_button = QPushButton("start/stop Simulation")
+    start_stop_button = QPushButton("start Simulation")
+    status = QLabel("Simulation not running")
+    status.setStyleSheet("color:#ff0000;")
 
     def start_stop_sim():
         vis.start_stop()
+        if vis.is_running():
+            status.setText("Simulation running")
+            status.setStyleSheet("color:#00ff00;")
+            start_stop_button.setText("pause Simulation")
+        else:
+            status.setText("Simulation paused")
+            status.setStyleSheet("color:#0000ff;")
+            start_stop_button.setText("unpause Simulation")
     start_stop_button.clicked.connect(start_stop_sim)
 
     # screenshots button
@@ -95,6 +108,9 @@ def sim_tab(vis, world):
 
     def reset_sim():
         world.reset()
+        status.setText("Simulation not running")
+        status.setStyleSheet("color:#ff0000;")
+
     reset_button.clicked.connect(reset_sim)
 
     save_scenario_button = QPushButton("save Scenario")
@@ -103,18 +119,52 @@ def sim_tab(vis, world):
         world.save_scenario()
 
     save_scenario_button.clicked.connect(save_scenario)
-
+    layout.addWidget(status, alignment=Qt.AlignBaseline)
+    layout.addWidget(start_stop_button, alignment=Qt.AlignBaseline)
+    layout.addLayout(get_rps_slider())
     layout.addWidget(screenshot_button, alignment=Qt.AlignBaseline)
     layout.addWidget(reset_button, alignment=Qt.AlignBaseline)
     layout.addWidget(save_scenario_button, alignment=Qt.AlignBaseline)
+    layout.addLayout(get_matter_radios())
     layout.addStretch(0)
-    layout.addWidget(start_stop_button, alignment=Qt.AlignBaseline)
     tab.setLayout(layout)
 
     return tab
 
 
-def get_rps_slider(vis):
+def get_matter_radios():
+    p_radio = QRadioButton("particle")
+    p_radio.setChecked(False)
+    t_radio = QRadioButton("tile")
+    t_radio.setChecked(True)
+    l_radio = QRadioButton("location")
+    l_radio.setChecked(False)
+    desc = QLabel("matter type to be created/removed:")
+
+    def on_toggle():
+        if p_radio.isChecked():
+            vis.set_on_cursor_click_matter_type("particle")
+
+        if t_radio.isChecked():
+            vis.set_on_cursor_click_matter_type("tile")
+
+        if l_radio.isChecked():
+            vis.set_on_cursor_click_matter_type("location")
+
+    p_radio.toggled.connect(on_toggle)
+    t_radio.toggled.connect(on_toggle)
+    l_radio.toggled.connect(on_toggle)
+
+    vbox = QVBoxLayout()
+    vbox.addWidget(desc, alignment=Qt.AlignBaseline)
+    vbox.addWidget(p_radio, alignment=Qt.AlignBaseline)
+    vbox.addWidget(t_radio, alignment=Qt.AlignBaseline)
+    vbox.addWidget(l_radio, alignment=Qt.AlignBaseline)
+
+    return vbox
+
+
+def get_rps_slider():
     hbox = QVBoxLayout()
     desc = QLabel("rounds per second (%d) : " % vis.get_rounds_per_second())
     hbox.addWidget(desc, alignment=Qt.AlignBaseline)
@@ -127,16 +177,16 @@ def get_rps_slider(vis):
     return hbox
 
 
-def vis_tab(vis: Visualization):
+def vis_tab():
     tab = QTabBar()
     layout = QVBoxLayout()
-    layout.addLayout(get_projection_switch(vis))
-    layout.addLayout(get_fov_slider(vis))
-    layout.addLayout(get_render_distance_slider(vis))
-    layout.addLayout(get_drag_sens_slider(vis))
-    layout.addLayout(get_zoom_sens_slider(vis))
-    layout.addLayout(get_rota_sens_slider(vis))
-    layout.addLayout(get_vis_show_checkboxes(vis))
+    layout.addLayout(get_projection_switch())
+    layout.addLayout(get_fov_slider())
+    layout.addLayout(get_render_distance_slider())
+    layout.addLayout(get_drag_sens_slider())
+    layout.addLayout(get_zoom_sens_slider())
+    layout.addLayout(get_rota_sens_slider())
+    layout.addLayout(get_vis_show_checkboxes())
     reset_position_button = QPushButton("reset position")
     reset_position_button.clicked.connect(vis.reset_camera_position)
     layout.addWidget(reset_position_button, alignment=Qt.AlignBaseline)
@@ -145,67 +195,76 @@ def vis_tab(vis: Visualization):
     return tab
 
 
-def grid_tab(world, vis: Visualization):
+def grid_tab():
     tab = QTabBar()
     layout = QVBoxLayout()
-    layout.addLayout(get_grid_lines_scale_slider(vis))
-    layout.addLayout(get_grid_coordinates_scale_slider(vis))
-    layout.addLayout(get_show_checkboxes(world, vis))
-    layout.addLayout(recalculate_grid(vis))
-    layout.addLayout(get_color_picker(vis))
+    layout.addLayout(get_grid_lines_scale_slider())
+    layout.addLayout(get_grid_coordinates_scale_slider())
+    layout.addLayout(get_show_checkboxes())
+    layout.addLayout(recalculate_grid())
+    layout.addLayout(get_color_picker())
     layout.addStretch(0)
     tab.setLayout(layout)
     return tab
 
 
-def matter_tab(vis):
+def matter_tab():
     tab = QTabBar()
     layout = QVBoxLayout()
-    layout.addLayout(get_matter_combo(vis))
-    layout.addStretch(1)
-    layout.addLayout(get_particle_scaler(vis))
-    layout.addStretch(1)
-    layout.addLayout(get_location_scaler(vis))
-    layout.addStretch(1)
-    layout.addLayout(get_tile_scaler(vis))
+    layout.addLayout(get_scaler("particle"))
+    layout.addLayout(get_scaler("tile"))
+    layout.addLayout(get_scaler("location"))
     layout.addStretch(1)
     tab.setLayout(layout)
     return tab
 
 
-def get_matter_combo(vis):
-    combo = QComboBox()
-    combo.addItems(["particle", "tile", "location"])
-    combo.setCurrentIndex(1)
+def get_scaler(mattertype):
+    if mattertype == "particle":
+        def x_scaler_change(value):
+            cs = vis.get_particle_scaling()
+            new_scaling = (value/10.0, cs[1], cs[2])
+            vis.set_particle_scaling(new_scaling)
 
-    def on_change(value):
-        vis.set_on_cursor_click_matter_type(value)
+        def y_scaler_change(value):
+            cs = vis.get_particle_scaling()
+            new_scaling = (cs[0], value/10.0, cs[2])
+            vis.set_particle_scaling(new_scaling)
 
-    combo.currentTextChanged.connect(on_change)
+        def z_scaler_change(value):
+            cs = vis.get_particle_scaling()
+            new_scaling = (cs[0], cs[1], value/10.0)
+            vis.set_particle_scaling(new_scaling)
+    elif mattertype == "tile":
+        def x_scaler_change(value):
+            cs = vis.get_tile_scaling()
+            new_scaling = (value / 10.0, cs[1], cs[2])
+            vis.set_tile_scaling(new_scaling)
 
-    desc = QLabel("matter to create on cursor click:")
-    vbox = QVBoxLayout()
-    vbox.addWidget(desc, alignment=Qt.AlignBaseline)
-    vbox.addWidget(combo, alignment=Qt.AlignBaseline)
-    return vbox
+        def y_scaler_change(value):
+            cs = vis.get_tile_scaling()
+            new_scaling = (cs[0], value / 10.0, cs[2])
+            vis.set_tile_scaling(new_scaling)
 
-def get_particle_scaler(vis):
-    def x_scaler_change(value):
-        current_scaling = vis.get_particle_scaling()
-        print(current_scaling)
-        new_scaling = (value/10.0, current_scaling[1], current_scaling[2])
-        print(new_scaling)
-        vis.set_particle_scaling(new_scaling)
+        def z_scaler_change(value):
+            cs = vis.get_tile_scaling()
+            new_scaling = (cs[0], cs[1], value / 10.0)
+            vis.set_tile_scaling(new_scaling)
+    else:
+        def x_scaler_change(value):
+            cs = vis.get_location_scaling()
+            new_scaling = (value / 10.0, cs[1], cs[2])
+            vis.set_location_scaling(new_scaling)
 
-    def y_scaler_change(value):
-        current_scaling = vis.get_particle_scaling()
-        new_scaling = (current_scaling[0], value/10.0, current_scaling[2])
-        vis.set_particle_scaling(new_scaling)
+        def y_scaler_change(value):
+            cs = vis.get_location_scaling()
+            new_scaling = (cs[0], value / 10.0, cs[2])
+            vis.set_location_scaling(new_scaling)
 
-    def z_scaler_change(value):
-        current_scaling = vis.get_particle_scaling()
-        new_scaling = (current_scaling[0], current_scaling[1], value/10.0)
-        vis.set_particle_scaling(new_scaling)
+        def z_scaler_change(value):
+            cs = vis.get_location_scaling()
+            new_scaling = (cs[0], cs[1], value / 10.0)
+            vis.set_location_scaling(new_scaling)
 
     current_scaling = vis.get_particle_scaling()
     x_desc = QLabel("x scale:")
@@ -228,7 +287,7 @@ def get_particle_scaler(vis):
     hbox3.addWidget(z_scaler, alignment=Qt.AlignBaseline)
 
     vbox = QVBoxLayout()
-    vbox.addWidget(QLabel("particle scaling:"), alignment=Qt.AlignBaseline)
+    vbox.addWidget(QLabel("%s scaling:" % mattertype), alignment=Qt.AlignBaseline)
     vbox.addLayout(hbox1)
     vbox.addLayout(hbox2)
     vbox.addLayout(hbox3)
@@ -236,100 +295,7 @@ def get_particle_scaler(vis):
     return vbox
 
 
-def get_tile_scaler(vis):
-    def x_scaler_change(value):
-        current_scaling = vis.get_tile_scaling()
-        print(current_scaling)
-        new_scaling = (value/10.0, current_scaling[1], current_scaling[2])
-        print(new_scaling)
-        vis.set_tile_scaling(new_scaling)
-
-    def y_scaler_change(value):
-        current_scaling = vis.get_tile_scaling()
-        new_scaling = (current_scaling[0], value/10.0, current_scaling[2])
-        vis.set_tile_scaling(new_scaling)
-
-    def z_scaler_change(value):
-        current_scaling = vis.get_tile_scaling()
-        new_scaling = (current_scaling[0], current_scaling[1], value/10.0)
-        vis.set_tile_scaling(new_scaling)
-
-    current_scaling = vis.get_tile_scaling()
-    x_desc = QLabel("x scale:")
-    y_desc = QLabel("y scale:")
-    z_desc = QLabel("z scale:")
-    x_scaler = create_slider(2, 2, 20, 1, current_scaling[0]*10, x_scaler_change)
-    y_scaler = create_slider(2, 2, 20, 1, current_scaling[1]*10, y_scaler_change)
-    z_scaler = create_slider(2, 2, 20, 1, current_scaling[2]*10, z_scaler_change)
-
-    hbox1 = QHBoxLayout()
-    hbox1.addWidget(x_desc, alignment=Qt.AlignBaseline)
-    hbox1.addWidget(x_scaler, alignment=Qt.AlignBaseline)
-
-    hbox2 = QHBoxLayout()
-    hbox2.addWidget(y_desc, alignment=Qt.AlignBaseline)
-    hbox2.addWidget(y_scaler, alignment=Qt.AlignBaseline)
-
-    hbox3 = QHBoxLayout()
-    hbox3.addWidget(z_desc, alignment=Qt.AlignBaseline)
-    hbox3.addWidget(z_scaler, alignment=Qt.AlignBaseline)
-
-    vbox = QVBoxLayout()
-    vbox.addWidget(QLabel("tile scaling:"), alignment=Qt.AlignBaseline)
-    vbox.addLayout(hbox1)
-    vbox.addLayout(hbox2)
-    vbox.addLayout(hbox3)
-
-    return vbox
-
-
-def get_location_scaler(vis):
-    def x_scaler_change(value):
-        current_scaling = vis.get_location_scaling()
-        print(current_scaling)
-        new_scaling = (value/10.0, current_scaling[1], current_scaling[2])
-        print(new_scaling)
-        vis.set_location_scaling(new_scaling)
-
-    def y_scaler_change(value):
-        current_scaling = vis.get_location_scaling()
-        new_scaling = (current_scaling[0], value/10.0, current_scaling[2])
-        vis.set_location_scaling(new_scaling)
-
-    def z_scaler_change(value):
-        current_scaling = vis.get_location_scaling()
-        new_scaling = (current_scaling[0], current_scaling[1], value/10.0)
-        vis.set_location_scaling(new_scaling)
-
-    current_scaling = vis.get_location_scaling()
-    x_desc = QLabel("x scale:")
-    y_desc = QLabel("y scale:")
-    z_desc = QLabel("z scale:")
-    x_scaler = create_slider(2, 2, 20, 1, current_scaling[0]*10, x_scaler_change)
-    y_scaler = create_slider(2, 2, 20, 1, current_scaling[1]*10, y_scaler_change)
-    z_scaler = create_slider(2, 2, 20, 1, current_scaling[2]*10, z_scaler_change)
-
-    hbox1 = QHBoxLayout()
-    hbox1.addWidget(x_desc, alignment=Qt.AlignBaseline)
-    hbox1.addWidget(x_scaler, alignment=Qt.AlignBaseline)
-
-    hbox2 = QHBoxLayout()
-    hbox2.addWidget(y_desc, alignment=Qt.AlignBaseline)
-    hbox2.addWidget(y_scaler, alignment=Qt.AlignBaseline)
-
-    hbox3 = QHBoxLayout()
-    hbox3.addWidget(z_desc, alignment=Qt.AlignBaseline)
-    hbox3.addWidget(z_scaler, alignment=Qt.AlignBaseline)
-
-    vbox = QVBoxLayout()
-    vbox.addWidget(QLabel("location scaling:"), alignment=Qt.AlignBaseline)
-    vbox.addLayout(hbox1)
-    vbox.addLayout(hbox2)
-    vbox.addLayout(hbox3)
-
-    return vbox
-
-def get_fov_slider(vis: Visualization):
+def get_fov_slider():
     hbox = QVBoxLayout()
     desc = QLabel("(only for perspective projection)\nfield of view (%d°) : " % vis.get_field_of_view())
     hbox.addWidget(desc, alignment=Qt.AlignBaseline)
@@ -342,7 +308,7 @@ def get_fov_slider(vis: Visualization):
     return hbox
 
 
-def get_drag_sens_slider(vis):
+def get_drag_sens_slider():
     hbox = QVBoxLayout()
     desc = QLabel("drag sensitivity:")
     hbox.addWidget(desc, alignment=Qt.AlignBaseline)
@@ -355,7 +321,7 @@ def get_drag_sens_slider(vis):
     return hbox
 
 
-def get_zoom_sens_slider(vis):
+def get_zoom_sens_slider():
     hbox = QVBoxLayout()
     desc = QLabel("zoom sensitivity:")
     hbox.addWidget(desc, alignment=Qt.AlignBaseline)
@@ -367,7 +333,7 @@ def get_zoom_sens_slider(vis):
     return hbox
 
 
-def get_rota_sens_slider(vis):
+def get_rota_sens_slider():
     hbox = QVBoxLayout()
     desc = QLabel("(only for 3D)\nrotation sensitivity:")
     hbox.addWidget(desc, alignment=Qt.AlignBaseline)
@@ -379,7 +345,7 @@ def get_rota_sens_slider(vis):
     return hbox
 
 
-def get_projection_switch(vis):
+def get_projection_switch():
     vbox = QVBoxLayout()
     desc = QLabel("projection type:")
     vbox.addWidget(desc, alignment=Qt.AlignBaseline)
@@ -410,7 +376,7 @@ def get_projection_switch(vis):
     return vbox
 
 
-def get_color_picker(vis):
+def get_color_picker():
 
     bg_button = QPushButton("background")
 
@@ -473,7 +439,7 @@ def get_color_picker(vis):
     return vbox
 
 
-def get_render_distance_slider(vis):
+def get_render_distance_slider():
     vbox = QVBoxLayout()
     desc = QLabel("render distance (%d):" % vis.get_render_distance())
     vbox.addWidget(desc, alignment=Qt.AlignBaseline)
@@ -486,7 +452,7 @@ def get_render_distance_slider(vis):
     return vbox
 
 
-def get_vis_show_checkboxes(vis):
+def get_vis_show_checkboxes():
     center_cb = QCheckBox()
     center_cb.setText("show center")
     center_cb.setChecked(vis.get_show_center())
@@ -520,7 +486,8 @@ def get_vis_show_checkboxes(vis):
     hbox.addWidget(rl_cb, alignment=Qt.AlignBaseline)
     return hbox
 
-def get_show_checkboxes(world, vis):
+
+def get_show_checkboxes():
 
     lines_cb = QCheckBox()
     lines_cb.setText("show lines")
@@ -539,6 +506,9 @@ def get_show_checkboxes(world, vis):
 
     coords_cb.clicked.connect(coords_clicked)
 
+    hbox = QHBoxLayout()
+    hbox.addWidget(lines_cb, alignment=Qt.AlignBaseline)
+    hbox.addWidget(coords_cb, alignment=Qt.AlignBaseline)
     if world.config_data.border:
         border_cb = QCheckBox()
         border_cb.setText("show border")
@@ -548,17 +518,12 @@ def get_show_checkboxes(world, vis):
             vis.set_show_border(border_cb.isChecked())
 
         border_cb.clicked.connect(border_clicked)
-
-    hbox = QHBoxLayout()
-    hbox.addWidget(lines_cb, alignment=Qt.AlignBaseline)
-    hbox.addWidget(coords_cb, alignment=Qt.AlignBaseline)
-    if world.config_data.border:
         hbox.addWidget(border_cb, alignment=Qt.AlignBaseline)
 
     return hbox
 
 
-def get_grid_lines_scale_slider(vis):
+def get_grid_lines_scale_slider():
     vbox = QVBoxLayout()
     desc = QLabel("grid lines scale (%d%%):" % int(vis.get_grid_line_scaling()[0]*100))
     vbox.addWidget(desc, alignment=Qt.AlignBaseline)
@@ -572,7 +537,7 @@ def get_grid_lines_scale_slider(vis):
     return vbox
 
 
-def get_grid_coordinates_scale_slider(vis):
+def get_grid_coordinates_scale_slider():
     vbox = QVBoxLayout()
     desc = QLabel("grid coordinates model scale (%d%%):" % int(vis.get_grid_coordinates_scaling()[0]*500))
     vbox.addWidget(desc, alignment=Qt.AlignBaseline)
@@ -586,13 +551,13 @@ def get_grid_coordinates_scale_slider(vis):
     return vbox
 
 
-def recalculate_grid(vis):
+def recalculate_grid():
     hbox = QHBoxLayout()
     rec_button = QPushButton("update grid with size:")
 
     size_edit = QLineEdit()
     size_edit.setValidator(QIntValidator())
-    size_edit.setText(str(vis._world.grid.size))
+    size_edit.setText(str(world.grid.size))
 
     def on_click():
         if size_edit.text().isnumeric():
@@ -606,5 +571,3 @@ def recalculate_grid(vis):
     hbox.addWidget(size_edit, alignment=Qt.AlignBaseline)
 
     return hbox
-
-
