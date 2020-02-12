@@ -326,6 +326,12 @@ class Visualization:
     def set_grid_line_color(self, color):
         self._viewer.programs["grid"].set_line_color(color)
 
+    def get_grid_border_color(self):
+        return self._viewer.programs["grid"].get_border_color()
+
+    def set_grid_border_color(self, color):
+        self._viewer.programs["grid"].set_border_color(color)
+
     def get_grid_line_width(self):
         return self._viewer.programs["grid"].width
 
@@ -367,6 +373,13 @@ class Visualization:
 
     def set_show_lines(self, show_lines: bool):
         self._viewer.programs["grid"].show_lines = show_lines
+        self._viewer.glDraw()
+
+    def get_show_border(self):
+        return self._viewer.programs["grid"].show_border
+
+    def set_show_border(self, show_border: bool):
+        self._viewer.programs["grid"].show_border = show_border
         self._viewer.glDraw()
 
     def get_show_coordinates(self):
@@ -422,3 +435,6 @@ class Visualization:
         if matter_type == 'tile' or matter_type == 'particle' or matter_type == 'location':
             self._viewer.cursor_type = matter_type
             self._viewer.update_cursor_data()
+
+    def is_running(self):
+        return self._running

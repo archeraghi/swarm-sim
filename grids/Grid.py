@@ -208,7 +208,7 @@ class Grid(ABC):
         :return: direction (float, float, float)
         """
 
-        v = (target[0]-position[0], target[1] - position[1], target[2] - position[2])
+        v = (target[0] - position[0], target[1] - position[1], target[2] - position[2])
         v_length = np.sqrt((v[0]*v[0])+(v[1]*v[1])+(v[2]*v[2]))
         s = self.get_scaling()
         best = None
@@ -226,3 +226,12 @@ class Grid(ABC):
                         best_angle = angle
                         best = d
         return best
+
+    def get_shortest_path(self, start, end):
+        current = start
+        path = []
+        while current != end:
+            direction = self.get_nearest_direction(current, end)
+            path.append(direction)
+            current = self.get_coordinates_in_direction(current, direction)
+        return path

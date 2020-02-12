@@ -1,15 +1,15 @@
-import inspect
-
 import OpenGL.GL as GL
 from PIL import Image
 from PyQt5 import QtOpenGL, QtGui, QtCore
 
 from lib.swarm_sim_header import eprint
+from lib.visualization.MatterInfoFrame import MatterInfoFrame
 from lib.visualization.programs.offset_color_carry_program import OffsetColorCarryProgram
 from lib.visualization.programs.offset_color_program import OffsetColorProgram
 from lib.visualization.programs.grid_program import GridProgram
 import numpy as np
-import time
+import os
+import datetime
 
 
 class OGLWidget(QtOpenGL.QGLWidget):
@@ -25,6 +25,10 @@ class OGLWidget(QtOpenGL.QGLWidget):
         fmt.setProfile(QtOpenGL.QGLFormat.CoreProfile)
         fmt.setSampleBuffers(True)
         super(OGLWidget, self).__init__(fmt)
+
+        self.info_frame = MatterInfoFrame()
+        self.info_frame.setParent(self)
+        self.info_frame.hide()
 
         self.debug = False
         self.world = world
@@ -142,18 +146,19 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
         self.programs["grid"] = GridProgram(self.world.grid, self.world.config_data.line_color,
                                             self.world.config_data.coordinates_color,
-                                            self.world.config_data.tile_model_file)
+                                            self.world.config_data.tile_model_file,
+                                            (self.world.get_world_x_size(),
+                                             self.world.get_world_y_size(),
+                                             self.world.get_world_z_size()))
         self.programs["grid"].set_world_scaling(self.world.grid.get_scaling())
         self.programs["grid"].set_line_scaling(self.world.config_data.line_scaling)
         self.programs["grid"].show_lines = self.world.config_data.show_lines
         self.programs["grid"].set_model_scaling(self.world.config_data.coordinates_scaling)
         self.programs["grid"].show_coordinates = self.world.config_data.show_coordinates
+        if self.world.config_data.border:
+            self.programs["grid"].show_border = self.world.config_data.show_border
+        self.programs["grid"].set_border_color(self.world.config_data.border_color)
         self.programs["grid"].update_offsets(self.world.grid.get_box(self.world.grid.size))
-
-        # showing coordinates in 2D is not really necessary, since all coordinates are easy to spot on the grid
-        # and there's no depth
-        if self.world.grid.get_dimension_count() == 2:
-            self.programs["grid"].show_coordinates = False
 
         self.programs["center"] = OffsetColorProgram(self.world.config_data.particle_model_file)
         self.programs["center"].set_world_scaling(self.world.grid.get_scaling())
@@ -237,7 +242,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :return:
         """
         # updating only the current cursor program
-        self.programs["cursor_"+self.cursor_type].update_offsets(
+        self.programs["cursor_" + self.cursor_type].update_offsets(
             self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position))
 
     def rotate_light(self, angle):
@@ -271,7 +276,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
         # cursor
         if self.ctrl:
-            self.programs["cursor_"+self.cursor_type].draw()
+            self.programs["cursor_" + self.cursor_type].draw()
 
         if self.show_focus:
             self.programs["focus"].draw()
@@ -284,25 +289,26 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :return:
         """
         # starting dragging
-        if self.ctrl and int(a0.buttons()) & QtCore.Qt.LeftButton:
-            nl = self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position)
-            if self.cursor_type == 'tile':
-                if nl in self.world.tile_map_coordinates:
-                    self.world.remove_tile_on(nl)
-                else:
-                    self.world.add_tile(nl)
-            if self.cursor_type == 'particle':
-                if nl in self.world.particle_map_coordinates:
-                    self.world.remove_particle_on(nl)
-                else:
-                    self.world.add_particle(nl)
-            if self.cursor_type == 'location':
-                if nl in self.world.location_map_coordinates:
-                    self.world.remove_location_on(nl)
-                else:
-                    self.world.add_location(nl)
-            self.update_data()
-            self.glDraw()
+        if self.ctrl:
+            if int(a0.buttons()) & QtCore.Qt.LeftButton:
+                nl = self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position)
+                if self.cursor_type == 'tile':
+                    if nl in self.world.tile_map_coordinates:
+                        self.world.remove_tile_on(nl)
+                    else:
+                        self.world.add_tile(nl)
+                if self.cursor_type == 'particle':
+                    if nl in self.world.particle_map_coordinates:
+                        self.world.remove_particle_on(nl)
+                    else:
+                        self.world.add_particle(nl)
+                if self.cursor_type == 'location':
+                    if nl in self.world.location_map_coordinates:
+                        self.world.remove_location_on(nl)
+                    else:
+                        self.world.add_location(nl)
+                self.update_data()
+                self.glDraw()
         else:
             if a0.button() & QtCore.Qt.LeftButton or a0.button() & QtCore.Qt.RightButton:
                 self.drag_state = True
@@ -328,12 +334,14 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :return:
         """
         if self.ctrl:
+            self.update_info_frame()
             if self.world.grid.get_dimension_count() < 3:
                 self.camera.update_radius(a0.angleDelta().y() / self.zoom_sensitivity)
                 self.camera.set_cursor_radius(-self.camera.get_radius())
             else:
                 self.camera.update_cursor_radius(-a0.angleDelta().y() / self.cursor_zoom_sensitivity)
         else:
+            self.update_info_frame()
             self.camera.update_radius(a0.angleDelta().y() / self.zoom_sensitivity)
 
         self.update_scene()
@@ -346,13 +354,16 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :param a0: mouse move event data
         :return:
         """
+
         self.setFocus()
         self.mouse_pos = [a0.x(), a0.y()]
         if self.ctrl:
             self.camera.update_mouse_position(self.mouse_pos)
             self.update_cursor_data()
             self.glDraw()
+            self.update_info_frame()
         else:
+            self.update_info_frame()
             if self.drag_state:
                 drag_amount = [self.last_position[0] - self.mouse_pos[0], self.last_position[1] - self.mouse_pos[1]]
 
@@ -363,6 +374,32 @@ class OGLWidget(QtOpenGL.QGLWidget):
                     self.drag_view(drag_amount)
 
                 self.last_position = self.mouse_pos
+
+    def update_info_frame(self):
+        if not self.ctrl:
+            self.info_frame.hide()
+            return
+        vc = self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position)
+        matter = []
+        if vc in self.world.particle_map_coordinates:
+            matter.append(self.world.particle_map_coordinates[vc])
+            if self.world.particle_map_coordinates[vc].carried_tile is not None:
+                matter.append(self.world.particle_map_coordinates[vc].carried_tile)
+            if self.world.particle_map_coordinates[vc].carried_particle is not None:
+                matter.append(self.world.particle_map_coordinates[vc].carried_particle)
+
+        if vc in self.world.tile_map_coordinates:
+            matter.append(self.world.tile_map_coordinates[vc])
+
+        if vc in self.world.location_map_coordinates:
+            matter.append(self.world.location_map_coordinates[vc])
+
+        if len(matter) > 0:
+            self.info_frame.show()
+            self.info_frame.move(self.mouse_pos[0] + 20, self.mouse_pos[1] + 20)
+            self.info_frame.set_info(matter)
+        else:
+            self.info_frame.hide()
 
     def rotate_view(self, drag_amount):
         """
@@ -403,6 +440,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         if a0.key() == QtCore.Qt.Key_Control:
             self.ctrl = True
             self.camera.update_mouse_position(self.mouse_pos)
+            self.update_info_frame()
             self.update_cursor_data()
             self.glDraw()
         if self.keyPressEventHandler is not None:
@@ -418,23 +456,37 @@ class OGLWidget(QtOpenGL.QGLWidget):
         if a0.key() == QtCore.Qt.Key_Control:
             self.ctrl = False
             self.update_cursor_data()
+            self.update_info_frame()
             self.glDraw()
 
     def take_screenshot(self):
         """
-        takes a screenshot of the OpenGLWidget. saves it with a random name in the screenshots folder.
+        takes a screenshot of the OpenGLWidget. saves it in the screenshots folder with .
         :return:
         """
         GL.glReadBuffer(GL.GL_FRONT)
         pixels = GL.glReadPixels(0, 0, self.width(), self.height(), GL.GL_RGB, GL.GL_UNSIGNED_BYTE)
         i = Image.frombytes('RGB', (self.width(), self.height()), pixels, 'raw')
-        import os
+
+        # if screenshot folder doesn't exist -> create it
+        if not os.path.exists("screenshots") or not os.path.isdir("screenshots"):
+            os.mkdir("screenshots")
+
+        # if the screenshot folder exists save it, else print an error.
         if os.path.exists("screenshots") and os.path.isdir("screenshots"):
-            i.save("screenshots/screenshot%s.jpg" % str(time.perf_counter_ns()), "JPEG")
+            now = datetime.datetime.now()
+            filename = str("screenshots/%d-%d-%d_%d-%d-%d_screenshot.jpg"
+                           % (now.year, now.month, now.day, now.hour, now.minute, now.second))
+            i.save(filename, "JPEG")
+
+            # checks if the file exists. If not, some unknown error occured in the Image library.
+            if not os.path.exists(filename) or not os.path.isfile(filename):
+                eprint("Error: screenshot couldn't be saved due to unknown reasons.")
+
         else:
-            eprint("\"screenshots\" folder doesn't exist. "
-                   "Please create it in the running directory before taking screenshots.")
+            eprint("Error: couldn't create the screenshot folder.")
 
     def set_background_color(self, color):
+        self.background = color
         GL.glClearColor(*color, 1.0)
         self.glDraw()

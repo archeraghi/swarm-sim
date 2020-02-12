@@ -68,6 +68,9 @@ class ConfigData:
         self.cursor_offset = config.getint("Visualization", "cursor_offset")
         self.render_distance = config.getint("Visualization", "render_distance")
 
+        self.show_border = config.getboolean("Visualization", "show_border")
+        self.border_color = make_tuple(config.get("Visualization", "border_color"))
+
         self.size_x = config.getfloat("World", "size_x")
         self.size_y = config.getfloat("World", "size_y")
         self.size_z = config.getfloat("World", "size_z")

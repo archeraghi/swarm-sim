@@ -24,8 +24,8 @@ class TriangularGrid(Grid):
 
     def get_box(self, width):
         locs = []
-        for y in range(-int(width/2),int(width/2)):
-            for x in range(-int(width / 2), int(width / 2)):
+        for y in range(-width, width+1):
+            for x in range(-width, width+1):
                 if y % 2 == 0:
                     locs.append((x, y, 0.0))
                 else:
@@ -62,16 +62,33 @@ class TriangularGrid(Grid):
     def get_dimension_count(self):
         return 2
 
-    def get_distance(self, start, end):
-        dx = abs(start[0]-end[0])
-        dy = abs(start[1]-end[1])
-        if dx*2 >= dy:
-            return (dx*2+dy)/2
-        else:
-            return dy
 
     def get_center(self):
         return 0, 0, 0
 
     def get_scaling(self):
         return 1.0, math.sqrt(3/4), 1.0
+
+
+    def get_distance(self,start,end):
+        if start[1] == end[1] and start[0] != end[0]:
+            return abs(end[0] - start[0])
+        elif abs(end[0] - start[0]) - (abs(end[1] - start[1]) * 0.5) > 0:
+            return abs(end[1] - start[1]) + abs(end[0] - start[0]) - ( abs(end[1] - start[1]) * 0.5 )
+        return abs(end[1] - start[1])
+
+
+    def get_nearest_direction(self, start, end):
+        best_distance = None
+        best_direction  = None
+        for d in self.get_directions_list():
+            next_coords =self.get_coordinates_in_direction(start, d)
+            tmp_best_distance = self.get_distance(next_coords, end)
+            if best_distance is None:
+                best_distance = tmp_best_distance
+                best_direction = d
+            else:
+                if tmp_best_distance < best_distance:
+                    best_distance = tmp_best_distance
+                    best_direction = d
+        return best_direction

@@ -14,6 +14,8 @@ uniform mat4 view;
 uniform mat4 world;
 // color of the grid lines
 uniform vec4 line_color;
+// color of the border
+uniform vec4 border_color;
 // color of the locaiton model
 uniform vec4 model_color;
 // scaling of the world
@@ -28,18 +30,17 @@ uniform float ambient_light;
 uniform vec3 light_direction;
 // color of the parallel lightsource
 uniform vec4 light_color;
-// flag if drawing the lines or the location model
-uniform bool drawing_lines;
-
+// flag for distinction of drawing the grid's connections (0), the location model (1) or the border (2)
+uniform int drawing_part;
 
 // varying color for fragment shader
 out vec4 v_color;
 void main(void)
 {
-   if(drawing_lines){
+   if(drawing_part == 0){
       v_color = line_color;
       gl_Position = projection * view * world * vec4((position * line_scaling + offset) * world_scaling, 1.0);
-   }else{
+   }else if(drawing_part == 1){
       vec3 nn = normalize(normal);
       vec3 diffuseReflection = vec3(light_color) * vec3(model_color)
                              * max(max(ambient_light, dot(nn, light_direction)), dot(-nn, light_direction));
@@ -48,5 +49,8 @@ void main(void)
       mat4 use_world = world;
       use_world[3] += vec4(offset * world_scaling, 0);
       gl_Position = projection  * view * use_world * vec4(position * model_scaling, 1.0);
+   }else if(drawing_part == 2){
+      v_color = border_color;
+      gl_Position = projection * view * world * vec4(position * world_scaling, 1.0);
    }
 }
