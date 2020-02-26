@@ -170,8 +170,12 @@ class World:
 
     def set_successful_end(self):
         self.csv_round.success()
+        self.__end = True
         # self.set_end()
 
+    def set_successful_round(self):
+        self.csv_round.success()
+        
     def get_max_round(self):
         """
         The max round number
@@ -312,27 +316,27 @@ class World:
         """
         return self.location_map_id
 
-    def get_world_x_size(self):
+    def get_x_size(self):
         """
 
         :return: Returns the maximal x size of the world
         """
         return self.config_data.size_x
 
-    def get_world_y_size(self):
+    def get_y_size(self):
         """
         :return: Returns the maximal y size of the world
         """
         return self.config_data.size_y
 
-    def get_world_z_size(self):
+    def get_z_size(self):
         """
 
         :return: Returns the maximal z size of the world
         """
         return self.config_data.size_z
 
-    def get_world_size(self):
+    def get_size(self):
         """
         :return: Returns the maximal (x,y) size of the world as a tupel
         """
@@ -356,7 +360,7 @@ class World:
     def set_location_deleted(self):
         self.__location_deleted = False
 
-    def add_particle(self, coordinates, color=None):
+    def add_particle(self, coordinates, color=None, new_class=particle.Particle):
         """
         Add a particle to the world database
 
@@ -364,8 +368,11 @@ class World:
         :param color: The color of the particle
         :return: Added Matter; False: Unsuccessful
         """
+        if isinstance(coordinates, int) or isinstance(coordinates, float):
+            coordinates = (coordinates, color, 0.0)
+            color = None
 
-        if len(coordinates) == 2:
+        elif len(coordinates) == 2:
             coordinates = (coordinates[0], coordinates[1], 0.0)
 
         if len(self.particles) < self.config_data.max_particles:
@@ -374,7 +381,7 @@ class World:
                     if color is None:
                         color = self.config_data.particle_color
                     self.particle_id_counter += 1
-                    self.new_particle = particle.Particle(self, coordinates, color, self.particle_id_counter)
+                    self.new_particle = new_class(self, coordinates, color, self.particle_id_counter)
                     if self.vis is not None:
                         self.vis.particle_changed(self.new_particle)
                     self.particles_created.append(self.new_particle)
@@ -438,8 +445,11 @@ class World:
         :param coordinates: the coordinates on which the tile should be added
         :return: Successful added matter; False: Unsuccessful
         """
+        if isinstance(coordinates, int) or isinstance(coordinates, float):
+            coordinates = (coordinates, color, 0.0)
+            color = None
 
-        if len(coordinates) == 2:
+        elif len(coordinates) == 2:
             coordinates = (coordinates[0], coordinates[1], 0.0)
 
         if self.grid.are_valid_coordinates(coordinates):
@@ -515,7 +525,11 @@ class World:
         :return: True: Successful added; False: Unsuccessful
         """
 
-        if len(coordinates) == 2:
+        if isinstance(coordinates, int) or isinstance(coordinates, float):
+            coordinates = (coordinates, color, 0.0)
+            color = None
+
+        elif len(coordinates) == 2:
             coordinates = (coordinates[0], coordinates[1], 0.0)
 
         if self.grid.are_valid_coordinates(coordinates):
