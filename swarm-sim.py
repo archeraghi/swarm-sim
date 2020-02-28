@@ -35,6 +35,9 @@ def swarm_sim(argv):
             round_start_timestamp = time.perf_counter()
 
         run_solution(swarm_sim_world)
+    
+    if config_data.visualization:
+        swarm_sim_world.vis.run(round_start_timestamp)
 
     logging.info('Finished')
 
