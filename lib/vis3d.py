@@ -1,13 +1,16 @@
 import importlib
+import os
 from threading import Thread
 
-from PyQt5.QtWidgets import QApplication, QSplitter, QWidget
+import cv2
+from PyQt5.QtWidgets import QApplication, QSplitter, QWidget, QFileDialog
 
-from lib.swarm_sim_header import eprint
+from lib.visualization.recorder import Recorder
 from lib.visualization.OGLWidget import OGLWidget
 import time
 from lib.visualization.camera import Camera
-from lib.visualization.utils import LoadingWindow
+from lib.visualization.toms_svg_generator import create_svg
+from lib.visualization.utils import LoadingWindow, show_msg
 
 
 def close(_):
@@ -30,7 +33,9 @@ class Visualization:
         self._viewer = None
         self._gui = None
         self._splitter = None
+        self._recording = False
         self.light_rotation = False
+        self.grid_size = world.grid.size
 
         # create the QApplication
         self._app = QApplication([])
@@ -54,6 +59,7 @@ class Visualization:
         # create the opengl widget
         self._viewer = OGLWidget(self._world, self._camera)
         self._viewer.glInit()
+        self.recorder = Recorder(self._world, self._viewer)
 
         # create and show the main Window
         self._splitter = QSplitter()
@@ -67,22 +73,22 @@ class Visualization:
         # create gui
         # creating the gui has to happen after showing the window, so the gui can access
         # opengl variables and programs during creation
-        gui_module = importlib.import_module('gui.' + self._world.config_data.gui)
+        self._gui_module = importlib.import_module('gui.' + self._world.config_data.gui)
 
         # the key press handler
         def key_press_event(event):
-            gui_module.key_handler(event.key(), self._world, self)
+            self._gui_module.key_handler(event.key(), self._world, self)
 
         # loading key handler from gui module
-        if "key_handler" in dir(gui_module):
+        if "key_handler" in dir(self._gui_module):
             self._viewer.keyPressEventHandler = key_press_event
             self._splitter.keyPressEvent = key_press_event
         else:
-            eprint("Warning: no key_handler in gui module => no key handler added.")
+            show_msg("No key_handler(key, vis) function found in gui module!", 1)
 
         # loading gui from gui module
-        if "create_gui" in dir(gui_module):
-            self._gui = gui_module.create_gui(self._world, self)
+        if "create_gui" in dir(self._gui_module):
+            self._gui = self._gui_module.create_gui(self._world, self)
             if self._gui is not None and issubclass(self._gui.__class__, QWidget):
                 self._splitter.addWidget(self._gui)
                 self._splitter.keyPressEvent = self._viewer.keyPressEvent
@@ -91,13 +97,23 @@ class Visualization:
                 self._splitter.setSizes(
                     [self._world.config_data.window_size_x * 0.25, self._world.config_data.window_size_x * 0.75])
             else:
-                eprint("warning: create_gui in gui module didn't return a QWidget. expected subclass of QWidget, "
-                       "but got %s => no gui added." % self._gui.__class__.__name__)
+                show_msg("The create_gui(world, vis) function in gui module didn't return a QWidget." +
+                         "Expected a QWidget or a subclass, but got %s."
+                         % self._gui.__class__.__name__, 1)
                 self._splitter.addWidget(self._viewer)
 
         else:
-            eprint("warning: no create_gui in gui module => no gui added.")
+            show_msg("No create_gui(world, vis) function found in gui module. GUI not created", 1)
             self._splitter.addWidget(self._viewer)
+
+        # waiting for the simulation window to be fully active
+        while not self._splitter.windowHandle().isExposed():
+            self._app.processEvents()
+        # first update and draw call.
+        self._viewer.update_scene()
+
+    def is_recording(self):
+        return self._recording
 
     def reset(self):
         """
@@ -189,6 +205,9 @@ class Visualization:
         self._viewer.glDraw()
         # waiting until simulation starts
         self._wait_while_not_running()
+        if self._recording:
+            self.recorder.record_round()
+            self._splitter.setWindowTitle("Simulator, recorded: %d rounds" % len(self.recorder.records))
         # waiting until enough time passed to do the next simulation round.
         time_elapsed = time.perf_counter() - round_start_timestamp
         # sleeping time - max 1/120 for a responsive GUI
@@ -403,10 +422,11 @@ class Visualization:
         self._viewer.show_focus = show_focus
         self._viewer.glDraw()
 
-    def take_screenshot(self):
-        self._viewer.take_screenshot()
+    def take_screenshot(self, quick):
+        self._viewer.take_screenshot(quick)
 
     def recalculate_grid(self, size):
+        self.grid_size = size
         self._viewer.programs["grid"].update_offsets(self._world.grid.get_box(size))
         self._viewer.glDraw()
 
@@ -438,3 +458,115 @@ class Visualization:
 
     def is_running(self):
         return self._running
+
+    def get_added_matter_color(self):
+        return self._viewer.added_matter_color
+
+    def set_added_matter_color(self, color):
+        self._viewer.added_matter_color = color
+
+    def start_recording(self):
+        self.recorder.record_round()
+        self._splitter.setWindowTitle("Simulator, recorded: %d rounds" % len(self.recorder.records))
+        self._recording = True
+
+    def get_viewer_res(self):
+        return self._viewer.width(), self._viewer.height()
+
+    def stop_recording(self):
+        self._recording = False
+
+    def export_recording(self):
+        if len(self.recorder.records) == 0:
+            show_msg("No rounds recorded. Nothing to export.", 0)
+            return
+        if self._running:
+            self.start_stop()
+        self._viewer.set_show_info_frame(False)
+        self._viewer.set_enable_cursor(False)
+        if "set_disable_sim" in dir(self._gui_module):
+            self._gui_module.set_disable_sim(True)
+        else:
+            show_msg("No 'set_disable_sim(disable_flag)' function in gui module found."
+                     "\nRunning simulation within recording mode may result in undefined behavior!", 1)
+
+        self.recorder.show(self.do_export)
+
+        # loop
+        while self.recorder.is_open():
+            self._app.processEvents()
+
+        # go back to the main window
+        if "set_disable_sim" in dir(self._gui_module):
+            self._gui_module.set_disable_sim(False)
+
+        self._viewer.particle_update_flag = True
+        self._viewer.tile_update_flag = True
+        self._viewer.location_update_flag = True
+        self._viewer.update_data()
+        self._viewer.set_show_info_frame(True)
+        self._viewer.set_enable_cursor(True)
+
+    def do_export(self, rps, width, height, codec, first_frame_idx, last_frame_idx):
+
+        if not os.path.exists("videos") or not os.path.isdir("videos"):
+            os.mkdir("videos")
+        directory = "."
+        if os.path.exists("videos") and os.path.isdir("videos"):
+            directory = "videos"
+
+        path = QFileDialog().getSaveFileName(options=(QFileDialog.Options()),
+                                             filter="*.mp4;;*.avi;;*.mkv",
+                                             directory=directory)
+        writer = cv2.VideoWriter(path[0], cv2.VideoWriter_fourcc(*codec), rps, (width, height))
+        self._viewer.setDisabled(True)
+        # creating and opening loading window
+        lw = LoadingWindow("", "Exporting Video...")
+        lw.show()
+        for i in range(first_frame_idx-1, last_frame_idx):
+            # update loading windows text and progress bar
+            processing = i - first_frame_idx + 2
+            out_of = last_frame_idx - first_frame_idx + 1
+            lw.set_message("Please wait!\nExporting frame %d/%d..." % (processing, out_of))
+            lw.set_progress(processing, out_of)
+            # process events so the gui thread does respond to interactions..
+            self._app.processEvents()
+            # render and write frame
+            self._viewer.inject_record_data(self.recorder.records[i])
+            img = self._viewer.get_frame_cv(width, height)
+            writer.write(img)
+        self._viewer.inject_record_data(self.recorder.records[last_frame_idx-1])
+        writer.release()
+        lw.close()
+        self._viewer.setDisabled(False)
+        self._viewer.resizeGL(self._viewer.width(), self._viewer.height())
+        self._viewer.update_scene()
+        show_msg("Video exported successfully!", 0)
+
+    def delete_recording(self):
+        self.recorder = Recorder(self._world, self._viewer)
+        self._splitter.setWindowTitle("Simulator")
+
+    def set_antialiasing(self, value):
+        if value <= 0:
+            self._viewer.disable_aa()
+        else:
+            self._viewer.enable_aa(value)
+
+    def take_vector_screenshot(self):
+        if self._world.grid.__class__.__name__ == "TriangularGrid":
+            if not os.path.exists("screenshots") or not os.path.isdir("screenshots"):
+                os.mkdir("screenshots")
+            directory = "."
+            if os.path.exists("screenshots") and os.path.isdir("screenshots"):
+                directory = "screenshots"
+
+            path = QFileDialog().getSaveFileName(options=(QFileDialog.Options()),
+                                                 filter="*.svg",
+                                                 directory=directory)
+            create_svg(self._world, path[0])
+        else:
+            show_msg("Not implemented yet.\nWorks only with Triangular Grid for now!\nSorry!", 2)
+
+
+

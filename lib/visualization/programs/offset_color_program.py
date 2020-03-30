@@ -1,9 +1,10 @@
-import OpenGL.GL as gl
+import OpenGL.GL as GL
 
-from lib.swarm_sim_header import eprint
 from lib.visualization.programs.program import Program
 import numpy as np
 import ctypes
+
+from lib.visualization.utils import show_msg
 
 
 class OffsetColorProgram(Program):
@@ -25,36 +26,36 @@ class OffsetColorProgram(Program):
         gpu_data = np.array(vertices + normals, dtype=np.float32)
 
         # create VBOs
-        self.vbos = list(gl.glGenBuffers(3))
+        self.vbos = list(GL.glGenBuffers(3))
 
         # init VBO 0 - static mesh data
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbos[0])
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.vbos[0])
         loc = self.get_attribute_location("position")
-        gl.glEnableVertexAttribArray(loc)
-        gl.glVertexAttribPointer(loc, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, ctypes.c_void_p(0))
+        GL.glEnableVertexAttribArray(loc)
+        GL.glVertexAttribPointer(loc, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, ctypes.c_void_p(0))
         loc = self.get_attribute_location("normal")
-        gl.glEnableVertexAttribArray(loc)
-        gl.glVertexAttribPointer(loc, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, ctypes.c_void_p(self.size*12))
-        gl.glBufferData(gl.GL_ARRAY_BUFFER, 12 * len(gpu_data), gpu_data, gl.GL_STATIC_DRAW)
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
+        GL.glEnableVertexAttribArray(loc)
+        GL.glVertexAttribPointer(loc, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, ctypes.c_void_p(self.size * 12))
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, 12 * len(gpu_data), gpu_data, GL.GL_STATIC_DRAW)
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
         # init VBO 1 - dynamic offset data
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbos[1])
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.vbos[1])
         loc = self.get_attribute_location("offset")
-        gl.glEnableVertexAttribArray(loc)
-        gl.glVertexAttribPointer(loc, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, ctypes.c_void_p(0))
-        gl.glVertexAttribDivisor(loc, 1)
-        gl.glBufferData(gl.GL_ARRAY_BUFFER, 0, np.array([], dtype=np.float32), gl.GL_DYNAMIC_DRAW)
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
+        GL.glEnableVertexAttribArray(loc)
+        GL.glVertexAttribPointer(loc, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, ctypes.c_void_p(0))
+        GL.glVertexAttribDivisor(loc, 1)
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, 0, np.array([], dtype=np.float32), GL.GL_DYNAMIC_DRAW)
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
         # init VBO 2 - dynamic color data
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbos[2])
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.vbos[2])
         loc = self.get_attribute_location("color")
-        gl.glEnableVertexAttribArray(loc)
-        gl.glVertexAttribPointer(loc, 4, gl.GL_FLOAT, gl.GL_FALSE, 0, ctypes.c_void_p(0))
-        gl.glVertexAttribDivisor(loc, 1)
-        gl.glBufferData(gl.GL_ARRAY_BUFFER, 0, np.array([], dtype=np.float32), gl.GL_DYNAMIC_DRAW)
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
+        GL.glEnableVertexAttribArray(loc)
+        GL.glVertexAttribPointer(loc, 4, GL.GL_FLOAT, GL.GL_FALSE, 0, ctypes.c_void_p(0))
+        GL.glVertexAttribDivisor(loc, 1)
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, 0, np.array([], dtype=np.float32), GL.GL_DYNAMIC_DRAW)
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
     def draw(self):
         """
@@ -62,24 +63,8 @@ class OffsetColorProgram(Program):
         :return:
         """
         self.use()
-        gl.glBindVertexArray(self._vao)
-        gl.glDrawArraysInstanced(gl.GL_TRIANGLES, 0, self.size, self.amount)
-
-    def update_offsets(self, data):
-        """
-        updates the offsets/positions data (VBO 1)
-        :param data: array of 3d positions
-        :return:
-        """
-        self.use()
-        gpu_data = np.array(data, dtype=np.float32).flatten()
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbos[1])
-        gl.glBufferData(gl.GL_ARRAY_BUFFER, gpu_data.nbytes, gpu_data, gl.GL_DYNAMIC_DRAW)
-        self.amount = len(gpu_data)/3.0
-        if len(gpu_data) % 3.0 != 0.0:
-            eprint("WARNING: invalid offset data! "
-                   "Amount of coordinate components not dividable by 3 (not in xyz format?)!")
-        self.amount = int(self.amount)
+        GL.glBindVertexArray(self._vao)
+        GL.glDrawArraysInstanced(GL.GL_TRIANGLES, 0, self.size, self.amount)
 
     def update_colors(self, data):
         """
@@ -89,8 +74,7 @@ class OffsetColorProgram(Program):
         """
         self.use()
         gpu_data = np.array(data, dtype=np.float32).flatten()
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbos[2])
-        gl.glBufferData(gl.GL_ARRAY_BUFFER, gpu_data.nbytes, gpu_data, gl.GL_DYNAMIC_DRAW)
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.vbos[2])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, gpu_data.nbytes, gpu_data, GL.GL_DYNAMIC_DRAW)
         if len(gpu_data) % 4.0 != 0.0:
-            eprint("WARNING: invalid color data! "
-                   "Amount of color components not dividable by 4 (not in rgba format?)!")
+            show_msg("Invalid color data! Amount of color components not dividable by 4 (not in rgba format?)!", 2)

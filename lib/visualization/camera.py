@@ -1,8 +1,7 @@
 import numpy as np
 
-from lib.swarm_sim_header import eprint
 from lib.visualization.utils import (get_perspetive_projection_matrix, get_orthographic_projection_matrix,
-                                     get_look_at_matrix, get_translation_matrix)
+                                     get_look_at_matrix, get_translation_matrix, show_msg)
 
 
 class Camera:
@@ -91,7 +90,8 @@ class Camera:
                                                                         -self._radius, self._radius,
                                                                         0.001, self._render_distance)
         else:
-            eprint("warning: unknown projection \"" + self._projection_type + "\"! setting projection to perspective.")
+            show_msg("Unknown projection type: \"" + self._projection_type +
+                     "\"! Setting projection to perspective.", 1)
             self._projection_type = "perspective"
             self.projection_matrix = get_perspetive_projection_matrix(self._fov, self._aspect, 1, self._render_distance)
 
@@ -197,3 +197,6 @@ class Camera:
 
     def get_look_at(self):
         return self._look_at
+
+    def get_position(self):
+        return self._position

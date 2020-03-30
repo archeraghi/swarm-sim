@@ -1,8 +1,11 @@
 
 import numpy as np
-from PyQt5.QtGui import QCloseEvent
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QProgressBar
-from PyQt5 import QtCore
+from PyQt5.QtGui import QCloseEvent, QIcon
+from PyQt5.QtMultimedia import QMediaPlayer
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QProgressBar, QMessageBox, QFrame, QPushButton, \
+    QStyle
+from PyQt5.QtCore import Qt
+from PyQt5 import QtCore, QtGui
 
 
 def normalize(v):
@@ -79,6 +82,23 @@ def get_perspetive_projection_matrix(fov, aspect, znear, zfar):
 
     return pers_matrix
 
+
+def show_msg(text, level):
+    msg = QMessageBox()
+    msg.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, True)
+    if level == 0:
+        msg.setIcon(QMessageBox.Information)
+        msg.setWindowTitle("Information")
+    elif level == 1:
+        msg.setIcon(QMessageBox.Warning)
+        msg.setWindowTitle("Warning")
+    else:
+        msg.setIcon(QMessageBox.Critical)
+        msg.setWindowTitle("Error")
+    msg.setText(text)
+    return msg.exec_()
+
+
 def load_obj_file(file_path: str):
     """
     loads and parses an .obj file.
@@ -91,7 +111,8 @@ def load_obj_file(file_path: str):
     try:
         model_file = open(file_path, "r").readlines()
     except IOError as e:
-        eeprint("ERROR: Cannot open the model file (%s):\n%s" % (file_path, str(e)))
+        show_msg("Cannot open the model file (%s):\n\n%s" % (file_path, str(e)), 2)
+        exit(1)
 
     vertices = []
     normals = []
@@ -135,14 +156,14 @@ class LoadingWindow(QMainWindow):
         used for loading the scenario.
         """
         super(LoadingWindow, self).__init__()
-
         main_widget = QWidget(self)
         layout = QVBoxLayout()
-        layout.addWidget(QLabel(message, self), alignment=QtCore.Qt.AlignBaseline)
-        progress = QProgressBar(self)
-        progress.setMinimum(0)
-        progress.setMaximum(0)
-        layout.addWidget(progress, alignment=QtCore.Qt.AlignBaseline)
+        self.msg = QLabel(message, self)
+        layout.addWidget(self.msg, alignment=QtCore.Qt.AlignBaseline)
+        self.progress = QProgressBar(self)
+        self.progress.setMinimum(0)
+        self.progress.setMaximum(0)
+        layout.addWidget(self.progress, alignment=QtCore.Qt.AlignBaseline)
         main_widget.setLayout(layout)
         main_widget.setFocus()
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
@@ -155,5 +176,51 @@ class LoadingWindow(QMainWindow):
         self.setCentralWidget(main_widget)
         self.show()
 
+    def set_progress(self, current, max_value):
+        self.progress.setMaximum(max_value)
+        self.progress.setValue(current)
+
+    def set_message(self, message):
+        self.msg.setText(message)
+
     def closeEvent(self, event: QCloseEvent):
         event.ignore()
+
+
+class MatterInfoFrame(QFrame):
+    def __init__(self, *args, **kwargs):
+        super(MatterInfoFrame, self).__init__(*args, **kwargs)
+        self.setWindowFlag(Qt.WindowTransparentForInput)
+        self.setWindowFlag(Qt.WindowDoesNotAcceptFocus)
+        self.setWindowFlag(Qt.WindowStaysOnTopHint)
+        self.setStyleSheet("background-color: white; border: 2px solid black;")
+
+        self.text = QLabel()
+        self.text.setStyleSheet("border: 0px; padding: 0px; margin: 0px;")
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.text, alignment=Qt.AlignBaseline)
+        self.setLayout(vbox)
+
+    def set_info(self, sim_objects):
+
+        info_text = ""
+        counter = 0
+        for o in sim_objects:
+            if counter > 0:
+                info_text += "\n\n"
+            info_text += str(o.type).upper()
+            if o.type == "particle" and o.get_carried_status():
+                info_text += " (carried)"
+            if o.type == "tile" and o.get_tile_status():
+                info_text += "(carried)"
+            info_text += "\nid: %s" % str(o.get_id())
+            info_text += "\ncoordinates: %s" % str(o.coordinates)
+            info_text += "\ncolor: %s" % str(o.color)
+            info_text += "\nmemory:"
+            mem = o.read_whole_memory()
+            for x in mem:
+                info_text += "\n\t"+str(x)+": "+str(mem[x])
+            counter += 1
+        self.text.setText(info_text)
+        self.adjustSize()

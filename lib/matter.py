@@ -2,7 +2,7 @@
 import uuid
 from datetime import datetime
 
-from lib.swarm_sim_header import eprint
+from lib.visualization.utils import show_msg
 
 
 class Matter:
@@ -103,7 +103,7 @@ class Matter:
         :return: None
         """
         if len(color) != 4:
-            eprint("invalid color format!\ncolor has to be in rgba format => (float, float, float, float)")
+            show_msg("Invalid color format!\ncolor has to be in rgba format => (float, float, float, float)", 2)
         else:
             self.color = color
 

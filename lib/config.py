@@ -9,6 +9,7 @@ class ConfigData:
     def __init__(self):
         config = configparser.ConfigParser(allow_no_value=True)
         config.read("config.ini")
+        self.directory_name = ""
         self.seed_value = config.getint("Simulator", "seedvalue")
         self.max_round = config.getint("Simulator", "max_round")
         self.particle_random_order = config.getboolean("Simulator", "particle_random_order")

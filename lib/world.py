@@ -11,8 +11,10 @@ import threading
 import os
 import datetime
 
+from PyQt5.QtWidgets import QFileDialog
+
 from lib import csv_generator, particle, tile, location, vis3d
-from lib.swarm_sim_header import eprint
+from lib.visualization.utils import show_msg
 
 
 class World:
@@ -58,7 +60,7 @@ class World:
         self.csv_round = csv_generator.CsvRoundData(scenario=config_data.scenario,
                                                     solution=config_data.solution,
                                                     seed=config_data.seed_value,
-                                                    directory=config_data.direction_name)
+                                                    directory=config_data.directory_name)
 
         if config_data.visualization:
             self.vis = vis3d.Visualization(self)
@@ -130,19 +132,11 @@ class World:
         if self.config_data.particle_random_order:
             random.shuffle(self.particles)
 
-    def save_scenario(self):
+    def save_scenario(self, quick):
 
-        # create scenario folder, if it doesn't already exist.
-        if not os.path.exists("scenario") or not os.path.isdir("scenario"):
-            os.mkdir("scenario")
-
-        # if the scenario folder exists, try to create and save the new scenario file, if it fails print the error.
-        if os.path.exists("scenario") and os.path.isdir("scenario"):
-            now = datetime.datetime.now()
-            filename = str("scenario/%d-%d-%d_%d-%d-%d_scenario.py"
-                           % (now.year, now.month, now.day, now.hour, now.minute, now.second))
+        def save_scenario(fn):
             try:
-                f = open(filename, "w+")
+                f = open(fn, "w+")
                 f.write("def scenario(world):\n")
                 for p in self.particle_map_coordinates.values():
                     f.write("\tworld.add_particle(%s, color=%s)\n" % (str(p.coordinates), str(p.get_color())))
@@ -153,17 +147,36 @@ class World:
                 f.flush()
                 f.close()
             except IOError as e:
-                eprint(e)
+                show_msg("Couldn't save scenario.\n%s" % e, 2)
 
-            # checks if the file exists. If not, some unknown error occured while saving.
-            if not os.path.exists(filename) or not os.path.isfile(filename):
-                eprint("Error: scenario couldn't be saved due to unknown reasons.")
+        # create scenario folder, if it doesn't already exist.
+        if not os.path.exists("scenario") or not os.path.isdir("scenario"):
+            os.mkdir("scenario")
+
+        if quick:
+            # if the scenario folder exists, try to create and save the new scenario file, if it fails print the error.
+            if os.path.exists("scenario") and os.path.isdir("scenario"):
+                now = datetime.datetime.now()
+                filename = str("scenario/%d-%d-%d_%d-%d-%d_scenario.py"
+                               % (now.year, now.month, now.day, now.hour, now.minute, now.second))
+                save_scenario(filename)
+                # checks if the file exists. If not, some unknown error occured while saving.
+                if not os.path.exists(filename) or not os.path.isfile(filename):
+                    show_msg("Error: scenario couldn't be saved due to an unknown reason.", 1)
+            else:
+                show_msg("\"scenario\" folder couldn't be created.", 1)
         else:
-            eprint("\"scenario\" folder couldn't be created.")
+            directory = "."
+            if os.path.exists("scenario") and os.path.isdir("scenario"):
+                directory = "scenario"
+            path = QFileDialog().getSaveFileName(options=QFileDialog.Options(),
+                                                 filter="*.py",
+                                                 directory=directory)
+            save_scenario(path[0])
 
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()
-        particle_csv = csv_generator.CsvParticleFile(self.config_data.direction_name)
+        particle_csv = csv_generator.CsvParticleFile(self.config_data.directory_name)
         for p in self.particles:
             particle_csv.write_particle(p)
         particle_csv.csv_file.close()

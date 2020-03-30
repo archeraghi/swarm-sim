@@ -76,8 +76,7 @@ def valid_sim_coords(world, coords):
 def is_border(world, coords):
     for tile in world.get_tiles_list():
         if coords == tile.coordinates:
-            if tile.color == (0.0, 0.0, 0.0, 0.5):
-                return True
+            return True
     return False
 
 
@@ -386,7 +385,6 @@ def solution(world):
                     move(world, particle, particle.next_location)
                     if len(particle.unvisited_queue) <= 0:
                         mark_location(world, particle)
-                        world.set_successful_end()
                         return
                     continue
 
@@ -396,7 +394,6 @@ def solution(world):
                     move(world, particle, particle.next_location)
                     if len(particle.unvisited_queue) <= 0:
                         mark_location(world, particle)
-                        world.success_termination()
                         return
                     continue
 
@@ -412,7 +409,6 @@ def solution(world):
                 move(world, particle, particle.next_location)
                 if len(particle.unvisited_queue) <= 0:
                     mark_location(world, particle)
-                    world.set_successful_end()
                     return
                 continue
 
@@ -424,7 +420,6 @@ def solution(world):
                     move(world, particle, particle.next_location)
                     if len(particle.unvisited_queue) <= 0:
                         mark_location(world, particle)
-                        world.set_successful_end()
                         return
                     continue
 
@@ -437,7 +432,6 @@ def solution(world):
                         move(world, particle, particle.next_location)
                         if len(particle.unvisited_queue) <= 0:
                             mark_location(world, particle)
-                            world.set_successful_end()
                             return
                         continue
 
@@ -448,11 +442,9 @@ def solution(world):
                         move(world, particle, particle.next_location)
                         if len(particle.unvisited_queue) <= 0:
                             mark_location(world, particle)
-                            world.set_successful_end()
                             return
                         continue
 
             if len(particle.unvisited_queue) <= 0:
                 mark_location(world, particle)
-                world.set_successful_end()
                 return

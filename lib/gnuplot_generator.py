@@ -1,4 +1,4 @@
-import subprocess, os
+import subprocess
 import pandas as pd
 
 

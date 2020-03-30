@@ -1,9 +1,8 @@
-import OpenGL.GL as gl
+import OpenGL.GL as GL
 from abc import ABC, abstractmethod
 import numpy as np
 
-from lib.swarm_sim_header import eeprint, eprint
-from lib.visualization.utils import load_obj_file
+from lib.visualization.utils import load_obj_file, show_msg
 
 
 class Program(ABC):
@@ -18,26 +17,39 @@ class Program(ABC):
         :param model_file: file path to the .obj file
         """
         # creating GL Program
-        self._program = gl.glCreateProgram()
+        self._program = GL.glCreateProgram()
         # loading shader source files
-        self._vertex = gl.glCreateShader(gl.GL_VERTEX_SHADER)
-        self._fragment = gl.glCreateShader(gl.GL_FRAGMENT_SHADER)
+        self._vertex = GL.glCreateShader(GL.GL_VERTEX_SHADER)
+        self._fragment = GL.glCreateShader(GL.GL_FRAGMENT_SHADER)
+
+        vert_source = ""
+        frag_source = ""
+
         try:
             vert_source = open(vertex_file).read()
-            frag_source = open(fragment_file).read()
-            self._init_shaders(vert_source, frag_source)
         except IOError as e:
-            eeprint("ERROR: vertex or fragment shader file couldn't be loaded:\n%s" % str(e))
-        gl.glUseProgram(self._program)
+            show_msg("Vertex shader file couldn't be loaded:\n%s" % str(e), 2)
+            exit(1)
+
+        try:
+            frag_source = open(fragment_file).read()
+        except IOError as e:
+            show_msg("Fragment shader file couldn't be loaded:\n%s" % str(e), 2)
+            exit(1)
+
+        self.vbos = []
+        self._init_shaders(vert_source, frag_source)
+
+        GL.glUseProgram(self._program)
 
         self.light_angle = 0
-        v, n, t = load_obj_file("lib/visualization/models/"+model_file)
+        v, n, t = load_obj_file("lib/visualization/models/" + model_file)
         self.size = len(v)
 
-        self._vao = gl.glGenVertexArrays(1)
+        self._vao = GL.glGenVertexArrays(1)
         self.use()
         self._init_buffers(v, n, t)
-        gl.glBindVertexArray(0)
+        GL.glBindVertexArray(0)
 
         self._init_uniforms()
 
@@ -75,33 +87,36 @@ class Program(ABC):
         :return:
         """
         # set the sources
-        gl.glShaderSource(self._vertex, vert)
-        gl.glShaderSource(self._fragment, frag)
+        GL.glShaderSource(self._vertex, vert)
+        GL.glShaderSource(self._fragment, frag)
         # compile vertex shader
-        gl.glCompileShader(self._vertex)
-        if not gl.glGetShaderiv(self._vertex, gl.GL_COMPILE_STATUS):
-            e = gl.glGetShaderInfoLog(self._vertex).decode()
-            eeprint("COMPILATION ERROR: vertex shader couldn't be compiled:\n%s" % str(e))
+        GL.glCompileShader(self._vertex)
+        if not GL.glGetShaderiv(self._vertex, GL.GL_COMPILE_STATUS):
+            e = GL.glGetShaderInfoLog(self._vertex).decode()
+            show_msg("Vertex shader couldn't be compiled:\n%s" % str(e), 2)
+            exit(1)
 
         # compile fragment shader
-        gl.glCompileShader(self._fragment)
-        if not gl.glGetShaderiv(self._fragment, gl.GL_COMPILE_STATUS):
-            e = gl.glGetShaderInfoLog(self._fragment).decode()
-            eeprint("COMPILATION ERROR: fragment shader couldn't be compiled:\n%s" % str(e))
+        GL.glCompileShader(self._fragment)
+        if not GL.glGetShaderiv(self._fragment, GL.GL_COMPILE_STATUS):
+            e = GL.glGetShaderInfoLog(self._fragment).decode()
+            show_msg("Fragment shader couldn't be compiled:\n%s" % str(e), 2)
+            exit(1)
 
         # attach the shaders to the matter program
-        gl.glAttachShader(self._program, self._vertex)
-        gl.glAttachShader(self._program, self._fragment)
+        GL.glAttachShader(self._program, self._vertex)
+        GL.glAttachShader(self._program, self._fragment)
 
         # link the shaders to the matter program
-        gl.glLinkProgram(self._program)
-        if not gl.glGetProgramiv(self._program, gl.GL_LINK_STATUS):
-            e = gl.glGetProgramInfoLog(self._program)
-            eeprint("LINKING ERROR: the shader couldn't be linked to program:\n%s" % str(e))
+        GL.glLinkProgram(self._program)
+        if not GL.glGetProgramiv(self._program, GL.GL_LINK_STATUS):
+            e = GL.glGetProgramInfoLog(self._program)
+            show_msg("The shaders couldn't be linked to program:\n%s" % str(e), 2)
+            exit(1)
 
         # detach the shaders from matter program
-        gl.glDetachShader(self._program, self._vertex)
-        gl.glDetachShader(self._program, self._fragment)
+        GL.glDetachShader(self._program, self._vertex)
+        GL.glDetachShader(self._program, self._fragment)
 
     def get_uniform_location(self, name: str):
         """
@@ -109,10 +124,12 @@ class Program(ABC):
         :param name: variable name (string)
         :return: location (int)
         """
-        loc = gl.glGetUniformLocation(self._program, name)
+        self.use()
+        loc = GL.glGetUniformLocation(self._program, name)
         if loc < 0:
-            eeprint("Uniform \"%s\" doesn't exist!"
-                    "(Maybe the compilation optimized the shader by removing the unused uniform?)" % name)
+            show_msg("Uniform \"%s\" doesn't exist!\n"
+                     "(Maybe the compilation optimized the shader by removing the unused uniform?)" % name, 2)
+            exit(1)
         else:
             return loc
 
@@ -122,17 +139,18 @@ class Program(ABC):
         :param name: variable name (string)
         :return: location (int)
         """
-        loc = gl.glGetAttribLocation(self._program, name)
+        loc = GL.glGetAttribLocation(self._program, name)
         if loc < 0:
-            eeprint("Attribute \"%s\" doesn't exist!"
-                    "(Maybe the compilation optimized the shader by removing the unused attribute?)" % name)
+            show_msg("Attribute \"%s\" doesn't exist!\n"
+                     "(Maybe the compilation optimized the shader by removing the unused attribute?)" % name, 2)
+            exit(1)
         else:
             return loc
 
     def get_uniform(self, name, length):
         output = np.zeros(length, dtype=np.float32)
         loc = self.get_uniform_location(name)
-        gl.glGetUniformfv(self._program, loc, output)
+        GL.glGetUniformfv(self._program, loc, output)
         return output
 
     def use(self):
@@ -140,8 +158,8 @@ class Program(ABC):
         sets the gl program to this one.
         :return:
         """
-        gl.glBindVertexArray(self._vao)
-        gl.glUseProgram(self._program)
+        GL.glBindVertexArray(self._vao)
+        GL.glUseProgram(self._program)
 
     def set_projection_matrix(self, projection_matrix):
         """
@@ -152,16 +170,17 @@ class Program(ABC):
         self.use()
         gpu_data = np.array(projection_matrix, dtype=np.float32).flatten()
         if len(gpu_data) != 16:
-            eprint("ERROR: length of set_projection_matrix parameter not correct, expected 16 got %d " % len(gpu_data))
+            show_msg("Length of set_projection_matrix parameter not correct, expected 16 got %d " % len(gpu_data), 2)
         else:
             loc = self.get_uniform_location("projection")
-            gl.glUniformMatrix4fv(loc, 1, False, projection_matrix)
+            GL.glUniformMatrix4fv(loc, 1, False, projection_matrix)
 
     def get_projection_matrix(self):
         """
         reads the projection matrix from the vertex shader
         :return:
         """
+        self.use()
         return self.get_uniform("projection", 16)
 
     def set_view_matrix(self, view_matrix):
@@ -173,16 +192,17 @@ class Program(ABC):
         self.use()
         gpu_data = np.array(view_matrix, dtype=np.float32).flatten()
         if len(gpu_data) != 16:
-            eprint("ERROR: length of set_view_matrix parameter not correct, expected 16 got %d " % len(gpu_data))
+            show_msg("Length of set_view_matrix parameter not correct, expected 16 got %d " % len(gpu_data), 2)
         else:
             loc = self.get_uniform_location("view")
-            gl.glUniformMatrix4fv(loc, 1, False, view_matrix)
+            GL.glUniformMatrix4fv(loc, 1, False, view_matrix)
 
     def get_view_matrix(self):
         """
         reads the view matrix from the vertex shader
         :return:
         """
+        self.use()
         return self.get_uniform("view", 16)
 
     def set_world_matrix(self, world_matrix):
@@ -194,16 +214,17 @@ class Program(ABC):
         self.use()
         gpu_data = np.array(world_matrix, dtype=np.float32).flatten()
         if len(gpu_data) != 16:
-            eprint("ERROR: length of set_world_matrix parameter not correct, expected 16 got %d " % len(gpu_data))
+            show_msg("Length of set_world_matrix parameter not correct, expected 16 got %d " % len(gpu_data), 2)
         else:
             loc = self.get_uniform_location("world")
-            gl.glUniformMatrix4fv(loc, 1, False, world_matrix)
+            GL.glUniformMatrix4fv(loc, 1, False, world_matrix)
 
     def get_world_matrix(self):
         """
         reads the world matrix from the vertex shader
         :return:
         """
+        self.use()
         return self.get_uniform("world", 16)
 
     def set_world_scaling(self, scaling):
@@ -215,16 +236,17 @@ class Program(ABC):
         self.use()
         gpu_data = np.array(scaling, dtype=np.float32).flatten()
         if len(gpu_data) != 3:
-            eprint("ERROR: length of set_world_scaling parameter not correct, expected 3 got %d " % len(gpu_data))
+            show_msg("Length of set_world_scaling parameter not correct, expected 3 got %d " % len(gpu_data), 2)
         else:
             loc = self.get_uniform_location("world_scaling")
-            gl.glUniform3f(loc, *gpu_data)
+            GL.glUniform3f(loc, *gpu_data)
 
     def get_world_scaling(self):
         """
         reads the world scaling vector from the vertex shader
         :return:
         """
+        self.use()
         return self.get_uniform("world_scaling", 3)
 
     def rotate_light(self, angle: float):
@@ -236,13 +258,14 @@ class Program(ABC):
         self.use()
         self.light_angle += angle
         loc = self.get_uniform_location("light_direction")
-        gl.glUniform3f(loc, np.sin(np.radians(self.light_angle)), 0.0, np.cos(np.radians(self.light_angle)))
+        GL.glUniform3f(loc, np.sin(np.radians(self.light_angle)), 0.4, np.cos(np.radians(self.light_angle)))
 
     def get_light_direction(self):
         """
         reads the light direction vector from the vertex shader
         :return:
         """
+        self.use()
         return self.get_uniform("light_direction", 3)
 
     def set_model_scaling(self, scaling):
@@ -254,16 +277,32 @@ class Program(ABC):
         self.use()
         gpu_data = np.array(scaling, dtype=np.float32).flatten()
         if len(gpu_data) != 3:
-            eprint("ERROR: length of set_model_scaling parameter not correct, expected 3 got %d " % len(gpu_data))
+            show_msg("Length of set_model_scaling parameter not correct, expected 3 got %d " % len(gpu_data), 2)
         else:
             loc = self.get_uniform_location("model_scaling")
-            gl.glUniform3f(loc, *gpu_data)
+            GL.glUniform3f(loc, *gpu_data)
+
+    def update_offsets(self, data):
+        """
+        updates the offsets/positions data (VBO 1)
+        :param data: array of 3d positions
+        :return:
+        """
+        self.use()
+        gpu_data = np.array(data, dtype=np.float32).flatten()
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.vbos[1])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, gpu_data.nbytes, gpu_data, GL.GL_DYNAMIC_DRAW)
+        self.amount = len(gpu_data) / 3.0
+        if len(gpu_data) % 3.0 != 0.0:
+            show_msg("Invalid offset data! Amount of coordinate components not dividable by 3 (not in xyz format?)!", 2)
+        self.amount = int(self.amount)
 
     def get_model_scaling(self):
         """
         reads the model scaling vector from the vertex shader
         :return:
         """
+        self.use()
         return self.get_uniform("model_scaling", 3)
 
     def set_ambient_light(self, ambient_light: float):
@@ -274,13 +313,14 @@ class Program(ABC):
         """
         self.use()
         loc = self.get_uniform_location("ambient_light")
-        gl.glUniform1f(loc, ambient_light)
+        GL.glUniform1f(loc, ambient_light)
 
     def get_ambient_light(self):
         """
         reads the ambient light value from the vertex shader
         :return:
         """
+        self.use()
         return self.get_uniform("ambient_light", 1)
 
     def set_light_color(self, light_color):
@@ -292,14 +332,15 @@ class Program(ABC):
         self.use()
         gpu_data = np.array(light_color, dtype=np.float32).flatten()
         if len(gpu_data) != 4:
-            eprint("ERROR: length of set_light_color parameter not correct, expected 4 got %d " % len(gpu_data))
+            show_msg("Length of set_light_color parameter not correct, expected 4 got %d " % len(gpu_data), 2)
         else:
             loc = self.get_uniform_location("light_color")
-            gl.glUniform4f(loc, *light_color)
+            GL.glUniform4f(loc, *light_color)
 
     def get_light_color(self):
         """
         reads the light color from the vertex shader
         :return:
         """
+        self.use()
         return self.get_uniform("light_color", 4)

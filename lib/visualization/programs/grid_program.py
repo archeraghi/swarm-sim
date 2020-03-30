@@ -1,8 +1,9 @@
-from lib.swarm_sim_header import eprint
 from lib.visualization.programs.program import Program
-import OpenGL.GL as gl
+import OpenGL.GL as GL
 import numpy as np
 import ctypes
+
+from lib.visualization.utils import show_msg
 
 
 class GridProgram(Program):
@@ -51,68 +52,67 @@ class GridProgram(Program):
         gpu_data = np.array(verts + lines + border + normals, dtype=np.float32)
 
         # create VBO
-        self.vbos = list(gl.glGenBuffers(2))
+        self.vbos = list(GL.glGenBuffers(2))
         # init VBO
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbos[0])
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.vbos[0])
         loc = self.get_attribute_location("position")
-        gl.glEnableVertexAttribArray(loc)
-        gl.glVertexAttribPointer(loc, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, ctypes.c_void_p(0))
+        GL.glEnableVertexAttribArray(loc)
+        GL.glVertexAttribPointer(loc, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, ctypes.c_void_p(0))
 
         loc = self.get_attribute_location("normal")
-        gl.glEnableVertexAttribArray(loc)
-        gl.glVertexAttribPointer(loc, 3, gl.GL_FLOAT, gl.GL_FALSE, 0,
+        GL.glEnableVertexAttribArray(loc)
+        GL.glVertexAttribPointer(loc, 3, GL.GL_FLOAT, GL.GL_FALSE, 0,
                                  ctypes.c_void_p((len(verts) + len(lines) + len(border)) * 12))
-        gl.glBufferData(gl.GL_ARRAY_BUFFER, 12 * len(gpu_data), gpu_data, gl.GL_STATIC_DRAW)
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, 12 * len(gpu_data), gpu_data, GL.GL_STATIC_DRAW)
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
         # init VBO 1 - dynamic offset data
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbos[1])
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.vbos[1])
         loc = self.get_attribute_location("offset")
-        gl.glEnableVertexAttribArray(loc)
-        gl.glVertexAttribPointer(loc, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, ctypes.c_void_p(0))
-        gl.glVertexAttribDivisor(loc, 1)
-        gl.glBufferData(gl.GL_ARRAY_BUFFER, 0, np.array([], dtype=np.float32), gl.GL_DYNAMIC_DRAW)
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
+        GL.glEnableVertexAttribArray(loc)
+        GL.glVertexAttribPointer(loc, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, ctypes.c_void_p(0))
+        GL.glVertexAttribDivisor(loc, 1)
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, 0, np.array([], dtype=np.float32), GL.GL_DYNAMIC_DRAW)
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
     def _calculate_border(self):
         lines = []
 
         if self.grid.get_dimension_count() == 3:
             lines = [(-self.border_size[0], -self.border_size[1], -self.border_size[2]),
-                    (-self.border_size[0], -self.border_size[1], self.border_size[2]),
-                    (-self.border_size[0], -self.border_size[1], self.border_size[2]),
-                    (-self.border_size[0], self.border_size[1], self.border_size[2]),
-                    (-self.border_size[0], self.border_size[1], self.border_size[2]),
-                    (-self.border_size[0], self.border_size[1], -self.border_size[2]),
-                    (-self.border_size[0], self.border_size[1], -self.border_size[2]),
-                    (-self.border_size[0], -self.border_size[1], -self.border_size[2]),
-                    (self.border_size[0], -self.border_size[1], -self.border_size[2]),
-                    (self.border_size[0], -self.border_size[1], self.border_size[2]),
-                    (self.border_size[0], -self.border_size[1], self.border_size[2]),
-                    (self.border_size[0], self.border_size[1], self.border_size[2]),
-                    (self.border_size[0], self.border_size[1], self.border_size[2]),
-                    (self.border_size[0], self.border_size[1], -self.border_size[2]),
-                    (self.border_size[0], self.border_size[1], -self.border_size[2]),
-                    (self.border_size[0], -self.border_size[1], -self.border_size[2]),
-                    (-self.border_size[0], self.border_size[1], self.border_size[2]),
-                    (self.border_size[0], self.border_size[1], self.border_size[2]),
-                    (-self.border_size[0], -self.border_size[1], self.border_size[2]),
-                    (self.border_size[0], -self.border_size[1], self.border_size[2]),
-                    (-self.border_size[0], self.border_size[1], -self.border_size[2]),
-                    (self.border_size[0], self.border_size[1], -self.border_size[2]),
-                    (-self.border_size[0], -self.border_size[1], -self.border_size[2]),
-                    (self.border_size[0], -self.border_size[1], -self.border_size[2])]
+                     (-self.border_size[0], -self.border_size[1], self.border_size[2]),
+                     (-self.border_size[0], -self.border_size[1], self.border_size[2]),
+                     (-self.border_size[0], self.border_size[1], self.border_size[2]),
+                     (-self.border_size[0], self.border_size[1], self.border_size[2]),
+                     (-self.border_size[0], self.border_size[1], -self.border_size[2]),
+                     (-self.border_size[0], self.border_size[1], -self.border_size[2]),
+                     (-self.border_size[0], -self.border_size[1], -self.border_size[2]),
+                     (self.border_size[0], -self.border_size[1], -self.border_size[2]),
+                     (self.border_size[0], -self.border_size[1], self.border_size[2]),
+                     (self.border_size[0], -self.border_size[1], self.border_size[2]),
+                     (self.border_size[0], self.border_size[1], self.border_size[2]),
+                     (self.border_size[0], self.border_size[1], self.border_size[2]),
+                     (self.border_size[0], self.border_size[1], -self.border_size[2]),
+                     (self.border_size[0], self.border_size[1], -self.border_size[2]),
+                     (self.border_size[0], -self.border_size[1], -self.border_size[2]),
+                     (-self.border_size[0], self.border_size[1], self.border_size[2]),
+                     (self.border_size[0], self.border_size[1], self.border_size[2]),
+                     (-self.border_size[0], -self.border_size[1], self.border_size[2]),
+                     (self.border_size[0], -self.border_size[1], self.border_size[2]),
+                     (-self.border_size[0], self.border_size[1], -self.border_size[2]),
+                     (self.border_size[0], self.border_size[1], -self.border_size[2]),
+                     (-self.border_size[0], -self.border_size[1], -self.border_size[2]),
+                     (self.border_size[0], -self.border_size[1], -self.border_size[2])]
         if self.grid.get_dimension_count() <= 2:
             lines = [(-self.border_size[0], -self.border_size[1], 0),
-                    (-self.border_size[0], self.border_size[1], 0),
-                    (-self.border_size[0], self.border_size[1], 0),
-                    (self.border_size[0], self.border_size[1], 0),
-                    (self.border_size[0], self.border_size[1], 0),
-                    (self.border_size[0], -self.border_size[1], 0),
-                    (self.border_size[0], -self.border_size[1], 0),
-                    (-self.border_size[0], -self.border_size[1], 0)]
+                     (-self.border_size[0], self.border_size[1], 0),
+                     (-self.border_size[0], self.border_size[1], 0),
+                     (self.border_size[0], self.border_size[1], 0),
+                     (self.border_size[0], self.border_size[1], 0),
+                     (self.border_size[0], -self.border_size[1], 0),
+                     (self.border_size[0], -self.border_size[1], 0),
+                     (-self.border_size[0], -self.border_size[1], 0)]
         return lines
-
 
     def _init_uniforms(self):
         """
@@ -133,14 +133,13 @@ class GridProgram(Program):
         self.use()
         if self.show_border:
             self._draw_part(2)
-            gl.glDrawArrays(gl.GL_LINES, self.border_offset, self.border_length)
+            GL.glDrawArrays(GL.GL_LINES, self.border_offset, self.border_length)
         if self.show_lines:
             self._draw_part(0)
-            gl.glDrawArraysInstanced(gl.GL_LINES, self.line_offset, self.line_length, self.amount)
+            GL.glDrawArraysInstanced(GL.GL_LINES, self.line_offset, self.line_length, self.amount)
         if self.show_coordinates:
             self._draw_part(1)
-            gl.glDrawArraysInstanced(gl.GL_TRIANGLES, 0, self.size, self.amount)
-
+            GL.glDrawArraysInstanced(GL.GL_TRIANGLES, 0, self.size, self.amount)
 
     def set_width(self, width):
         """
@@ -149,7 +148,7 @@ class GridProgram(Program):
         :return:
         """
         self.width = width
-        gl.glLineWidth(self.width)
+        GL.glLineWidth(self.width)
 
     def set_line_color(self, color):
         """
@@ -161,10 +160,10 @@ class GridProgram(Program):
 
         gpu_data = np.array(color, dtype=np.float32).flatten()
         if len(gpu_data) != 4:
-            eprint("ERROR: length of set_line_color parameter not correct, expected 4 got %d " % len(gpu_data))
+            show_msg("Length of set_line_color parameter not correct, expected 4 got %d " % len(gpu_data), 2)
         else:
             loc = self.get_uniform_location("line_color")
-            gl.glUniform4f(loc, *gpu_data)
+            GL.glUniform4f(loc, *gpu_data)
 
     def get_line_color(self):
         """
@@ -183,10 +182,10 @@ class GridProgram(Program):
 
         gpu_data = np.array(color, dtype=np.float32).flatten()
         if len(gpu_data) != 4:
-            eprint("ERROR: length of set_border_color parameter not correct, expected 4 got %d " % len(gpu_data))
+            show_msg("Length of set_border_color parameter not correct, expected 4 got %d " % len(gpu_data), 2)
         else:
             loc = self.get_uniform_location("border_color")
-            gl.glUniform4f(loc, *gpu_data)
+            GL.glUniform4f(loc, *gpu_data)
 
     def get_border_color(self):
         """
@@ -204,37 +203,22 @@ class GridProgram(Program):
         self.use()
         gpu_data = np.array(color, dtype=np.float32).flatten()
         if len(gpu_data) != 4:
-            eprint("ERROR: length of set_model_color parameter not correct, expected 4 got %d " % len(gpu_data))
+            show_msg("Length of set_model_color parameter not correct, expected 4 got %d " % len(gpu_data), 2)
         else:
             loc = self.get_uniform_location("model_color")
-            gl.glUniform4f(loc, *gpu_data)
+            GL.glUniform4f(loc, *gpu_data)
 
     def get_model_color(self):
         """
         reads the model color from the vertex shader
         :return:
         """
+        self.use()
         return self.get_uniform("model_color", 4)
 
     def _draw_part(self, part: int):
         loc = self.get_uniform_location("drawing_part")
-        gl.glUniform1i(loc, part)
-
-    def update_offsets(self, data):
-        """
-        updates the offsets/positions data (VBO 1)
-        :param data: array of 3d positions
-        :return:
-        """
-        self.use()
-        gpu_data = np.array(data, dtype=np.float32).flatten()
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbos[1])
-        gl.glBufferData(gl.GL_ARRAY_BUFFER, gpu_data.nbytes, gpu_data, gl.GL_DYNAMIC_DRAW)
-        self.amount = len(gpu_data) / 3.0
-        if len(gpu_data) % 3.0 != 0.0:
-            eprint("WARNING: invalid offset data! "
-                   "Amount of coordinate components not dividable by 3 (not in xyz format?)!")
-        self.amount = int(self.amount)
+        GL.glUniform1i(loc, part)
 
     def set_line_scaling(self, scaling):
         """
@@ -245,10 +229,10 @@ class GridProgram(Program):
         self.use()
         gpu_data = np.array(scaling, dtype=np.float32).flatten()
         if len(gpu_data) != 3:
-            eprint("ERROR: length of set_line_scaling parameter not correct, expected 3 got %d " % len(gpu_data))
+            show_msg("Length of set_line_scaling parameter not correct, expected 3 got %d " % len(gpu_data), 2)
         else:
             loc = self.get_uniform_location("line_scaling")
-            gl.glUniform3f(loc, *gpu_data)
+            GL.glUniform3f(loc, *gpu_data)
 
     def get_line_scaling(self):
         """

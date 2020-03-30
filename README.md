@@ -19,6 +19,8 @@ For Linux:
     
     6. sudo pip3 install PyQt5
     
+    7. sudo pip3 install opencv-python
+    
 for older Systems (e.g. Ubuntu 14.04) install the PyQt5 version 5.10.1
 
     6. sudo pip3 install PyQt5==5.10.1
@@ -52,6 +54,7 @@ For Windows/Linux/MacOs:
     4. PyOpenGL
     5. Pillow
     6. PyQt5 (in version 5.10.1 for older Systems like Ubuntu 14.04)
+    7. opencv-python
 - press Okey
 - wait until everything is installed
 - chose Run->swarm-sim.py

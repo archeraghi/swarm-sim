@@ -1,29 +1,5 @@
 import sys
 
-
-def eeprint(*args, sep=' ', end='\n'):
-    """
-    prints error message to stderr, stops the program with error code -1
-    :param args: like in print()
-    :param sep: like in print()
-    :param end: like in print()
-    :return:
-    """
-    print(*args, sep, end, file=sys.stderr)
-    exit(-1)
-
-
-def eprint(*args, sep=' ', end='\n'):
-    """
-    prints error message to stderr
-    :param args: like in print()
-    :param sep: like in print()
-    :param end: like in print()
-    :return:
-    """
-    print(*args, sep, end, file=sys.stderr)
-
-
 def get_coordinates_in_direction(coordinates, direction):
     """
     Returns the coordinates data of the pointed directions

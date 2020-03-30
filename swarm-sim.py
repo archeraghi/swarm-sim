@@ -6,7 +6,7 @@ import os
 import sys
 import time
 import random
-from lib import world, config, vis3d
+from lib import world, config
 from lib.gnuplot_generator import gnuplot_generator
 
 
@@ -21,7 +21,7 @@ def swarm_sim(argv):
 
     read_cmd_args(argv, config_data)
 
-    create_direction_for_data(config_data)
+    create_directory_for_data(config_data)
 
     random.seed(config_data.seed_value)
     swarm_sim_world = world.World(config_data)
@@ -29,7 +29,6 @@ def swarm_sim(argv):
     round_start_timestamp = time.perf_counter()
     while (config_data.max_round == 0 or swarm_sim_world.get_actual_round() <= config_data.max_round) \
             and swarm_sim_world.get_end() is False:
-
         if config_data.visualization:
             swarm_sim_world.vis.run(round_start_timestamp)
             round_start_timestamp = time.perf_counter()
@@ -77,21 +76,21 @@ def read_cmd_args(argv, config_data):
             config_data.local_time = str(arg)
 
 
-def create_direction_for_data(config_data):
+def create_directory_for_data(config_data):
     if config_data.multiple_sim == 1:
-        config_data.direction_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
+        config_data.directory_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
                                      "_" + config_data.solution.rsplit('.', 1)[0] + "/" + \
                                      str(config_data.seed_value)
 
-        config_data.direction_name = "./outputs/mulitple/" + config_data.direction_name
+        config_data.directory_name = "./outputs/mulitple/" + config_data.directory_name
 
     else:
-        config_data.direction_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
+        config_data.directory_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
                                      "_" + config_data.solution.rsplit('.', 1)[0] + "_" + \
                                      str(config_data.seed_value)
-        config_data.direction_name = "./outputs/" + config_data.direction_name
-    if not os.path.exists(config_data.direction_name):
-        os.makedirs(config_data.direction_name)
+        config_data.directory_name = "./outputs/" + config_data.directory_name
+    if not os.path.exists(config_data.directory_name):
+        os.makedirs(config_data.directory_name)
 
 
 def run_solution(swarm_sim_world):
@@ -105,7 +104,7 @@ def run_solution(swarm_sim_world):
 
 def generate_data(config_data, swarm_sim_world):
     swarm_sim_world.csv_aggregator()
-    gnuplot_generator(config_data.direction_name)
+    gnuplot_generator(config_data.directory_name)
 
 
 if __name__ == "__main__":
