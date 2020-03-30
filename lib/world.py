@@ -172,7 +172,15 @@ class World:
             path = QFileDialog().getSaveFileName(options=QFileDialog.Options(),
                                                  filter="*.py",
                                                  directory=directory)
-            save_scenario(path[0])
+
+            if path[0] == '':
+                return
+
+            if path[0].endswith(".py"):
+                save_scenario(path[0])
+            else:
+                save_scenario(path[0]+".py")
+
 
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()

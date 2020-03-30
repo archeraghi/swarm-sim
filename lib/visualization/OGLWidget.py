@@ -514,7 +514,15 @@ class OGLWidget(QtOpenGL.QGLWidget):
             path = QFileDialog().getSaveFileName(options=(QFileDialog.Options()),
                                                  filter="*.jpg;;*.png;;*.bmp",
                                                  directory=directory)
-            i.save(path[0])
+
+            if path[0] == '':
+                return
+
+            if path[0].endswith(".jpg") or path[0].endswith(".jpeg") or \
+                path[0].endswith(".png") or path[0].endswith(".bmp"):
+                i.save(path[0])
+            else:
+                i.save(path[0]+path[1].replace('*', ''))
 
     def set_background_color(self, color):
         self.background = color

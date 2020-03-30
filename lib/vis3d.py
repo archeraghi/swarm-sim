@@ -518,7 +518,15 @@ class Visualization:
         path = QFileDialog().getSaveFileName(options=(QFileDialog.Options()),
                                              filter="*.mp4;;*.avi;;*.mkv",
                                              directory=directory)
-        writer = cv2.VideoWriter(path[0], cv2.VideoWriter_fourcc(*codec), rps, (width, height))
+        if path[0] == '':
+            return
+
+        if path[0].endswith("mp4") or path[0].endswith(".avi") or path[0].endswith(".mkv"):
+            fullpath = path[0]
+        else:
+            fullpath = path[0]+path[1].replace('*', '')
+
+        writer = cv2.VideoWriter(fullpath, cv2.VideoWriter_fourcc(*codec), rps, (width, height))
         self._viewer.setDisabled(True)
         # creating and opening loading window
         lw = LoadingWindow("", "Exporting Video...")
@@ -564,7 +572,13 @@ class Visualization:
             path = QFileDialog().getSaveFileName(options=(QFileDialog.Options()),
                                                  filter="*.svg",
                                                  directory=directory)
-            create_svg(self._world, path[0])
+            if path[0] == '':
+                return
+
+            if path[0].endswith(".svg"):
+                create_svg(self._world, path[0]+".svg")
+            else:
+                create_svg(self._world, path[0])
         else:
             show_msg("Not implemented yet.\nWorks only with Triangular Grid for now!\nSorry!", 2)
 
