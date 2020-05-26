@@ -576,9 +576,9 @@ class Visualization:
                 return
 
             if path[0].endswith(".svg"):
-                create_svg(self._world, path[0]+".svg")
-            else:
                 create_svg(self._world, path[0])
+            else:
+                create_svg(self._world, path[0]+".svg")
         else:
             show_msg("Not implemented yet.\nWorks only with Triangular Grid for now!\nSorry!", 2)
 

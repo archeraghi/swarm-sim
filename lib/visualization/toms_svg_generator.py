@@ -172,11 +172,14 @@ def create_svg(world, filename):
     location_coordinates_in_image = []
     particle_coordinates_in_image = []
     for coordinates in tile_coordinates:
-        tile_coordinates_in_image.append((int(coordinates[0] - x_offset), int(- coordinates[1] + y_offset)))
+        tile_coordinates_in_image.append((int(coordinates[0] - x_offset + (0 if coordinates[1] % 2 == 0 else 1)),
+                                          int(- coordinates[1] + y_offset)))
     for coordinates in location_coordinates:
-        location_coordinates_in_image.append((int(coordinates[0] - x_offset), int(- coordinates[1] + y_offset)))
+        location_coordinates_in_image.append((int(coordinates[0] - x_offset + (0 if coordinates[1] % 2 == 0 else 1)),
+                                              int(- coordinates[1] + y_offset)))
     for coordinates in particle_coordinates:
-        particle_coordinates_in_image.append((int(coordinates[0] - x_offset), int(- coordinates[1] + y_offset)))
+        particle_coordinates_in_image.append((int(coordinates[0] - x_offset + (0 if coordinates[1] % 2 == 0 else 1)),
+                                              int(- coordinates[1] + y_offset)))
 
     draw_world(
         tiles=tile_coordinates_in_image,
