@@ -67,6 +67,9 @@ class World:
         else:
             self.vis = None
 
+        mod = importlib.import_module('solution.' + self.config_data.solution)
+        importlib.reload(mod)
+
         mod = importlib.import_module('scenario.' + self.config_data.scenario)
 
         if config_data.visualization:
@@ -116,6 +119,9 @@ class World:
 
         if self.config_data.visualization:
             self.vis.reset()
+
+        mod = importlib.import_module('solution.' + self.config_data.solution)
+        importlib.reload(mod)
 
         mod = importlib.import_module('scenario.' + self.config_data.scenario)
 
