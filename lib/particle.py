@@ -90,7 +90,8 @@ class Particle(matter.Matter):
         direction_coord = get_coordinates_in_direction(self.coordinates, direction)
         direction_coord = self.check_within_border(direction, direction_coord)
         if self.world.grid.are_valid_coordinates(direction_coord) \
-        and direction_coord not in self.world.particle_map_coordinates:
+                and direction_coord not in self.world.particle_map_coordinates \
+                and not self.__isCarried:
             if self.coordinates in self.world.particle_map_coordinates:
                 del self.world.particle_map_coordinates[self.coordinates]
             self.coordinates = direction_coord
@@ -119,11 +120,14 @@ class Particle(matter.Matter):
         if self.world.config_data.border == 1:
             if self.world.config_data.type == 1:
                 if abs(direction_coord[0]) > self.world.get_x_size():
-                    direction_coord = (-1 * (self.coordinates[0] - direction[0]), direction_coord[1], direction_coord[2])
+                    direction_coord = (
+                    -1 * (self.coordinates[0] - direction[0]), direction_coord[1], direction_coord[2])
                 if abs(direction_coord[1]) > self.world.get_y_size():
-                    direction_coord = (direction_coord[0], -1* (self.coordinates[1] - direction[1]), direction_coord[2])
+                    direction_coord = (
+                    direction_coord[0], -1 * (self.coordinates[1] - direction[1]), direction_coord[2])
                 if abs(direction_coord[2]) > self.world.get_z_size():
-                    direction_coord = (direction_coord[0], direction_coord[1], -1* (self.coordinates[2] - direction[2]))
+                    direction_coord = (
+                    direction_coord[0], direction_coord[1], -1 * (self.coordinates[2] - direction[2]))
             else:
                 if abs(direction_coord[0]) > self.world.get_x_size():
                     direction_coord = (self.coordinates[0], direction_coord[1], direction_coord[2])
@@ -147,7 +151,7 @@ class Particle(matter.Matter):
             tmp_memory = target.read_whole_memory()
 
         if tmp_memory is not None \
-        and not (hasattr(tmp_memory, '__len__')) or len(tmp_memory) > 0:
+                and not (hasattr(tmp_memory, '__len__')) or len(tmp_memory) > 0:
             if target.type == "particle":
                 self.world.csv_round.update_metrics(particle_read=1)
                 self.csv_particle_writer.write_particle(particle_read=1)
@@ -817,7 +821,6 @@ class Particle(matter.Matter):
             logging.info("Could not delete particle on coordinates %s" % str(coordinates))
             return False
 
-
     def take_particle_with(self, particle_id):
         """
         Takes a particle with a given tile id
@@ -846,7 +849,6 @@ class Particle(matter.Matter):
             self.carried_particle = None
             logging.info("particle with particle id %s could not be taken" % str(particle_id))
             return False
-
 
     def take_particle_on(self, coordinates):
         """

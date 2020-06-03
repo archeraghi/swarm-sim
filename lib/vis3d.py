@@ -214,7 +214,7 @@ class Visualization:
 
             # using the rounds_per_second and the
             # timestamp of the start of the round, calculate the time left for animation
-            timeleft = (1/self._rounds_per_second) - (time.perf_counter() - round_start_time)
+            timeleft = (1 / self._rounds_per_second) - (time.perf_counter() - round_start_time)
 
             # calculate the amount of animation steps we can do in the time left
             steps = int(timeleft / frametime / 1.5)
@@ -223,7 +223,7 @@ class Visualization:
 
         # animate
         for i in range(1, steps):
-            self._viewer.set_animation_percentage(float(i/steps))
+            self._viewer.set_animation_percentage(float(i / steps))
             self._app.processEvents()
             self._viewer.glDraw()
 
@@ -238,7 +238,12 @@ class Visualization:
             current_data = self._viewer.particle_offset_data[particle]
             self._viewer.particle_offset_data[particle] = (current_data[0], current_data[1], particle.coordinates,
                                                            current_data[3])
+        for tile in self._viewer.tile_offset_data:
+            current_data = self._viewer.tile_offset_data[tile]
+            self._viewer.tile_offset_data[tile] = (current_data[0], current_data[1], tile.coordinates,
+                                                   current_data[3])
         self._viewer.particle_update_flag = True
+        self._viewer.tile_update_flag = True
 
     def run(self, round_start_timestamp):
         """
@@ -318,7 +323,7 @@ class Visualization:
         self._viewer.tile_update_flag = True
         prev_pos = tile.coordinates
         if tile in self._viewer.tile_offset_data:
-            prev_pos = self._viewer.particle_offset_data[tile][0]
+            prev_pos = self._viewer.tile_offset_data[tile][0]
         self._viewer.tile_offset_data[tile] = (tile.coordinates, tile.color, prev_pos,
                                                1.0 if tile.get_tile_status() else 0.0)
 
@@ -582,14 +587,14 @@ class Visualization:
         if path[0].endswith("mp4") or path[0].endswith(".avi") or path[0].endswith(".mkv"):
             fullpath = path[0]
         else:
-            fullpath = path[0]+path[1].replace('*', '')
+            fullpath = path[0] + path[1].replace('*', '')
 
         writer = cv2.VideoWriter(fullpath, cv2.VideoWriter_fourcc(*codec), rps, (width, height))
         self._viewer.setDisabled(True)
         # creating and opening loading window
         lw = LoadingWindow("", "Exporting Video...")
         lw.show()
-        for i in range(first_frame_idx-1, last_frame_idx):
+        for i in range(first_frame_idx - 1, last_frame_idx):
             # update loading windows text and progress bar
             processing = i - first_frame_idx + 2
             out_of = last_frame_idx - first_frame_idx + 1
@@ -601,7 +606,7 @@ class Visualization:
             self._viewer.inject_record_data(self.recorder.records[i])
             img = self._viewer.get_frame_cv(width, height)
             writer.write(img)
-        self._viewer.inject_record_data(self.recorder.records[last_frame_idx-1])
+        self._viewer.inject_record_data(self.recorder.records[last_frame_idx - 1])
         writer.release()
         lw.close()
         self._viewer.setDisabled(False)
@@ -636,7 +641,7 @@ class Visualization:
             if path[0].endswith(".svg"):
                 create_svg(self._world, path[0])
             else:
-                create_svg(self._world, path[0]+".svg")
+                create_svg(self._world, path[0] + ".svg")
         else:
             show_msg("Not implemented yet.\nWorks only with Triangular Grid for now!\nSorry!", 2)
 
