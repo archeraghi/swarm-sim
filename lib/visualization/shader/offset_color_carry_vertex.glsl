@@ -56,7 +56,8 @@ void main(void)
     }
     use_world[3] += vec4(real_offset * world_scaling, 0);
     float alpha = color[3];
-    if(carried > 0.5){
+    //taken
+    if(carried > 0.8){
         use_world[0][0] = 0.5;
         use_world[1][1] = 0.5;
         use_world[2][2] = 0.5;
@@ -64,6 +65,22 @@ void main(void)
         use_world[3][1] += 0.2;
         use_world[3][2] += 0.2;
         alpha = 0.8;
+    }else if(carried > 0.5){ // just taken
+        use_world[0][0] = 1.0-0.5*animation_percentage;
+        use_world[1][1] = 1.0-0.5*animation_percentage;
+        use_world[2][2] = 1.0-0.5*animation_percentage;
+        use_world[3][0] += 1.0-0.8*animation_percentage;
+        use_world[3][1] += 1.0-0.8*animation_percentage;
+        use_world[3][2] += 1.0-0.8*animation_percentage;
+        alpha = 1.0-0.2*animation_percentage;
+    }else if(carried > 0.2){ // just placed
+        use_world[0][0] = 0.5+0.5*animation_percentage;
+        use_world[1][1] = 0.5+0.5*animation_percentage;
+        use_world[2][2] = 0.5+0.5*animation_percentage;
+        use_world[3][0] += 0.2+0.8*animation_percentage;
+        use_world[3][1] += 0.2+-0.8*animation_percentage;
+        use_world[3][2] += 0.2+-0.8*animation_percentage;
+        alpha = 0.8+0.2*animation_percentage;
     }
 
     v_color = vec4(diffuseReflection, alpha);

@@ -324,8 +324,10 @@ class Visualization:
         prev_pos = tile.coordinates
         if tile in self._viewer.tile_offset_data:
             prev_pos = self._viewer.tile_offset_data[tile][0]
+
         self._viewer.tile_offset_data[tile] = (tile.coordinates, tile.color, prev_pos,
                                                1.0 if tile.get_tile_status() else 0.0)
+
 
     def remove_location(self, location):
         """
@@ -570,7 +572,7 @@ class Visualization:
         self._viewer.set_show_info_frame(True)
         self._viewer.set_enable_cursor(True)
 
-    def do_export(self, rps, width, height, codec, first_frame_idx, last_frame_idx):
+    def do_export(self, rps, width, height, codec, first_frame_idx, last_frame_idx, animation):
 
         if not os.path.exists("videos") or not os.path.isdir("videos"):
             os.mkdir("videos")
@@ -589,23 +591,34 @@ class Visualization:
         else:
             fullpath = path[0] + path[1].replace('*', '')
 
-        writer = cv2.VideoWriter(fullpath, cv2.VideoWriter_fourcc(*codec), rps, (width, height))
+        if animation:
+            animation_steps = int(30/rps)
+            if animation_steps < 1:
+                animation_steps = 1
+        else:
+            animation_steps = 1
+
+        writer = cv2.VideoWriter(fullpath, cv2.VideoWriter_fourcc(*codec), rps*animation_steps, (width, height))
         self._viewer.setDisabled(True)
         # creating and opening loading window
         lw = LoadingWindow("", "Exporting Video...")
         lw.show()
+        out_of = (last_frame_idx - first_frame_idx + 1) * animation_steps
         for i in range(first_frame_idx - 1, last_frame_idx):
-            # update loading windows text and progress bar
-            processing = i - first_frame_idx + 2
-            out_of = last_frame_idx - first_frame_idx + 1
-            lw.set_message("Please wait!\nExporting frame %d/%d..." % (processing, out_of))
-            lw.set_progress(processing, out_of)
-            # process events so the gui thread does respond to interactions..
-            self._app.processEvents()
             # render and write frame
             self._viewer.inject_record_data(self.recorder.records[i])
-            img = self._viewer.get_frame_cv(width, height)
-            writer.write(img)
+            # animate
+            for j in range(1, animation_steps+1):
+                # process events so the gui thread does respond to interactions..
+                self._app.processEvents()
+                # update loading windows text and progress bar
+                processing = (i - first_frame_idx + 1)*animation_steps + j
+                lw.set_message("Please wait!\nExporting frame %d/%d..." % (processing, out_of))
+                lw.set_progress(processing, out_of)
+                self._viewer.set_animation_percentage(j / animation_steps)
+                self._viewer.glDraw()
+                img = self._viewer.get_frame_cv(width, height)
+                writer.write(img)
         self._viewer.inject_record_data(self.recorder.records[last_frame_idx - 1])
         writer.release()
         lw.close()

@@ -84,13 +84,14 @@ class OGLWidget(QtOpenGL.QGLWidget):
     def inject_record_data(self, record):
         self.programs["particle"].update_offsets(record[0][0])
         self.programs["particle"].update_colors(record[0][1])
-        self.programs["particle"].update_carried(record[0][2])
+        self.programs["particle"].update_previous_positions(record[0][2])
+        self.programs["particle"].update_carried(record[0][3])
         self.programs["tile"].update_offsets(record[1][0])
         self.programs["tile"].update_colors(record[1][1])
-        self.programs["tile"].update_carried(record[1][2])
+        self.programs["tile"].update_previous_positions(record[1][2])
+        self.programs["tile"].update_carried(record[1][3])
         self.programs["location"].update_offsets(record[2][0])
         self.programs["location"].update_colors(record[2][1])
-        self.glDraw()
 
     def update_data(self):
         """

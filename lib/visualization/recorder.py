@@ -1,7 +1,7 @@
 import copy
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QSlider, QWidget, QHBoxLayout, QLabel, QPushButton, QLineEdit, QMainWindow, \
-    QComboBox
+    QComboBox, QCheckBox
 
 from lib.visualization.utils import show_msg
 
@@ -26,16 +26,24 @@ class Recorder:
         return self._gui.isVisible()
 
     def record_round(self):
-        r = [[[], [], []], [[], [], []], [[], []]]
+        r = [[[], [], [], []], [[], [], [], []], [[], []]]
         for particle in self._world.particles:
             r[0][0].append(copy.deepcopy(particle.coordinates))
             r[0][1].append(copy.deepcopy(particle.color))
-            r[0][2].append(copy.deepcopy(particle.get_carried_status()))
+            if len(self.records) > 0:
+                r[0][2].append(copy.deepcopy(self.records[-1][0][0]))
+            else:
+                r[0][2].append(copy.deepcopy(particle.coordinates))
+            r[0][3].append(copy.deepcopy(particle.get_carried_status()))
 
         for tile in self._world.tiles:
             r[1][0].append(copy.deepcopy(tile.coordinates))
             r[1][1].append(copy.deepcopy(tile.color))
-            r[1][2].append(copy.deepcopy(tile.get_tile_status()))
+            if len(self.records) > 0:
+                r[1][2].append(copy.deepcopy(self.records[-1][1][0]))
+            else:
+                r[1][2].append(copy.deepcopy(tile.coordinates))
+            r[1][3].append(copy.deepcopy(tile.get_tile_status()))
 
         for location in self._world.locations:
             r[2][0].append(copy.deepcopy(location.coordinates))
@@ -124,6 +132,9 @@ class Recorder:
         codec_box.addWidget(QLabel("codec:"))
         codec_box.addWidget(codec_combo)
 
+        anim_checkbox = QCheckBox("export with animation")
+        anim_checkbox.setChecked(self._world.vis.get_animation())
+
         export_button = QPushButton("export video")
 
         def export_call():
@@ -172,7 +183,7 @@ class Recorder:
 
             window.setDisabled(True)
             export_callback(input_rps, input_width, input_height,
-                            codec_combo.itemData(codec_combo.currentIndex()), ff, ef)
+                            codec_combo.itemData(codec_combo.currentIndex()), ff, ef, anim_checkbox.isChecked())
             window.setDisabled(False)
 
         export_button.clicked.connect(export_call)
@@ -182,6 +193,7 @@ class Recorder:
         main_layout.addLayout(fpsbox)
         main_layout.addLayout(resbox)
         main_layout.addLayout(codec_box)
+        main_layout.addWidget(anim_checkbox)
         main_layout.addWidget(export_button)
         window.setCentralWidget(main_widget)
         return window
