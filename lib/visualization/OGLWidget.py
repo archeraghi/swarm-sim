@@ -104,11 +104,13 @@ class OGLWidget(QtOpenGL.QGLWidget):
             if len(tmp) == 0:
                 self.programs["particle"].update_offsets([])
                 self.programs["particle"].update_colors([])
+                self.programs["particle"].update_previous_positions([])
                 self.programs["particle"].update_carried([])
             else:
                 self.programs["particle"].update_offsets(tmp[0].tolist())
                 self.programs["particle"].update_colors(tmp[1].tolist())
-                self.programs["particle"].update_carried(tmp[2].tolist())
+                self.programs["particle"].update_previous_positions(tmp[2].tolist())
+                self.programs["particle"].update_carried(tmp[3].tolist())
 
         if self.tile_update_flag:
             self.tile_update_flag = False
@@ -116,12 +118,14 @@ class OGLWidget(QtOpenGL.QGLWidget):
             if len(tmp) == 0:
                 self.programs["tile"].update_offsets([])
                 self.programs["tile"].update_colors([])
+                self.programs["tile"].update_previous_positions([])
                 self.programs["tile"].update_carried([])
             else:
 
                 self.programs["tile"].update_offsets(tmp[0].tolist())
                 self.programs["tile"].update_colors(tmp[1].tolist())
-                self.programs["tile"].update_carried(tmp[2].tolist())
+                self.programs["tile"].update_previous_positions(tmp[2].tolist())
+                self.programs["tile"].update_carried(tmp[3].tolist())
 
         if self.location_update_flag:
             self.location_update_flag = False
@@ -154,10 +158,12 @@ class OGLWidget(QtOpenGL.QGLWidget):
         self.programs["particle"] = OffsetColorCarryProgram(self.world.config_data.particle_model_file)
         self.programs["particle"].set_world_scaling(self.world.grid.get_scaling())
         self.programs["particle"].set_model_scaling(self.world.config_data.particle_scaling)
+        self.programs["particle"].set_animation(True)
 
         self.programs["tile"] = OffsetColorCarryProgram(self.world.config_data.tile_model_file)
         self.programs["tile"].set_world_scaling(self.world.grid.get_scaling())
         self.programs["tile"].set_model_scaling(self.world.config_data.tile_scaling)
+        self.programs["tile"].set_animation(True)
 
         self.programs["location"] = OffsetColorProgram(self.world.config_data.location_model_file)
         self.programs["location"].set_world_scaling(self.world.grid.get_scaling())
@@ -565,3 +571,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
     def enable_aa(self, value):
         GL.glEnable(GL.GL_MULTISAMPLE)
         self.fmt.setSamples(value)
+
+    def set_animation_percentage(self, animation_percentage):
+        self.programs["particle"].set_animation_percentage(animation_percentage)
+        self.programs["tile"].set_animation_percentage(animation_percentage)

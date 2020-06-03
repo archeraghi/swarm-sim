@@ -2,17 +2,25 @@ from PyQt5.QtGui import QColor, QIntValidator
 from PyQt5.QtWidgets import (QVBoxLayout, QPushButton, QColorDialog, QRadioButton, QLabel, QTabWidget,
                              QSlider, QHBoxLayout, QCheckBox, QTabBar, QLineEdit, QGroupBox, QComboBox, QStyle)
 from PyQt5.QtCore import Qt
+from lib.vis3d import Visualization
 from lib.visualization.utils import show_msg
+from lib.world import World
+
+# global variables for all te functions..
+world: World
+vis: Visualization
+simulation_tab: QTabBar
+start_stop_button: QPushButton
 
 
-def create_gui(w, v):
-    global world, vis, simtab
+def create_gui(w: World, v: Visualization):
+    global world, vis, simulation_tab
     world = w
     vis = v
     tabbar = QTabWidget()
     tabbar.setMinimumWidth(200)
-    simtab = sim_tab()
-    tabbar.addTab(simtab, "Simulation")
+    simulation_tab = sim_tab()
+    tabbar.addTab(simulation_tab, "Simulation")
     tabbar.addTab(vis_tab(), "Visualization")
     tabbar.addTab(grid_tab(), "Grid")
     tabbar.addTab(matter_tab(), "Matter")
@@ -21,8 +29,8 @@ def create_gui(w, v):
 
 
 def set_disable_sim(disable_flag):
-    global simtab
-    simtab.setDisabled(disable_flag)
+    global simulation_tab
+    simulation_tab.setDisabled(disable_flag)
 
 
 def key_handler(key, w, v):
@@ -294,6 +302,13 @@ def vis_tab():
     sens_slider_box.setLayout(vbox)
     layout.addWidget(sens_slider_box)
 
+    anim_box = QGroupBox("animation")
+    vbox = QVBoxLayout()
+    vbox.addWidget(get_animation_checkbox())
+    vbox.addLayout(get_auto_animation())
+    anim_box.setLayout(vbox)
+    layout.addWidget(anim_box)
+
     misc_box = QGroupBox("miscellaneous")
     vbox = QVBoxLayout()
     vbox.addLayout(get_antialiasing_combobox())
@@ -303,10 +318,48 @@ def vis_tab():
     vbox.addWidget(reset_position_button)
     misc_box.setLayout(vbox)
     layout.addWidget(misc_box)
+
     layout.addStretch(0)
     tab.setLayout(layout)
     return tab
 
+
+def get_animation_checkbox():
+    chkbx = QCheckBox("enable")
+    chkbx.setChecked(vis.get_animation())
+
+    def chkbx_click():
+        vis.set_animation(chkbx.isChecked())
+    chkbx.clicked.connect(chkbx_click)
+
+    return chkbx
+
+
+def get_auto_animation():
+
+    mss_label = QLabel("speed (%d steps per round):" % vis.get_manual_animation_speed())
+
+    def mss_change(value):
+        vis.set_manual_animation_speed(1000-value)
+        mss_label.setText("speed (%d step%s):" % (vis.get_manual_animation_speed(), '' if 1000-value == 1 else 's'))
+    mss = create_slider(1, 100, 999, 0, 1000-vis.get_manual_animation_speed(), mss_change, Qt.Horizontal)
+    mss.setDisabled(vis.get_auto_animation())
+    mss_label.setDisabled(vis.get_auto_animation())
+
+    chkbx = QCheckBox("automatic speed adjustment")
+    chkbx.setChecked(vis.get_auto_animation())
+
+    def chkbx_click():
+        mss.setDisabled(chkbx.isChecked())
+        mss_label.setDisabled(chkbx.isChecked())
+        vis.set_auto_animation(chkbx.isChecked())
+    chkbx.clicked.connect(chkbx_click)
+
+    vbox = QVBoxLayout()
+    vbox.addWidget(chkbx)
+    vbox.addWidget(mss_label)
+    vbox.addWidget(mss)
+    return vbox
 
 def grid_tab():
     tab = QTabBar()
@@ -501,7 +554,7 @@ def get_color_picker():
     def bg():
         qcd = QColorDialog()
         qcd.setCurrentColor(QColor.fromRgbF(*vis.get_background_color()))
-        cd.setWindowFlags(Qt.WindowStaysOnTopHint)
+        qcd.setWindowFlags(Qt.WindowStaysOnTopHint)
         qcd.exec()
         if qcd.result() == 1:
             vis.set_background_color((qcd.selectedColor().getRgbF()[:3]))

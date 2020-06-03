@@ -72,6 +72,10 @@ class ConfigData:
         self.show_border = config.getboolean("Visualization", "show_border")
         self.border_color = make_tuple(config.get("Visualization", "border_color"))
 
+        self.animation = config.getboolean("Visualization", "animation")
+        self.auto_animation = config.getboolean("Visualization", "auto_animation")
+        self.manual_animation_speed = config.getint("Visualization", "manual_animation_speed")
+
         self.size_x = config.getfloat("World", "size_x")
         self.size_y = config.getfloat("World", "size_y")
         self.size_z = config.getfloat("World", "size_z")

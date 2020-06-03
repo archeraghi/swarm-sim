@@ -3,6 +3,7 @@ import os
 from threading import Thread
 
 import cv2
+from OpenGL import GL
 from PyQt5.QtWidgets import QApplication, QSplitter, QWidget, QFileDialog
 
 from lib.visualization.recorder import Recorder
@@ -34,6 +35,9 @@ class Visualization:
         self._gui = None
         self._splitter = None
         self._recording = False
+        self._animation = world.config_data.animation
+        self._auto_animation = world.config_data.auto_animation
+        self._manual_animation_speed = world.config_data.manual_animation_speed
         self.light_rotation = False
         self.grid_size = world.grid.size
 
@@ -41,7 +45,7 @@ class Visualization:
         self._app = QApplication([])
 
         # create camera for the visualization
-        # if grid is 2D, set to ortho (ortho is better for 2D)
+        # if grid is 2D, set to orthographic projection (it is better for 2D)
         if self._world.grid.get_dimension_count() == 2:
             self._camera = Camera(self._world.config_data.window_size_x, self._world.config_data.window_size_y,
                                   self._world.config_data.look_at, self._world.config_data.phi,
@@ -97,6 +101,7 @@ class Visualization:
                 self._splitter.setSizes(
                     [self._world.config_data.window_size_x * 0.25, self._world.config_data.window_size_x * 0.75])
             else:
+                # noinspection PyUnresolvedReferences
                 show_msg("The create_gui(world, vis) function in gui module didn't return a QWidget." +
                          "Expected a QWidget or a subclass, but got %s."
                          % self._gui.__class__.__name__, 1)
@@ -193,6 +198,48 @@ class Visualization:
                 self.rotate_light()
             self._app.processEvents()
 
+    def animate(self, round_start_time, speed):
+        """
+        loop for animating the movement of particles and carried tiles
+        :param round_start_time: the start of the round
+        :param speed: speed of the animation in 1/steps. less or equal zero = automatic mode
+        """
+        if speed < 0:
+            # measure the drawing of one frame
+            start = time.perf_counter()
+            self._viewer.set_animation_percentage(0)
+            self._viewer.glDraw()
+            GL.glFinish()
+            frametime = time.perf_counter() - start
+
+            # using the rounds_per_second and the
+            # timestamp of the start of the round, calculate the time left for animation
+            timeleft = (1/self._rounds_per_second) - (time.perf_counter() - round_start_time)
+
+            # calculate the amount of animation steps we can do in the time left
+            steps = int(timeleft / frametime / 1.5)
+        else:
+            steps = speed
+
+        # animate
+        for i in range(1, steps):
+            self._viewer.set_animation_percentage(float(i/steps))
+            self._app.processEvents()
+            self._viewer.glDraw()
+
+        # draw the last frame. its outside of the loop, so that if steps is equal or less then one,
+        # the particles will still be drawn at the correct locations.
+        self._viewer.set_animation_percentage(1.0)
+        self._viewer.glDraw()
+
+        # reset the previous position after animation.
+        # not reseting it causes a small visual bug if the particle didn't move.
+        for particle in self._viewer.particle_offset_data:
+            current_data = self._viewer.particle_offset_data[particle]
+            self._viewer.particle_offset_data[particle] = (current_data[0], current_data[1], particle.coordinates,
+                                                           current_data[3])
+        self._viewer.particle_update_flag = True
+
     def run(self, round_start_timestamp):
         """
         main function for running the simulation with the visualization.
@@ -200,9 +247,13 @@ class Visualization:
         :param round_start_timestamp: timestamp of the start of the round.
         :return:
         """
-        # update and draw scene
+        # update and draw/animate scene
         self._viewer.update_data()
-        self._viewer.glDraw()
+        if self._animation:
+            self.animate(round_start_timestamp, -1 if self._auto_animation else self._manual_animation_speed)
+        else:
+            self._viewer.glDraw()
+
         # waiting until simulation starts
         self._wait_while_not_running()
         if self._recording:
@@ -242,7 +293,10 @@ class Visualization:
         :return:
         """
         self._viewer.particle_update_flag = True
-        self._viewer.particle_offset_data[particle] = (particle.coordinates, particle.color,
+        prev_pos = particle.coordinates
+        if particle in self._viewer.particle_offset_data:
+            prev_pos = self._viewer.particle_offset_data[particle][0]
+        self._viewer.particle_offset_data[particle] = (particle.coordinates, particle.color, prev_pos,
                                                        1.0 if particle.get_carried_status() else 0.0)
 
     def remove_tile(self, tile):
@@ -262,7 +316,11 @@ class Visualization:
         :return:
         """
         self._viewer.tile_update_flag = True
-        self._viewer.tile_offset_data[tile] = (tile.coordinates, tile.color, 1.0 if tile.get_tile_status() else 0.0)
+        prev_pos = tile.coordinates
+        if tile in self._viewer.tile_offset_data:
+            prev_pos = self._viewer.particle_offset_data[tile][0]
+        self._viewer.tile_offset_data[tile] = (tile.coordinates, tile.color, prev_pos,
+                                               1.0 if tile.get_tile_status() else 0.0)
 
     def remove_location(self, location):
         """
@@ -582,5 +640,22 @@ class Visualization:
         else:
             show_msg("Not implemented yet.\nWorks only with Triangular Grid for now!\nSorry!", 2)
 
+    def set_animation(self, animation):
+        if not animation:
+            self._viewer.set_animation_percentage(1)
+        self._animation = animation
 
+    def get_animation(self):
+        return self._animation
 
+    def set_auto_animation(self, auto_animation):
+        self._auto_animation = auto_animation
+
+    def get_auto_animation(self):
+        return self._auto_animation
+
+    def set_manual_animation_speed(self, manual_animation_speed):
+        self._manual_animation_speed = manual_animation_speed
+
+    def get_manual_animation_speed(self):
+        return self._manual_animation_speed
