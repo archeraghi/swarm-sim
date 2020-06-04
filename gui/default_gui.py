@@ -229,11 +229,12 @@ def get_new_matter_color_picker():
     cp_button = QPushButton("change color of new matter")
 
     def cp():
-        cd = QColorDialog()
-        cd.setWindowFlags(Qt.WindowStaysOnTopHint)
+        cd = QColorDialog(parent=vis.get_main_window())
+        cd.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         cd.setOptions(QColorDialog.ShowAlphaChannel)
         cd.setCurrentColor(QColor.fromRgbF(*vis.get_added_matter_color()))
         cd.exec()
+
         if cd.result() == 1:
             vis.set_added_matter_color((cd.selectedColor().getRgbF()))
 
@@ -330,19 +331,20 @@ def get_animation_checkbox():
 
     def chkbx_click():
         vis.set_animation(chkbx.isChecked())
+
     chkbx.clicked.connect(chkbx_click)
 
     return chkbx
 
 
 def get_auto_animation():
-
     mss_label = QLabel("speed (%d steps per round):" % vis.get_manual_animation_speed())
 
     def mss_change(value):
-        vis.set_manual_animation_speed(1000-value)
-        mss_label.setText("speed (%d step%s):" % (vis.get_manual_animation_speed(), '' if 1000-value == 1 else 's'))
-    mss = create_slider(1, 100, 999, 0, 1000-vis.get_manual_animation_speed(), mss_change, Qt.Horizontal)
+        vis.set_manual_animation_speed(1000 - value)
+        mss_label.setText("speed (%d step%s):" % (vis.get_manual_animation_speed(), '' if 1000 - value == 1 else 's'))
+
+    mss = create_slider(1, 100, 999, 0, 1000 - vis.get_manual_animation_speed(), mss_change, Qt.Horizontal)
     mss.setDisabled(vis.get_auto_animation())
     mss_label.setDisabled(vis.get_auto_animation())
 
@@ -353,6 +355,7 @@ def get_auto_animation():
         mss.setDisabled(chkbx.isChecked())
         mss_label.setDisabled(chkbx.isChecked())
         vis.set_auto_animation(chkbx.isChecked())
+
     chkbx.clicked.connect(chkbx_click)
 
     vbox = QVBoxLayout()
@@ -360,6 +363,7 @@ def get_auto_animation():
     vbox.addWidget(mss_label)
     vbox.addWidget(mss)
     return vbox
+
 
 def grid_tab():
     tab = QTabBar()
@@ -552,9 +556,9 @@ def get_color_picker():
     bg_button = QPushButton("background")
 
     def bg():
-        qcd = QColorDialog()
+        qcd = QColorDialog(parent=vis.get_main_window())
+        qcd.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         qcd.setCurrentColor(QColor.fromRgbF(*vis.get_background_color()))
-        qcd.setWindowFlags(Qt.WindowStaysOnTopHint)
         qcd.exec()
         if qcd.result() == 1:
             vis.set_background_color((qcd.selectedColor().getRgbF()[:3]))
@@ -564,9 +568,9 @@ def get_color_picker():
     lines_button = QPushButton("grid lines")
 
     def lines():
-        qcd = QColorDialog()
+        qcd = QColorDialog(parent=vis.get_main_window())
         qcd.setOption(QColorDialog.ShowAlphaChannel)
-        qcd.setWindowFlags(Qt.WindowStaysOnTopHint)
+        qcd.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         qcd.setCurrentColor(QColor.fromRgbF(*vis.get_grid_line_color()))
         qcd.exec()
         if qcd.result() == 1:
@@ -577,9 +581,8 @@ def get_color_picker():
     locs_button = QPushButton("grid coordinates")
 
     def locs():
-        qcd = QColorDialog()
-        qcd.setOption(QColorDialog.ShowAlphaChannel)
-        qcd.setWindowFlags(Qt.WindowStaysOnTopHint)
+        qcd = QColorDialog(parent=vis.get_main_window())
+        qcd.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         qcd.setCurrentColor(QColor.fromRgbF(*vis.get_grid_coordinates_color()))
         qcd.exec()
         if qcd.result() == 1:
@@ -590,9 +593,9 @@ def get_color_picker():
     brd_button = QPushButton("grid border")
 
     def brd():
-        qcd = QColorDialog()
+        qcd = QColorDialog(parent=vis.get_main_window())
         qcd.setOption(QColorDialog.ShowAlphaChannel)
-        qcd.setWindowFlags(Qt.WindowStaysOnTopHint)
+        qcd.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         qcd.setCurrentColor(QColor.fromRgbF(*vis.get_grid_border_color()))
         qcd.exec()
         if qcd.result() == 1:
