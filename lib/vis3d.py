@@ -677,3 +677,6 @@ class Visualization:
 
     def get_manual_animation_speed(self):
         return self._manual_animation_speed
+
+    def get_main_window(self):
+        return self._splitter
