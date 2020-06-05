@@ -19,7 +19,7 @@ class Particle(matter.Matter):
     def __init__(self, world, coordinates, color, particle_counter=0):
         """Initializing the particle constructor"""
         super().__init__(world, coordinates, color,
-                         type="particle", mm_size=world.config_data.particle_mm_size)
+                         matter_type="particle", mm_size=world.config_data.particle_mm_size)
         self.number = particle_counter
         self.__isCarried = False
         self.carried_tile = None
@@ -121,13 +121,13 @@ class Particle(matter.Matter):
             if self.world.config_data.type == 1:
                 if abs(direction_coord[0]) > self.world.get_x_size():
                     direction_coord = (
-                    -1 * (self.coordinates[0] - direction[0]), direction_coord[1], direction_coord[2])
+                        -1 * (self.coordinates[0] - direction[0]), direction_coord[1], direction_coord[2])
                 if abs(direction_coord[1]) > self.world.get_y_size():
                     direction_coord = (
-                    direction_coord[0], -1 * (self.coordinates[1] - direction[1]), direction_coord[2])
+                        direction_coord[0], -1 * (self.coordinates[1] - direction[1]), direction_coord[2])
                 if abs(direction_coord[2]) > self.world.get_z_size():
                     direction_coord = (
-                    direction_coord[0], direction_coord[1], -1 * (self.coordinates[2] - direction[2]))
+                        direction_coord[0], direction_coord[1], -1 * (self.coordinates[2] - direction[2]))
             else:
                 if abs(direction_coord[0]) > self.world.get_x_size():
                     direction_coord = (self.coordinates[0], direction_coord[1], direction_coord[2])
@@ -1079,6 +1079,7 @@ class Particle(matter.Matter):
             return False
 
     def set_color(self, color):
+
         super().set_color(color)
         if self.world.vis is not None:
             self.world.vis.particle_changed(self)

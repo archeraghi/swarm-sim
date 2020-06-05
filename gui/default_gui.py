@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (QVBoxLayout, QPushButton, QColorDialog, QRadioButto
                              QSlider, QHBoxLayout, QCheckBox, QTabBar, QLineEdit, QGroupBox, QComboBox, QStyle)
 from PyQt5.QtCore import Qt
 from lib.vis3d import Visualization
-from lib.visualization.utils import show_msg
+from lib.visualization.utils import show_msg, Level
 from lib.world import World
 
 # global variables for all te functions..
@@ -78,10 +78,12 @@ def create_slider(tick_interval: int, tick_position: int, max_position: int, min
     slider.setMaximum(max_position)
     slider.setMinimum(min_position)
     slider.setSliderPosition(slider_position)
+    # noinspection PyUnresolvedReferences
     slider.valueChanged.connect(callback)
     return slider
 
 
+# noinspection PyUnresolvedReferences
 def sim_tab():
     tab = QTabBar()
     layout = QVBoxLayout()
@@ -225,6 +227,7 @@ def sim_tab():
     return tab
 
 
+# noinspection PyUnresolvedReferences
 def get_new_matter_color_picker():
     cp_button = QPushButton("change color of new matter")
 
@@ -242,6 +245,7 @@ def get_new_matter_color_picker():
     return cp_button
 
 
+# noinspection PyUnresolvedReferences
 def get_matter_radios():
     p_radio = QRadioButton("particle")
     p_radio.setChecked(False)
@@ -285,6 +289,7 @@ def get_rps_slider():
     return hbox
 
 
+# noinspection PyUnresolvedReferences
 def vis_tab():
     tab = QTabBar()
     layout = QVBoxLayout()
@@ -325,6 +330,7 @@ def vis_tab():
     return tab
 
 
+# noinspection PyUnresolvedReferences
 def get_animation_checkbox():
     chkbx = QCheckBox("enable")
     chkbx.setChecked(vis.get_animation())
@@ -337,6 +343,7 @@ def get_animation_checkbox():
     return chkbx
 
 
+# noinspection PyUnresolvedReferences
 def get_auto_animation():
     mss_label = QLabel("speed (%d steps per round):" % vis.get_manual_animation_speed())
 
@@ -520,6 +527,7 @@ def get_rota_sens_slider():
     return hbox
 
 
+# noinspection PyUnresolvedReferences
 def get_projection_switch():
     vbox = QVBoxLayout()
     desc = QLabel("projection type:")
@@ -552,6 +560,7 @@ def get_projection_switch():
     return vbox
 
 
+# noinspection PyUnresolvedReferences
 def get_color_picker():
     bg_button = QPushButton("background")
 
@@ -630,6 +639,7 @@ def get_render_distance_slider():
     return vbox
 
 
+# noinspection PyUnresolvedReferences
 def get_vis_show_checkboxes():
     center_cb = QCheckBox()
     center_cb.setText("show center")
@@ -665,6 +675,7 @@ def get_vis_show_checkboxes():
     return vbox
 
 
+# noinspection PyUnresolvedReferences
 def get_show_checkboxes():
     lines_cb = QCheckBox()
     lines_cb.setText("show lines")
@@ -729,6 +740,7 @@ def get_grid_coordinates_scale_slider():
     return vbox
 
 
+# noinspection PyUnresolvedReferences
 def recalculate_grid():
     hbox = QHBoxLayout()
     rec_button = QPushButton("update grid with size:")
@@ -741,7 +753,7 @@ def recalculate_grid():
         if size_edit.text().isnumeric():
             vis.recalculate_grid(int(size_edit.text()))
         else:
-            show_msg("Grid size has to be a number.", 2)
+            show_msg("Grid size has to be a number.", Level.WARNING, vis.get_main_window())
 
     rec_button.clicked.connect(on_click)
 
@@ -751,6 +763,7 @@ def recalculate_grid():
     return hbox
 
 
+# noinspection PyUnresolvedReferences
 def get_antialiasing_combobox():
     hbox = QHBoxLayout()
     combo = QComboBox()

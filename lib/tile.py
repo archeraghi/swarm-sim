@@ -7,7 +7,7 @@ class Tile(matter.Matter):
     """In the classe marker all the methods for the characterstic of a marker is included"""
     def __init__(self, world, coordinates, color):
         """Initializing the marker constructor"""
-        super().__init__(world, coordinates, color,  type="tile", mm_size=world.config_data.tile_mm_size)
+        super().__init__(world, coordinates, color, matter_type="tile", mm_size=world.config_data.tile_mm_size)
         self.__isCarried = False
 
     def get_tile_status(self):
@@ -31,7 +31,6 @@ class Tile(matter.Matter):
         """
         Takes the tile on the given coordinate if it is not taken
 
-        :param coordinates: Coordination of tile that should be taken
         :return: True: Successful taken; False: Cannot be taken or wrong Coordinates
         """
 

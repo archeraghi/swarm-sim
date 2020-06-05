@@ -2,9 +2,8 @@ import OpenGL.GL as GL
 from PIL import Image
 from PyQt5 import QtOpenGL, QtGui, QtCore
 from PyQt5.QtGui import QOpenGLFramebufferObject, QOpenGLFramebufferObjectFormat
-from PyQt5.QtWidgets import QFileDialog
 
-from lib.visualization.utils import MatterInfoFrame
+from lib.visualization.utils import MatterInfoFrame, TopQFileDialog
 from lib.visualization.programs.offset_color_carry_program import OffsetColorCarryProgram
 from lib.visualization.programs.offset_color_program import OffsetColorProgram
 from lib.visualization.programs.grid_program import GridProgram
@@ -13,7 +12,7 @@ import cv2
 import os
 import datetime
 
-from lib.visualization.utils import show_msg
+from lib.visualization.utils import VisualizationError, Level
 
 
 class OGLWidget(QtOpenGL.QGLWidget):
@@ -510,26 +509,27 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
                 # checks if the file exists. If not, some unknown error occured in the Image library.
                 if not os.path.exists(filename) or not os.path.isfile(filename):
-                    show_msg("Screenshot couldn't be saved due to an unknown reason.", 2)
+                    raise VisualizationError("Screenshot couldn't be saved due to an unknown reason.", Level.WARNING)
             else:
-                show_msg("Couldn't create the screenshot folder.", 2)
+                raise VisualizationError("Couldn't create the screenshot folder.", Level.WARNING)
+
         else:
             directory = "."
             if os.path.exists("screenshots") and os.path.isdir("screenshots"):
                 directory = "screenshots"
 
-            path = QFileDialog().getSaveFileName(options=(QFileDialog.Options()),
-                                                 filter="*.jpg;;*.png;;*.bmp",
-                                                 directory=directory)
+            path = TopQFileDialog(self.world.vis.get_main_window()).getSaveFileName(options=(TopQFileDialog.Options()),
+                                                                                    filter="*.jpg;;*.png;;*.bmp",
+                                                                                    directory=directory)
 
             if path[0] == '':
                 return
 
             if path[0].endswith(".jpg") or path[0].endswith(".jpeg") or \
-                path[0].endswith(".png") or path[0].endswith(".bmp"):
+                    path[0].endswith(".png") or path[0].endswith(".bmp"):
                 i.save(path[0])
             else:
-                i.save(path[0]+path[1].replace('*', ''))
+                i.save(path[0] + path[1].replace('*', ''))
 
     def set_background_color(self, color):
         self.background = color
@@ -568,6 +568,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
     def disable_aa(self):
         GL.glDisable(GL.GL_MULTISAMPLE)
+        self.glDraw()
 
     def enable_aa(self, value):
         GL.glEnable(GL.GL_MULTISAMPLE)

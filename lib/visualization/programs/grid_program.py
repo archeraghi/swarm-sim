@@ -3,7 +3,7 @@ import OpenGL.GL as GL
 import numpy as np
 import ctypes
 
-from lib.visualization.utils import show_msg
+from lib.visualization.utils import VisualizationError, Level
 
 
 class GridProgram(Program):
@@ -160,10 +160,11 @@ class GridProgram(Program):
 
         gpu_data = np.array(color, dtype=np.float32).flatten()
         if len(gpu_data) != 4:
-            show_msg("Length of set_line_color parameter not correct, expected 4 got %d " % len(gpu_data), 2)
-        else:
-            loc = self.get_uniform_location("line_color")
-            GL.glUniform4f(loc, *gpu_data)
+            raise VisualizationError(
+                "Length of set_line_color parameter not correct, expected 4 got %d " % len(gpu_data),
+                Level.WARNING)
+        loc = self.get_uniform_location("line_color")
+        GL.glUniform4f(loc, *gpu_data)
 
     def get_line_color(self):
         """
@@ -182,10 +183,11 @@ class GridProgram(Program):
 
         gpu_data = np.array(color, dtype=np.float32).flatten()
         if len(gpu_data) != 4:
-            show_msg("Length of set_border_color parameter not correct, expected 4 got %d " % len(gpu_data), 2)
-        else:
-            loc = self.get_uniform_location("border_color")
-            GL.glUniform4f(loc, *gpu_data)
+            raise VisualizationError(
+                "Length of set_border_color parameter not correct, expected 4 got %d " % len(gpu_data),
+                Level.WARNING)
+        loc = self.get_uniform_location("border_color")
+        GL.glUniform4f(loc, *gpu_data)
 
     def get_border_color(self):
         """
@@ -203,10 +205,11 @@ class GridProgram(Program):
         self.use()
         gpu_data = np.array(color, dtype=np.float32).flatten()
         if len(gpu_data) != 4:
-            show_msg("Length of set_model_color parameter not correct, expected 4 got %d " % len(gpu_data), 2)
-        else:
-            loc = self.get_uniform_location("model_color")
-            GL.glUniform4f(loc, *gpu_data)
+            raise VisualizationError(
+                "Length of set_model_color parameter not correct, expected 4 got %d " % len(gpu_data),
+                Level.WARNING)
+        loc = self.get_uniform_location("model_color")
+        GL.glUniform4f(loc, *gpu_data)
 
     def get_model_color(self):
         """
@@ -229,10 +232,11 @@ class GridProgram(Program):
         self.use()
         gpu_data = np.array(scaling, dtype=np.float32).flatten()
         if len(gpu_data) != 3:
-            show_msg("Length of set_line_scaling parameter not correct, expected 3 got %d " % len(gpu_data), 2)
-        else:
-            loc = self.get_uniform_location("line_scaling")
-            GL.glUniform3f(loc, *gpu_data)
+            raise VisualizationError(
+                "Length of set_line_scaling parameter not correct, expected 3 got %d " % len(gpu_data),
+                Level.WARNING)
+        loc = self.get_uniform_location("line_scaling")
+        GL.glUniform3f(loc, *gpu_data)
 
     def get_line_scaling(self):
         """

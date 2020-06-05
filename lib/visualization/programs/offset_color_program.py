@@ -4,7 +4,7 @@ from lib.visualization.programs.program import Program
 import numpy as np
 import ctypes
 
-from lib.visualization.utils import show_msg
+from lib.visualization.utils import VisualizationError, Level
 
 
 class OffsetColorProgram(Program):
@@ -77,4 +77,6 @@ class OffsetColorProgram(Program):
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.vbos[2])
         GL.glBufferData(GL.GL_ARRAY_BUFFER, gpu_data.nbytes, gpu_data, GL.GL_DYNAMIC_DRAW)
         if len(gpu_data) % 4.0 != 0.0:
-            show_msg("Invalid color data! Amount of color components not dividable by 4 (not in rgba format?)!", 2)
+            raise VisualizationError(
+                "Invalid color data! Amount of color components not dividable by 4 (not in rgba format?)!",
+                Level.WARNING)

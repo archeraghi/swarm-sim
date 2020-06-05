@@ -2,7 +2,7 @@ import OpenGL.GL as GL
 import ctypes
 import numpy as np
 from lib.visualization.programs.offset_color_program import OffsetColorProgram
-from lib.visualization.utils import show_msg
+from lib.visualization.utils import VisualizationError, Level
 
 
 class OffsetColorCarryProgram(OffsetColorProgram):
@@ -66,8 +66,8 @@ class OffsetColorCarryProgram(OffsetColorProgram):
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.vbos[3])
         GL.glBufferData(GL.GL_ARRAY_BUFFER, gpu_data.nbytes, gpu_data, GL.GL_DYNAMIC_DRAW)
         if len(gpu_data) % 3.0 != 0.0:
-            show_msg("Invalid previous positions data! Amount of coordinate "
-                     "components not dividable by 3 (not in xyz format?)!", 2)
+            raise VisualizationError("Invalid previous positions data! Amount of coordinate "
+                                     "components not dividable by 3 (not in xyz format?)!", Level.WARNING)
 
     def set_animation(self, animation: bool):
         """

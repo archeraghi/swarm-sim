@@ -1,7 +1,8 @@
 import numpy as np
 
 from lib.visualization.utils import (get_perspetive_projection_matrix, get_orthographic_projection_matrix,
-                                     get_look_at_matrix, get_translation_matrix, show_msg)
+                                     get_look_at_matrix, get_translation_matrix, VisualizationError,
+                                     Level)
 
 
 class Camera:
@@ -90,10 +91,10 @@ class Camera:
                                                                         -self._radius, self._radius,
                                                                         0.001, self._render_distance)
         else:
-            show_msg("Unknown projection type: \"" + self._projection_type +
-                     "\"! Setting projection to perspective.", 1)
             self._projection_type = "perspective"
             self.projection_matrix = get_perspetive_projection_matrix(self._fov, self._aspect, 1, self._render_distance)
+            raise VisualizationError("Unknown projection type: \"" + self._projection_type +
+                                     "\"! Setting projection to perspective.", Level.INFO)
 
     def _update_view(self):
         self.view_matrix = get_look_at_matrix(self._position, self._look_at, np.array([0, 1, 0], dtype=np.float32))

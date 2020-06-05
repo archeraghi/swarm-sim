@@ -4,14 +4,14 @@ from threading import Thread
 
 import cv2
 from OpenGL import GL
-from PyQt5.QtWidgets import QApplication, QSplitter, QWidget, QFileDialog
+from PyQt5.QtWidgets import QApplication, QSplitter, QWidget
 
 from lib.visualization.recorder import Recorder
 from lib.visualization.OGLWidget import OGLWidget
 import time
 from lib.visualization.camera import Camera
 from lib.visualization.toms_svg_generator import create_svg
-from lib.visualization.utils import LoadingWindow, show_msg
+from lib.visualization.utils import LoadingWindow, show_msg, TopQFileDialog, VisualizationError, Level
 
 
 class ResetException(Exception):
@@ -94,7 +94,7 @@ class Visualization:
             self._viewer.keyPressEventHandler = key_press_event
             self._splitter.keyPressEvent = key_press_event
         else:
-            show_msg("No key_handler(key, vis) function found in gui module!", 1)
+            show_msg("No key_handler(key, vis) function found in gui module!", 1, self._splitter)
 
         # loading gui from gui module
         if "create_gui" in dir(self._gui_module):
@@ -110,11 +110,11 @@ class Visualization:
                 # noinspection PyUnresolvedReferences
                 show_msg("The create_gui(world, vis) function in gui module didn't return a QWidget." +
                          "Expected a QWidget or a subclass, but got %s."
-                         % self._gui.__class__.__name__, 1)
+                         % self._gui.__class__.__name__, 1, self._splitter)
                 self._splitter.addWidget(self._viewer)
 
         else:
-            show_msg("No create_gui(world, vis) function found in gui module. GUI not created", 1)
+            show_msg("No create_gui(world, vis) function found in gui module. GUI not created", 1, self._splitter)
             self._splitter.addWidget(self._viewer)
 
         # waiting for the simulation window to be fully active
@@ -165,7 +165,10 @@ class Visualization:
             self._gui.setDisabled(True)
         thread.start()
         while thread.is_alive():
-            self._process_events()
+            try:
+                self._process_events()
+            except VisualizationError:
+                print("jooo")
         thread.join()
         loading_window.close()
         self._gui.setDisabled(False)
@@ -260,7 +263,30 @@ class Visualization:
     def run(self, round_start_timestamp):
         """
         main function for running the simulation with the visualization.
-        Controlls the waiting time, so the rounds_per_second value is being kept.
+        At this time, its just error handling here.. the simulation and drawing stuff starts in the run_iteration method
+        :param round_start_timestamp: timestamp of the start of the round.
+        :return:
+        """
+        try:
+            self._run_iteration(round_start_timestamp)
+        except VisualizationError as ve:
+            if ve.level == Level.INFO:
+                show_msg(ve.msg, ve.level, self.get_main_window())
+            if ve.level == Level.CRITICAL:
+                show_msg(ve.msg, ve.level, self.get_main_window())
+                exit(1)
+            if ve.level == Level.WARNING:
+                try:
+                    self._run_iteration(round_start_timestamp)
+                    show_msg(ve.msg, ve.level, self.get_main_window())
+                except VisualizationError as ve:
+                    show_msg(ve.msg, ve.level, self.get_main_window())
+                    if ve.level != Level.INFO:
+                        exit(1)
+
+    def _run_iteration(self, round_start_timestamp):
+        """
+        Controls the "waiting time", so the rounds_per_second value is being kept at the specified value.
         :param round_start_timestamp: timestamp of the start of the round.
         :return:
         """
@@ -273,16 +299,18 @@ class Visualization:
 
         # waiting until simulation starts
         self._wait_while_not_running()
+
+        # record round
         if self._recording:
             self.recorder.record_round()
             self._splitter.setWindowTitle("Simulator, recorded: %d rounds" % len(self.recorder.records))
+
         # waiting until enough time passed to do the next simulation round.
         time_elapsed = time.perf_counter() - round_start_timestamp
-        # sleeping time - max 1/120 for a responsive GUI
+        # sleeping time - max 1/120 s for a responsive GUI
         sleep_time = min(1.0 / 120, (1.0 / self._rounds_per_second) / 10.0)
         max_wait_time = 1 / self._rounds_per_second
         while time_elapsed < max_wait_time:
-            # waiting for 1/100 of the round_time
             time.sleep(sleep_time)
             # check if still running... if not wait (important for low rounds_per_second values)
             self._wait_while_not_running()
@@ -554,7 +582,7 @@ class Visualization:
 
     def export_recording(self):
         if len(self.recorder.records) == 0:
-            show_msg("No rounds recorded. Nothing to export.", 0)
+            show_msg("No rounds recorded. Nothing to export.", 0, self._splitter)
             return
         if self._running:
             self.start_stop()
@@ -564,7 +592,7 @@ class Visualization:
             self._gui_module.set_disable_sim(True)
         else:
             show_msg("No 'set_disable_sim(disable_flag)' function in gui module found."
-                     "\nRunning simulation within recording mode may result in undefined behavior!", 1)
+                     "\nRunning simulation within recording mode may result in undefined behavior!", 1, self._splitter)
 
         self.recorder.show(self.do_export)
 
@@ -590,10 +618,9 @@ class Visualization:
         directory = "."
         if os.path.exists("videos") and os.path.isdir("videos"):
             directory = "videos"
-
-        path = QFileDialog().getSaveFileName(options=(QFileDialog.Options()),
-                                             filter="*.mp4;;*.avi;;*.mkv",
-                                             directory=directory)
+        path = TopQFileDialog(self._splitter).getSaveFileName(options=(TopQFileDialog.Options()),
+                                                              filter="*.mp4;;*.avi;;*.mkv",
+                                                              directory=directory)
         if path[0] == '':
             return
 
@@ -603,13 +630,13 @@ class Visualization:
             fullpath = path[0] + path[1].replace('*', '')
 
         if animation:
-            animation_steps = int(30/rps)
+            animation_steps = int(30 / rps)
             if animation_steps < 1:
                 animation_steps = 1
         else:
             animation_steps = 1
 
-        writer = cv2.VideoWriter(fullpath, cv2.VideoWriter_fourcc(*codec), rps*animation_steps, (width, height))
+        writer = cv2.VideoWriter(fullpath, cv2.VideoWriter_fourcc(*codec), rps * animation_steps, (width, height))
         self._viewer.setDisabled(True)
         # creating and opening loading window
         lw = LoadingWindow("", "Exporting Video...")
@@ -619,11 +646,11 @@ class Visualization:
             # render and write frame
             self._viewer.inject_record_data(self.recorder.records[i])
             # animate
-            for j in range(1, animation_steps+1):
+            for j in range(1, animation_steps + 1):
                 # process events so the gui thread does respond to interactions..
                 self._process_events()
                 # update loading windows text and progress bar
-                processing = (i - first_frame_idx + 1)*animation_steps + j
+                processing = (i - first_frame_idx + 1) * animation_steps + j
                 lw.set_message("Please wait!\nExporting frame %d/%d..." % (processing, out_of))
                 lw.set_progress(processing, out_of)
                 self._viewer.set_animation_percentage(j / animation_steps)
@@ -636,7 +663,7 @@ class Visualization:
         self._viewer.setDisabled(False)
         self._viewer.resizeGL(self._viewer.width(), self._viewer.height())
         self._viewer.update_scene()
-        show_msg("Video exported successfully!", 0)
+        show_msg("Video exported successfully!", 0, self._splitter)
 
     def delete_recording(self):
         self.recorder = Recorder(self._world, self._viewer)
@@ -656,9 +683,9 @@ class Visualization:
             if os.path.exists("screenshots") and os.path.isdir("screenshots"):
                 directory = "screenshots"
 
-            path = QFileDialog().getSaveFileName(options=(QFileDialog.Options()),
-                                                 filter="*.svg",
-                                                 directory=directory)
+            path = TopQFileDialog(self._splitter).getSaveFileName(options=(TopQFileDialog.Options()),
+                                                                  filter="*.svg",
+                                                                  directory=directory)
             if path[0] == '':
                 return
 
@@ -667,7 +694,7 @@ class Visualization:
             else:
                 create_svg(self._world, path[0] + ".svg")
         else:
-            show_msg("Not implemented yet.\nWorks only with Triangular Grid for now!\nSorry!", 2)
+            show_msg("Not implemented yet.\nWorks only with Triangular Grid for now!\nSorry!", 1, self._splitter)
 
     def set_animation(self, animation):
         if not animation:

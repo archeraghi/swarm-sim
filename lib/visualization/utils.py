@@ -1,11 +1,10 @@
+from enum import Enum
 
 import numpy as np
-from PyQt5.QtGui import QCloseEvent, QIcon
-from PyQt5.QtMultimedia import QMediaPlayer
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QProgressBar, QMessageBox, QFrame, QPushButton, \
-    QStyle
+from PyQt5.QtGui import QCloseEvent
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QProgressBar, QMessageBox, QFrame, QFileDialog
 from PyQt5.QtCore import Qt
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore
 
 
 def normalize(v):
@@ -83,20 +82,26 @@ def get_perspetive_projection_matrix(fov, aspect, znear, zfar):
     return pers_matrix
 
 
-def show_msg(text, level):
-    msg = QMessageBox()
+def show_msg(text, level, prnt):
+    if prnt is not None:
+        msg = QMessageBox(parent=prnt)
+    else:
+        msg = QMessageBox()
     msg.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, True)
-    if level == 0:
+    if level == Level.INFO:
         msg.setIcon(QMessageBox.Information)
         msg.setWindowTitle("Information")
-    elif level == 1:
+    elif level == Level.WARNING:
         msg.setIcon(QMessageBox.Warning)
         msg.setWindowTitle("Warning")
-    else:
+    elif level == Level.CRITICAL:
         msg.setIcon(QMessageBox.Critical)
         msg.setWindowTitle("Error")
+    else:
+        msg.setWindowTitle("UNKNOWN MESSAGE LEVEL")
+
     msg.setText(text)
-    return msg.exec_()
+    msg.exec_()
 
 
 def load_obj_file(file_path: str):
@@ -111,7 +116,7 @@ def load_obj_file(file_path: str):
     try:
         model_file = open(file_path, "r").readlines()
     except IOError as e:
-        show_msg("Cannot open the model file (%s):\n\n%s" % (file_path, str(e)), 2)
+        show_msg("Cannot open the model file (%s):\n\n%s" % (file_path, str(e)), Level.CRITICAL, None)
         exit(1)
 
     vertices = []
@@ -224,3 +229,22 @@ class MatterInfoFrame(QFrame):
             counter += 1
         self.text.setText(info_text)
         self.adjustSize()
+
+
+class Level(Enum):
+    INFO = 0
+    WARNING = 1
+    CRITICAL = 2
+
+
+class VisualizationError(Exception):
+    def __init__(self, msg, level: Level):
+        super(VisualizationError, self).__init__(msg)
+        self.level = level
+        self.msg = msg
+
+
+class TopQFileDialog(QFileDialog):
+    def __init__(self, parent):
+        super(TopQFileDialog, self).__init__(parent=parent)
+        self.setWindowFlag(Qt.WindowStaysOnTopHint, True)

@@ -1,4 +1,3 @@
-
 from lib.vis3d import Visualization
 from lib.world import World
 

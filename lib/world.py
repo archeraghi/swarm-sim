@@ -11,10 +11,15 @@ import threading
 import os
 import datetime
 
-from PyQt5.QtWidgets import QFileDialog
-
 from lib import csv_generator, particle, tile, location, vis3d
-from lib.visualization.utils import show_msg
+from lib.visualization.utils import show_msg, TopQFileDialog, VisualizationError, Level
+
+
+def load_scenario(mod, world):
+    try:
+        mod.scenario(world)
+    except VisualizationError as ve:
+        world._scenario_load_error = ve
 
 
 class World:
@@ -67,20 +72,8 @@ class World:
         else:
             self.vis = None
 
-        mod = importlib.import_module('solution.' + self.config_data.solution)
-        importlib.reload(mod)
-
-        mod = importlib.import_module('scenario.' + self.config_data.scenario)
-
-        if config_data.visualization:
-            import threading
-            x = threading.Thread(target=mod.scenario, args=(self,))
-            self.vis.wait_for_thread(x, "loading scenario... please wait.", "Loading Scenario")
-        else:
-            mod.scenario(self)
-
-        if self.config_data.particle_random_order:
-            random.shuffle(self.particles)
+        self._scenario_load_error = None
+        self.init_modules()
 
     def reset(self):
         """
@@ -120,6 +113,9 @@ class World:
         if self.config_data.visualization:
             self.vis.reset()
 
+        self.init_modules()
+
+    def init_modules(self):
         # reload solution module (resets global variables)
         mod = importlib.import_module('solution.' + self.config_data.solution)
         importlib.reload(mod)
@@ -130,8 +126,12 @@ class World:
 
         if self.config_data.visualization:
             # if visualization is on, run the scenario in a separate thread and show that the program runs..
-            x = threading.Thread(target=mod.scenario, args=(self,))
+            x = threading.Thread(target=load_scenario, args=(mod, self,))
             self.vis.wait_for_thread(x, "loading scenario... please wait.", "Loading Scenario")
+            if self._scenario_load_error is not None:
+                show_msg("Error while loading Scenario:\n%s" % self._scenario_load_error.msg, Level.CRITICAL,
+                         self.vis.get_main_window())
+                exit(1)
             self.vis.update_visualization_data()
 
         else:
@@ -147,16 +147,16 @@ class World:
             try:
                 f = open(fn, "w+")
                 f.write("def scenario(world):\n")
-                for p in self.particle_map_coordinates.values():
-                    f.write("\tworld.add_particle(%s, color=%s)\n" % (str(p.coordinates), str(p.get_color())))
-                for t in self.tile_map_coordinates.values():
-                    f.write("\tworld.add_tile(%s, color=%s)\n" % (str(t.coordinates), str(t.get_color())))
-                for l in self.location_map_coordinates.values():
-                    f.write("\tworld.add_location(%s, color=%s)\n" % (str(l.coordinates), str(l.get_color())))
+                for prtc in self.particle_map_coordinates.values():
+                    f.write("\tworld.add_particle(%s, color=%s)\n" % (str(prtc.coordinates), str(prtc.get_color())))
+                for tl in self.tile_map_coordinates.values():
+                    f.write("\tworld.add_tile(%s, color=%s)\n" % (str(tl.coordinates), str(tl.get_color())))
+                for lctn in self.location_map_coordinates.values():
+                    f.write("\tworld.add_location(%s, color=%s)\n" % (str(lctn.coordinates), str(lctn.get_color())))
                 f.flush()
                 f.close()
             except IOError as e:
-                show_msg("Couldn't save scenario.\n%s" % e, 2)
+                show_msg("Couldn't save scenario.\n%s" % e, Level.WARNING, self.vis.get_main_window())
 
         # create scenario folder, if it doesn't already exist.
         if not os.path.exists("scenario") or not os.path.isdir("scenario"):
@@ -171,16 +171,17 @@ class World:
                 save_scenario(filename)
                 # checks if the file exists. If not, some unknown error occured while saving.
                 if not os.path.exists(filename) or not os.path.isfile(filename):
-                    show_msg("Error: scenario couldn't be saved due to an unknown reason.", 1)
+                    show_msg("Error: scenario couldn't be saved due to an unknown reason.", Level.WARNING,
+                             self.vis.get_main_window())
             else:
-                show_msg("\"scenario\" folder couldn't be created.", 1)
+                show_msg("\"scenario\" folder couldn't be created.", Level.WARNING, self.vis.get_main_window())
         else:
             directory = "."
             if os.path.exists("scenario") and os.path.isdir("scenario"):
                 directory = "scenario"
-            path = QFileDialog().getSaveFileName(options=QFileDialog.Options(),
-                                                 filter="*.py",
-                                                 directory=directory)
+            path = TopQFileDialog(self.vis.get_main_window()).getSaveFileName(options=TopQFileDialog.Options(),
+                                                                              filter="*.py",
+                                                                              directory=directory)
 
             if path[0] == '':
                 return
@@ -188,8 +189,7 @@ class World:
             if path[0].endswith(".py"):
                 save_scenario(path[0])
             else:
-                save_scenario(path[0]+".py")
-
+                save_scenario(path[0] + ".py")
 
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()
@@ -205,7 +205,7 @@ class World:
 
     def set_successful_round(self):
         self.csv_round.success()
-        
+
     def get_max_round(self):
         """
         The max round number
@@ -396,6 +396,7 @@ class World:
 
         :param coordinates: The x coordinate of the particle
         :param color: The color of the particle
+        :param new_class: the Particle class to be created (default: particle.Particle)
         :return: Added Matter; False: Unsuccessful
         """
         if isinstance(coordinates, int) or isinstance(coordinates, float):

@@ -2,7 +2,7 @@ import OpenGL.GL as GL
 from abc import ABC, abstractmethod
 import numpy as np
 
-from lib.visualization.utils import load_obj_file, show_msg
+from lib.visualization.utils import load_obj_file, show_msg, VisualizationError, Level
 
 
 class Program(ABC):
@@ -21,21 +21,17 @@ class Program(ABC):
         # loading shader source files
         self._vertex = GL.glCreateShader(GL.GL_VERTEX_SHADER)
         self._fragment = GL.glCreateShader(GL.GL_FRAGMENT_SHADER)
-
-        vert_source = ""
-        frag_source = ""
+        self.amount = 0
 
         try:
             vert_source = open(vertex_file).read()
         except IOError as e:
-            show_msg("Vertex shader file couldn't be loaded:\n%s" % str(e), 2)
-            exit(1)
+            raise VisualizationError("Vertex shader file couldn't be loaded:\n%s" % str(e), Level.CRITICAL)
 
         try:
             frag_source = open(fragment_file).read()
         except IOError as e:
-            show_msg("Fragment shader file couldn't be loaded:\n%s" % str(e), 2)
-            exit(1)
+            raise VisualizationError("Fragment shader file couldn't be loaded:\n%s" % str(e), Level.CRITICAL)
 
         self.vbos = []
         self._init_shaders(vert_source, frag_source)
@@ -93,15 +89,13 @@ class Program(ABC):
         GL.glCompileShader(self._vertex)
         if not GL.glGetShaderiv(self._vertex, GL.GL_COMPILE_STATUS):
             e = GL.glGetShaderInfoLog(self._vertex).decode()
-            show_msg("Vertex shader couldn't be compiled:\n%s" % str(e), 2)
-            exit(1)
+            raise VisualizationError("Vertex shader couldn't be compiled:\n%s" % str(e), Level.CRITICAL)
 
         # compile fragment shader
         GL.glCompileShader(self._fragment)
         if not GL.glGetShaderiv(self._fragment, GL.GL_COMPILE_STATUS):
             e = GL.glGetShaderInfoLog(self._fragment).decode()
-            show_msg("Fragment shader couldn't be compiled:\n%s" % str(e), 2)
-            exit(1)
+            raise VisualizationError("Fragment shader couldn't be compiled:\n%s" % str(e), Level.CRITICAL)
 
         # attach the shaders to the matter program
         GL.glAttachShader(self._program, self._vertex)
@@ -111,8 +105,7 @@ class Program(ABC):
         GL.glLinkProgram(self._program)
         if not GL.glGetProgramiv(self._program, GL.GL_LINK_STATUS):
             e = GL.glGetProgramInfoLog(self._program)
-            show_msg("The shaders couldn't be linked to program:\n%s" % str(e), 2)
-            exit(1)
+            raise VisualizationError("The shaders couldn't be linked to program:\n%s" % str(e), Level.CRITICAL)
 
         # detach the shaders from matter program
         GL.glDetachShader(self._program, self._vertex)
@@ -170,7 +163,9 @@ class Program(ABC):
         self.use()
         gpu_data = np.array(projection_matrix, dtype=np.float32).flatten()
         if len(gpu_data) != 16:
-            show_msg("Length of set_projection_matrix parameter not correct, expected 16 got %d " % len(gpu_data), 2)
+            raise VisualizationError(
+                "Length of set_projection_matrix parameter not correct, expected 16 got %d " % len(gpu_data),
+                Level.CRITICAL)
         else:
             loc = self.get_uniform_location("projection")
             GL.glUniformMatrix4fv(loc, 1, False, projection_matrix)
@@ -192,7 +187,9 @@ class Program(ABC):
         self.use()
         gpu_data = np.array(view_matrix, dtype=np.float32).flatten()
         if len(gpu_data) != 16:
-            show_msg("Length of set_view_matrix parameter not correct, expected 16 got %d " % len(gpu_data), 2)
+            raise VisualizationError(
+                "Length of set_view_matrix parameter not correct, expected 16 got %d " % len(gpu_data),
+                Level.WARNING)
         else:
             loc = self.get_uniform_location("view")
             GL.glUniformMatrix4fv(loc, 1, False, view_matrix)
@@ -214,7 +211,9 @@ class Program(ABC):
         self.use()
         gpu_data = np.array(world_matrix, dtype=np.float32).flatten()
         if len(gpu_data) != 16:
-            show_msg("Length of set_world_matrix parameter not correct, expected 16 got %d " % len(gpu_data), 2)
+            raise VisualizationError(
+                "Length of set_world_matrix parameter not correct, expected 16 got %d " % len(gpu_data),
+                Level.WARNING)
         else:
             loc = self.get_uniform_location("world")
             GL.glUniformMatrix4fv(loc, 1, False, world_matrix)
@@ -236,7 +235,9 @@ class Program(ABC):
         self.use()
         gpu_data = np.array(scaling, dtype=np.float32).flatten()
         if len(gpu_data) != 3:
-            show_msg("Length of set_world_scaling parameter not correct, expected 3 got %d " % len(gpu_data), 2)
+            raise VisualizationError(
+                "Length of set_world_scaling parameter not correct, expected 3 got %d " % len(gpu_data),
+                Level.WARNING)
         else:
             loc = self.get_uniform_location("world_scaling")
             GL.glUniform3f(loc, *gpu_data)
@@ -277,7 +278,9 @@ class Program(ABC):
         self.use()
         gpu_data = np.array(scaling, dtype=np.float32).flatten()
         if len(gpu_data) != 3:
-            show_msg("Length of set_model_scaling parameter not correct, expected 3 got %d " % len(gpu_data), 2)
+            raise VisualizationError(
+                "Length of set_model_scaling parameter not correct, expected 3 got %d " % len(gpu_data),
+                Level.WARNING)
         else:
             loc = self.get_uniform_location("model_scaling")
             GL.glUniform3f(loc, *gpu_data)
@@ -294,7 +297,9 @@ class Program(ABC):
         GL.glBufferData(GL.GL_ARRAY_BUFFER, gpu_data.nbytes, gpu_data, GL.GL_DYNAMIC_DRAW)
         self.amount = len(gpu_data) / 3.0
         if len(gpu_data) % 3.0 != 0.0:
-            show_msg("Invalid offset data! Amount of coordinate components not dividable by 3 (not in xyz format?)!", 2)
+            raise VisualizationError(
+                "Invalid offset data! Amount of coordinate components not dividable by 3 (not in xyz format?)!",
+                Level.WARNING)
         self.amount = int(self.amount)
 
     def get_model_scaling(self):
@@ -332,7 +337,9 @@ class Program(ABC):
         self.use()
         gpu_data = np.array(light_color, dtype=np.float32).flatten()
         if len(gpu_data) != 4:
-            show_msg("Length of set_light_color parameter not correct, expected 4 got %d " % len(gpu_data), 2)
+            raise VisualizationError(
+                "Length of set_light_color parameter not correct, expected 4 got %d " % len(gpu_data),
+                Level.WARNING)
         else:
             loc = self.get_uniform_location("light_color")
             GL.glUniform4f(loc, *light_color)

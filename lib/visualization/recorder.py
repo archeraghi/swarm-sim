@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QSlider, QWidget, QHBoxLayout, QLabel, QPushButton, QLineEdit, QMainWindow, \
     QComboBox, QCheckBox
 
-from lib.visualization.utils import show_msg
+from lib.visualization.utils import show_msg, Level
 
 
 class Recorder:
@@ -93,6 +93,7 @@ class Recorder:
             self._viewer.glDraw()
             text.setText("rounds: %d/%d" % (value + 1, len(self.records)))
 
+        # noinspection PyUnresolvedReferences
         slider.valueChanged.connect(onchange)
         round_slider_box.addWidget(text)
         round_slider_box.addWidget(slider)
@@ -141,44 +142,45 @@ class Recorder:
             try:
                 input_rps = float(fps_edit.text())
                 if input_rps <= 0:
-                    show_msg("Rounds per second has to be greater than 0!", 2)
+                    show_msg("Rounds per second has to be greater than 0!", Level.WARNING, window)
                     return
             except ValueError:
-                show_msg("Rounds per second has to be a number!", 2)
+                show_msg("Rounds per second has to be a number!", Level.WARNING, window)
                 return
 
             try:
                 input_width = int(width_edit.text())
                 if input_width <= 0:
-                    show_msg("Width has to be greater than 0!", 2)
+                    show_msg("Width has to be greater than 0!", Level.WARNING, window)
                     return
             except ValueError:
-                show_msg("Width has to be an integer!", 2)
+                show_msg("Width has to be an integer!", Level.WARNING, window)
                 return
 
             try:
                 input_height = int(height_edit.text())
                 if input_height <= 0:
-                    show_msg("Height has to be greater than 0!", 2)
+                    show_msg("Height has to be greater than 0!", Level.WARNING, window)
                     return
             except ValueError:
-                show_msg("Height has to be an integer!", 2)
+                show_msg("Height has to be an integer!", Level.WARNING, window)
                 return
 
             try:
                 ff = int(start_frame.text())
                 ef = int(end_frame.text())
                 if ff < 1 or ef < 1:
-                    show_msg("frame index cannot be lower than 1", 2)
+                    show_msg("frame index cannot be lower than 1", Level.WARNING, window)
                     return
                 if ff > len(self.records) or ef > len(self.records):
-                    show_msg("frame index cannot be higher than the index of last frame (%d)" % len(self.records), 2)
+                    show_msg("frame index cannot be higher than the index of last frame (%d)" % len(self.records),
+                             Level.WARNING, window)
                     return
                 if ff > ef:
-                    show_msg("index of first frame cannot be higher than index of last frame", 2)
+                    show_msg("index of first frame cannot be higher than index of last frame", Level.WARNING, window)
                     return
             except ValueError:
-                show_msg("frame index has to be an integer!", 2)
+                show_msg("frame index has to be an integer!", Level.WARNING, window)
                 return
 
             window.setDisabled(True)
@@ -186,6 +188,7 @@ class Recorder:
                             codec_combo.itemData(codec_combo.currentIndex()), ff, ef, anim_checkbox.isChecked())
             window.setDisabled(False)
 
+        # noinspection PyUnresolvedReferences
         export_button.clicked.connect(export_call)
 
         main_layout.addLayout(round_slider_box)
@@ -197,5 +200,3 @@ class Recorder:
         main_layout.addWidget(export_button)
         window.setCentralWidget(main_widget)
         return window
-
-

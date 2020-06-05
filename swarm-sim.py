@@ -24,7 +24,9 @@ def swarm_sim(argv):
     random.seed(config_data.seed_value)
     swarm_sim_world = world.World(config_data)
 
-    main_loop(config_data, swarm_sim_world)
+    reset = True
+    while reset:
+        reset = main_loop(config_data, swarm_sim_world)
 
     logging.info('Finished')
     generate_data(config_data, swarm_sim_world)
@@ -44,7 +46,14 @@ def main_loop(config_data, swarm_sim_world):
             swarm_sim_world.reset()
 
     if config_data.visualization:
-        swarm_sim_world.vis.run(round_start_timestamp)
+        try:
+            swarm_sim_world.vis.run(round_start_timestamp)
+            while not config_data.close_at_end:
+                swarm_sim_world.vis.run(round_start_timestamp)
+        except ResetException:
+            swarm_sim_world.reset()
+            return True
+    return False
 
 
 def read_cmd_args(argv, config_data):

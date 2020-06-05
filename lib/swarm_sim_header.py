@@ -1,5 +1,3 @@
-import sys
-
 def get_coordinates_in_direction(coordinates, direction):
     """
     Returns the coordinates data of the pointed directions
@@ -25,18 +23,18 @@ def get_multiple_steps_in_direction(start, direction, steps):
 def scan_in(matter_map: dict, center, hop, grid):
     result = []
     n_sphere_border = grid.get_n_sphere_border(center, hop)
-    for l in n_sphere_border:
-        if l in matter_map:
-            result.append(matter_map[l])
+    for coords in n_sphere_border:
+        if coords in matter_map:
+            result.append(matter_map[coords])
     return result
 
 
 def scan_within(matter_map, center, hop, grid):
     result = []
     n_sphere_border = grid.get_n_sphere(center, hop)
-    for l in n_sphere_border:
-        if l in matter_map:
-            result.append(matter_map[l])
+    for coords in n_sphere_border:
+        if coords in matter_map:
+            result.append(matter_map[coords])
     return result
 
 
@@ -53,4 +51,3 @@ def create_matter_in_line(world, start, direction, amount, matter_type='particle
             print("create_matter_in_line: unknown type (allowed: particle, tile or location")
             return
         current_position = get_coordinates_in_direction(current_position, direction)
-

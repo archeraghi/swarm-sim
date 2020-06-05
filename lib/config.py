@@ -16,22 +16,23 @@ class ConfigData:
         self.particle_random_order_always = config.getboolean("Simulator", "particle_random_order_always")
         self.window_size_x = config.getint("Simulator", "window_size_x")
         self.window_size_y = config.getint("Simulator", "window_size_y")
+        self.close_at_end = config.getboolean("Simulator", "close_at_end")
 
         self.visualization = config.getint("Visualization", "visualization")
         try:
             self.gui = config.get("Visualization", "gui")
-        except configparser.NoOptionError as noe:
+        except configparser.NoOptionError:
             print("no gui option given. setting to default \"gui.py\"")
             self.gui = "gui.py"
 
         try:
             self.grid_class = config.get("Visualization", "grid_class")
-        except configparser.NoOptionError as noe:
+        except configparser.NoOptionError:
             raise RuntimeError("Fatal Error: no grid class defined in config.ini!")
 
         try:
             self.grid_size = config.getint("Visualization", "grid_size")
-        except configparser.NoOptionError as noe:
+        except configparser.NoOptionError:
             raise RuntimeError("Fatal Error: no grid size defined in config.ini!")
 
         test = getattr(importlib.import_module("grids.%s" % self.grid_class), self.grid_class)
@@ -90,14 +91,13 @@ class ConfigData:
 
         try:
             self.scenario = config.get("File", "scenario")
-        except configparser.NoOptionError as noe:
+        except configparser.NoOptionError:
             self.scenario = "init_scenario.py"
 
         try:
             self.solution = config.get("File", "solution")
-        except configparser.NoOptionError as noe:
+        except configparser.NoOptionError:
             self.solution = "solution.py"
-
 
         self.local_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')[:-1]
         self.multiple_sim = 0
