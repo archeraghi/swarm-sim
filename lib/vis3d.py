@@ -14,6 +14,11 @@ from lib.visualization.toms_svg_generator import create_svg
 from lib.visualization.utils import LoadingWindow, show_msg
 
 
+class ResetException(Exception):
+    def __init__(self):
+        super(ResetException, self).__init__()
+
+
 def close(_):
     exit(0)
 
@@ -29,6 +34,7 @@ class Visualization:
         self._world = world
         self._last_light_rotation = 0
         self._rounds_per_second = 10
+        self._reset_flag = False
         self._running = False
         self._app = None
         self._viewer = None
@@ -113,12 +119,17 @@ class Visualization:
 
         # waiting for the simulation window to be fully active
         while not self._splitter.windowHandle().isExposed():
-            self._app.processEvents()
+            self._process_events()
         # first update and draw call.
         self._viewer.update_scene()
 
     def is_recording(self):
         return self._recording
+
+    def _process_events(self):
+        self._app.processEvents()
+        if self._reset_flag:
+            raise ResetException()
 
     def reset(self):
         """
@@ -127,6 +138,7 @@ class Visualization:
         resets the camera
         :return:
         """
+        self._reset_flag = False
         self._running = False
         self._viewer.particle_offset_data = {}
         self._viewer.particle_update_flag = True
@@ -153,7 +165,7 @@ class Visualization:
             self._gui.setDisabled(True)
         thread.start()
         while thread.is_alive():
-            self._app.processEvents()
+            self._process_events()
         thread.join()
         loading_window.close()
         self._gui.setDisabled(False)
@@ -188,7 +200,7 @@ class Visualization:
         :return:
         """
         sleep_time = 1.0 / 120.0
-        self._app.processEvents()
+        self._process_events()
         if self.light_rotation:
             self.rotate_light()
         while not self._running:
@@ -196,7 +208,7 @@ class Visualization:
             time.sleep(sleep_time)
             if self.light_rotation:
                 self.rotate_light()
-            self._app.processEvents()
+            self._process_events()
 
     def animate(self, round_start_time, speed):
         """
@@ -224,7 +236,7 @@ class Visualization:
         # animate
         for i in range(1, steps):
             self._viewer.set_animation_percentage(float(i / steps))
-            self._app.processEvents()
+            self._process_events()
             self._viewer.glDraw()
 
         # draw the last frame. its outside of the loop, so that if steps is equal or less then one,
@@ -327,7 +339,6 @@ class Visualization:
 
         self._viewer.tile_offset_data[tile] = (tile.coordinates, tile.color, prev_pos,
                                                1.0 if tile.get_tile_status() else 0.0)
-
 
     def remove_location(self, location):
         """
@@ -559,7 +570,7 @@ class Visualization:
 
         # loop
         while self.recorder.is_open():
-            self._app.processEvents()
+            self._process_events()
 
         # go back to the main window
         if "set_disable_sim" in dir(self._gui_module):
@@ -610,7 +621,7 @@ class Visualization:
             # animate
             for j in range(1, animation_steps+1):
                 # process events so the gui thread does respond to interactions..
-                self._app.processEvents()
+                self._process_events()
                 # update loading windows text and progress bar
                 processing = (i - first_frame_idx + 1)*animation_steps + j
                 lw.set_message("Please wait!\nExporting frame %d/%d..." % (processing, out_of))
@@ -680,3 +691,6 @@ class Visualization:
 
     def get_main_window(self):
         return self._splitter
+
+    def set_reset_flag(self):
+        self._reset_flag = True

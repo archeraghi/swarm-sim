@@ -8,6 +8,7 @@ import time
 import random
 from lib import world, config
 from lib.gnuplot_generator import gnuplot_generator
+from lib.vis3d import ResetException
 
 
 def swarm_sim(argv):
@@ -18,36 +19,32 @@ def swarm_sim(argv):
     logging.info('Started')
 
     config_data = config.ConfigData()
-
     read_cmd_args(argv, config_data)
-
     create_directory_for_data(config_data)
-
     random.seed(config_data.seed_value)
     swarm_sim_world = world.World(config_data)
 
-    round_start_timestamp = time.perf_counter()
-    while (config_data.max_round == 0 or swarm_sim_world.get_actual_round() <= config_data.max_round) \
-            and swarm_sim_world.get_end() is False:
-        if config_data.visualization:
-            swarm_sim_world.vis.run(round_start_timestamp)
-            round_start_timestamp = time.perf_counter()
-
-        run_solution(swarm_sim_world)
-    
-    if config_data.visualization:
-        swarm_sim_world.vis.run(round_start_timestamp)
+    main_loop(config_data, swarm_sim_world)
 
     logging.info('Finished')
-
     generate_data(config_data, swarm_sim_world)
 
 
-def draw_scenario(config_data, swarm_sim_world):
-    mod = importlib.import_module('scenario.' + config_data.scenario)
-    mod.scenario(swarm_sim_world)
-    if config_data.particle_random_order:
-        random.shuffle(swarm_sim_world.particles)
+def main_loop(config_data, swarm_sim_world):
+    round_start_timestamp = time.perf_counter()
+    while (config_data.max_round == 0 or swarm_sim_world.get_actual_round() <= config_data.max_round) \
+            and swarm_sim_world.get_end() is False:
+        try:
+            if config_data.visualization:
+                swarm_sim_world.vis.run(round_start_timestamp)
+                round_start_timestamp = time.perf_counter()
+
+            run_solution(swarm_sim_world)
+        except ResetException:
+            swarm_sim_world.reset()
+
+    if config_data.visualization:
+        swarm_sim_world.vis.run(round_start_timestamp)
 
 
 def read_cmd_args(argv, config_data):

@@ -175,11 +175,11 @@ def sim_tab():
     reset_button = QPushButton("reset Simulation")
 
     def reset_sim():
-        world.reset()
         start_stop_button.setText("start Simulation")
         start_stop_button.setIcon(start_stop_button.style().standardIcon(QStyle.SP_MediaPlay))
         status.setText("Simulation not running")
         status.setStyleSheet("font-weight:bold;color:#bb4444;")
+        vis.set_reset_flag()
 
     reset_button.clicked.connect(reset_sim)
 

@@ -120,10 +120,13 @@ class World:
         if self.config_data.visualization:
             self.vis.reset()
 
+        # reload solution module (resets global variables)
         mod = importlib.import_module('solution.' + self.config_data.solution)
         importlib.reload(mod)
 
+        # reload scenario module (resets global variables)
         mod = importlib.import_module('scenario.' + self.config_data.scenario)
+        importlib.reload(mod)
 
         if self.config_data.visualization:
             # if visualization is on, run the scenario in a separate thread and show that the program runs..
