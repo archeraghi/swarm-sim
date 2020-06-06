@@ -7,7 +7,7 @@ import sys
 import time
 import random
 from lib import world, config
-from lib.gnuplot_generator import gnuplot_generator
+from lib.plot_generator import plot_generator
 from lib.vis3d import ResetException
 
 
@@ -110,7 +110,7 @@ def run_solution(swarm_sim_world):
 
 def generate_data(config_data, swarm_sim_world):
     swarm_sim_world.csv_aggregator()
-    gnuplot_generator(config_data.directory_name)
+    plot_generator(config_data.directory_name)
 
 
 if __name__ == "__main__":

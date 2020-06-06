@@ -2,7 +2,7 @@ import subprocess
 import pandas as pd
 
 
-def gnuplot_generator(directory):
+def plot_generator(directory):
     data = pd.read_csv(directory+"/rounds.csv")
     i = 1
     plot = subprocess.Popen(['gnuplot', '--persist'], shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
