@@ -5,6 +5,7 @@ from threading import Thread
 import cv2
 from PyQt5.QtWidgets import QApplication, QSplitter, QWidget
 
+from core.matter import MatterType
 from core.visualization.recorder import Recorder
 from core.visualization.OGLWidget import OGLWidget
 import time
@@ -93,7 +94,7 @@ class Visualization:
             self._viewer.keyPressEventHandler = key_press_event
             self._splitter.keyPressEvent = key_press_event
         else:
-            show_msg("No key_handler(key, vis) function found in gui module!", 1, self._splitter)
+            show_msg("No key_handler(key, vis) function found in gui module!", Level.WARNING, self._splitter)
 
         # loading gui from gui module
         if "create_gui" in dir(self._gui_module):
@@ -109,11 +110,12 @@ class Visualization:
                 # noinspection PyUnresolvedReferences
                 show_msg("The create_gui(world, vis) function in gui module didn't return a QWidget." +
                          "Expected a QWidget or a subclass, but got %s."
-                         % self._gui.__class__.__name__, 1, self._splitter)
+                         % self._gui.__class__.__name__, Level.WARNING, self._splitter)
                 self._splitter.addWidget(self._viewer)
 
         else:
-            show_msg("No create_gui(world, vis) function found in gui module. GUI not created", 1, self._splitter)
+            show_msg("No create_gui(world, vis) function found in gui module. GUI not created", Level.INFO,
+                     self._splitter)
             self._splitter.addWidget(self._viewer)
 
         # waiting for the simulation window to be fully active
@@ -139,10 +141,10 @@ class Visualization:
         """
         self._reset_flag = False
         self._running = False
-        self._viewer.particle_offset_data = {}
-        self._viewer.particle_update_flag = True
-        self._viewer.tile_offset_data = {}
-        self._viewer.tile_update_flag = True
+        self._viewer.agent_offset_data = {}
+        self._viewer.agent_update_flag = True
+        self._viewer.item_offset_data = {}
+        self._viewer.item_update_flag = True
         self._viewer.location_offset_data = {}
         self._viewer.location_update_flag = True
         self._viewer.update_data()
@@ -166,8 +168,9 @@ class Visualization:
         while thread.is_alive():
             try:
                 self._process_events()
-            except VisualizationError:
-                print("jooo")
+            except VisualizationError as ve:
+                show_msg(ve, Level.CRITICAL, self._splitter)
+                exit(1)
         thread.join()
         loading_window.close()
         self._gui.setDisabled(False)
@@ -214,16 +217,16 @@ class Visualization:
 
     def animate(self, round_start_time, speed):
         """
-        loop for animating the movement of particles and carried tiles
+        loop for animating the movement of agents and carried items
         :param round_start_time: the start of the round
         :param speed: speed of the animation in 1/steps. less or equal zero = automatic mode
         """
         if speed < 0:
             # draw at location according to the passed time and the rps
-            half_round_time = (1.0/self._rounds_per_second)/2.0
+            half_round_time = (1.0 / self._rounds_per_second) / 2.0
             now = time.perf_counter()
             while (now - round_start_time) < half_round_time:
-                self._viewer.set_animation_percentage(min(1, (now-round_start_time)/half_round_time))
+                self._viewer.set_animation_percentage(min(1, (now - round_start_time) / half_round_time))
                 self._process_events()
                 self._viewer.glDraw()
                 now = time.perf_counter()
@@ -239,16 +242,16 @@ class Visualization:
 
         # reset the previous position after animation.
         # not reseting it causes a visual bug if the matter didn't move.
-        for particle in self._viewer.particle_offset_data:
-            current_data = self._viewer.particle_offset_data[particle]
-            self._viewer.particle_offset_data[particle] = (current_data[0], current_data[1], particle.coordinates,
-                                                           current_data[3])
-        for tile in self._viewer.tile_offset_data:
-            current_data = self._viewer.tile_offset_data[tile]
-            self._viewer.tile_offset_data[tile] = (current_data[0], current_data[1], tile.coordinates,
+        for agent in self._viewer.agent_offset_data:
+            current_data = self._viewer.agent_offset_data[agent]
+            self._viewer.agent_offset_data[agent] = (current_data[0], current_data[1], agent.coordinates,
+                                                     current_data[3])
+        for item in self._viewer.item_offset_data:
+            current_data = self._viewer.item_offset_data[item]
+            self._viewer.item_offset_data[item] = (current_data[0], current_data[1], item.coordinates,
                                                    current_data[3])
-        self._viewer.particle_update_flag = True
-        self._viewer.tile_update_flag = True
+        self._viewer.agent_update_flag = True
+        self._viewer.item_update_flag = True
 
     def run(self, round_start_timestamp):
         """
@@ -306,57 +309,57 @@ class Visualization:
             self._wait_while_not_running()
             time_elapsed = time.perf_counter() - round_start_timestamp
 
-    def remove_particle(self, particle):
+    def remove_agent(self, agent):
         """
-        removes a particle from the visualization.
+        removes an agent from the visualization.
         it wont be deleted immediately! not until the next round.
-        if you want an immediate deletion of the particle, then call this function, then, update_data and after that
+        if you want an immediate deletion of the agent, then call this function, then, update_data and after that
         glDraw of the OpenGLWidget.
 
-        :param particle: the particle (not the id, the instance) to be deleted
+        :param agent: the agent (not the id, the instance) to be deleted
         :return:
         """
-        self._viewer.particle_update_flag = True
-        if particle in self._viewer.particle_offset_data:
-            del self._viewer.particle_offset_data[particle]
+        self._viewer.agent_update_flag = True
+        if agent in self._viewer.agent_offset_data:
+            del self._viewer.agent_offset_data[agent]
 
-    def particle_changed(self, particle):
+    def agent_changed(self, agent):
         """
-        updates the offset, color and carry data of the particle in the visualization.
+        updates the offset, color and carry data of the agent in the visualization.
         it wont be an immediate update. it will update in the beginning of the next "run" call / after current round.
-        :param particle: the particle that has changed (the instance)
+        :param agent: the agent that has changed (the instance)
         :return:
         """
-        self._viewer.particle_update_flag = True
-        prev_pos = particle.coordinates
-        if particle in self._viewer.particle_offset_data:
-            prev_pos = self._viewer.particle_offset_data[particle][0]
-        self._viewer.particle_offset_data[particle] = (particle.coordinates, particle.color, prev_pos,
-                                                       1.0 if particle.get_carried_status() else 0.0)
+        self._viewer.agent_update_flag = True
+        prev_pos = agent.coordinates
+        if agent in self._viewer.agent_offset_data:
+            prev_pos = self._viewer.agent_offset_data[agent][0]
+        self._viewer.agent_offset_data[agent] = (agent.coordinates, agent.color, prev_pos,
+                                                 1.0 if agent.is_carried() else 0.0)
 
-    def remove_tile(self, tile):
+    def remove_item(self, item):
         """
-        removes a tile from the visualization.
-        :param tile: the tile (not the id, the instance) to be deleted
+        removes an item from the visualization.
+        :param item: the item (not the id, the instance) to be deleted
         :return:
         """
-        self._viewer.tile_update_flag = True
-        if tile in self._viewer.tile_offset_data:
-            del self._viewer.tile_offset_data[tile]
+        self._viewer.item_update_flag = True
+        if item in self._viewer.item_offset_data:
+            del self._viewer.item_offset_data[item]
 
-    def tile_changed(self, tile):
+    def item_changed(self, item):
         """
-        updates the offset, color and carry data of the tile in the visualization.
-        :param tile: the tile ( not the id, the instance) to be deleted
+        updates the offset, color and carry data of the item in the visualization.
+        :param item: the item ( not the id, the instance) to be deleted
         :return:
         """
-        self._viewer.tile_update_flag = True
-        prev_pos = tile.coordinates
-        if tile in self._viewer.tile_offset_data:
-            prev_pos = self._viewer.tile_offset_data[tile][0]
+        self._viewer.item_update_flag = True
+        prev_pos = item.coordinates
+        if item in self._viewer.item_offset_data:
+            prev_pos = self._viewer.item_offset_data[item][0]
 
-        self._viewer.tile_offset_data[tile] = (tile.coordinates, tile.color, prev_pos,
-                                               1.0 if tile.get_tile_status() else 0.0)
+        self._viewer.item_offset_data[item] = (item.coordinates, item.color, prev_pos,
+                                               1.0 if item.is_carried() else 0.0)
 
     def remove_location(self, location):
         """
@@ -524,18 +527,18 @@ class Visualization:
         self._viewer.programs["grid"].update_offsets(self._world.grid.get_box(size))
         self._viewer.glDraw()
 
-    def get_particle_scaling(self):
-        return self._viewer.programs["particle"].get_model_scaling()
+    def get_agent_scaling(self):
+        return self._viewer.programs["agent"].get_model_scaling()
 
-    def set_particle_scaling(self, scaling):
-        self._viewer.programs["particle"].set_model_scaling(scaling)
+    def set_agent_scaling(self, scaling):
+        self._viewer.programs["agent"].set_model_scaling(scaling)
         self._viewer.glDraw()
 
-    def get_tile_scaling(self):
-        return self._viewer.programs["tile"].get_model_scaling()
+    def get_item_scaling(self):
+        return self._viewer.programs["item"].get_model_scaling()
 
-    def set_tile_scaling(self, scaling):
-        self._viewer.programs["tile"].set_model_scaling(scaling)
+    def set_item_scaling(self, scaling):
+        self._viewer.programs["item"].set_model_scaling(scaling)
         self._viewer.glDraw()
 
     def get_location_scaling(self):
@@ -546,7 +549,7 @@ class Visualization:
         self._viewer.glDraw()
 
     def set_on_cursor_click_matter_type(self, matter_type):
-        if matter_type == 'tile' or matter_type == 'particle' or matter_type == 'location':
+        if matter_type == MatterType.ITEM or matter_type == MatterType.AGENT or matter_type == MatterType.LOCATION:
             self._viewer.cursor_type = matter_type
             self._viewer.update_cursor_data()
 
@@ -572,7 +575,7 @@ class Visualization:
 
     def export_recording(self):
         if len(self.recorder.records) == 0:
-            show_msg("No rounds recorded. Nothing to export.", 0, self._splitter)
+            show_msg("No rounds recorded. Nothing to export.", Level.INFO, self._splitter)
             return
         if self._running:
             self.start_stop()
@@ -582,7 +585,8 @@ class Visualization:
             self._gui_module.set_disable_sim(True)
         else:
             show_msg("No 'set_disable_sim(disable_flag)' function in gui module found."
-                     "\nRunning simulation within recording mode may result in undefined behavior!", 1, self._splitter)
+                     "\nRunning simulation within recording mode may result in undefined behavior!", Level.WARNING,
+                     self._splitter)
 
         self.recorder.show(self.do_export)
 
@@ -594,8 +598,8 @@ class Visualization:
         if "set_disable_sim" in dir(self._gui_module):
             self._gui_module.set_disable_sim(False)
 
-        self._viewer.particle_update_flag = True
-        self._viewer.tile_update_flag = True
+        self._viewer.agent_update_flag = True
+        self._viewer.item_update_flag = True
         self._viewer.location_update_flag = True
         self._viewer.update_data()
         self._viewer.set_show_info_frame(True)
@@ -653,7 +657,7 @@ class Visualization:
         self._viewer.setDisabled(False)
         self._viewer.resizeGL(self._viewer.width(), self._viewer.height())
         self._viewer.update_scene()
-        show_msg("Video exported successfully!", 0, self._splitter)
+        show_msg("Video exported successfully!", Level.INFO, self._splitter)
 
     def delete_recording(self):
         self.recorder = Recorder(self._world, self._viewer)
@@ -684,7 +688,8 @@ class Visualization:
             else:
                 create_svg(self._world, path[0] + ".svg")
         else:
-            show_msg("Not implemented yet.\nWorks only with Triangular Grid for now!\nSorry!", 1, self._splitter)
+            show_msg("Not implemented yet.\nWorks only with Triangular Grid for now!\nSorry!", Level.WARNING,
+                     self._splitter)
 
     def set_animation(self, animation):
         if not animation:

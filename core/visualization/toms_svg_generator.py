@@ -78,9 +78,9 @@ def make_svg_header(width, height):
 
 def draw_world(
         filename,
-        tiles,
+        items,
         locations,
-        particles,
+        agents,
         world_size_x,
         world_size_y,
         padding,
@@ -93,15 +93,13 @@ def draw_world(
     width = (world_size_x + 2 * padding) * scale
     height = (world_size_y + 2 * padding) * scale * squish
 
-    svg = []
-
-    svg.append(make_svg_header(width, height))
-    svg.append(f'<g transform="scale({scale} {scale})">')
-    svg.append('<g transform="translate(0.5, 0.5)">')
+    svg = [make_svg_header(width, height),
+           f'<g transform="scale({scale} {scale})">',
+           '<g transform="translate(0.5, 0.5)">']
 
     def draw_line(ax, ay, bx, by):
-        style = f'stroke: rgb(0,0,0); stroke-width: {stroke_width}'
-        svg.append(Line(ax, ay, bx, by).to_svg(style))
+        line_style = f'stroke: rgb(0,0,0); stroke-width: {stroke_width}'
+        svg.append(Line(ax, ay, bx, by).to_svg(line_style))
 
     # draw horizontal lines
     for y in range(world_size_y + 1):
@@ -130,8 +128,8 @@ def draw_world(
     #         style = f'stroke: rgb(0,0,0); stroke-width: {stroke_width}'
     #         svg.append(Circle(x + shift, y * squish, 0.05).to_svg(style))
 
-    # draw tiles
-    for x, y in tiles:
+    # draw items
+    for x, y in items:
         shift = 0.0 if y % 2 == 0 else -0.5
         style = f'fill:rgb(77, 77, 204); stroke:rgb(77, 77, 204);stroke-width: {stroke_width}'
         svg.append(NGon(x + shift, y * squish, 0.5, 6).to_svg(style))
@@ -140,7 +138,7 @@ def draw_world(
         shift = 0.0 if y % 2 == 0 else -0.5
         style = f'fill:rgb(77, 204, 77); stroke:rgb(77, 204, 77);stroke-width: {stroke_width}'
         svg.append(Ring(x + shift, y * squish, 0.2, 0.5 * squish).to_svg(style))
-    for x, y in particles:
+    for x, y in agents:
         shift = 0.0 if y % 2 == 0 else -0.5
         style = f'fill:rgb(204, 77, 77); stroke:rgb(204, 77, 77);stroke-width: {stroke_width}'
         svg.append(Circle(x + shift, y * squish, 0.3).to_svg(style))
@@ -155,12 +153,12 @@ def draw_world(
 
 
 def create_svg(world, filename):
-    tile_coordinates = world.tile_map_coordinates.keys()
+    item_coordinates = world.item_map_coordinates.keys()
     location_coordinates = world.location_map_coordinates.keys()
-    particle_coordinates = world.particle_map_coordinates.keys()
+    agent_coordinates = world.agent_map_coordinates.keys()
 
     minimum_x_coordinate, maximum_x_coordinate, minimum_y_coordinate, maximum_y_coordinate \
-        = calculate_bounds(tile_coordinates, particle_coordinates, location_coordinates)
+        = calculate_bounds(item_coordinates, agent_coordinates, location_coordinates)
     print(minimum_y_coordinate, minimum_x_coordinate, maximum_y_coordinate, maximum_x_coordinate)
     x_offset = int(minimum_x_coordinate - 4)
     y_offset = int(maximum_y_coordinate + 4)
@@ -168,23 +166,23 @@ def create_svg(world, filename):
     size_y = int(y_offset - minimum_y_coordinate + 4)
     img_size = max(size_x, size_y)  # make a square image
     print(img_size)
-    tile_coordinates_in_image = []
+    item_coordinates_in_image = []
     location_coordinates_in_image = []
-    particle_coordinates_in_image = []
-    for coordinates in tile_coordinates:
-        tile_coordinates_in_image.append((int(coordinates[0] - x_offset + (0 if coordinates[1] % 2 == 0 else 1)),
+    agent_coordinates_in_image = []
+    for coordinates in item_coordinates:
+        item_coordinates_in_image.append((int(coordinates[0] - x_offset + (0 if coordinates[1] % 2 == 0 else 1)),
                                           int(- coordinates[1] + y_offset)))
     for coordinates in location_coordinates:
         location_coordinates_in_image.append((int(coordinates[0] - x_offset + (0 if coordinates[1] % 2 == 0 else 1)),
                                               int(- coordinates[1] + y_offset)))
-    for coordinates in particle_coordinates:
-        particle_coordinates_in_image.append((int(coordinates[0] - x_offset + (0 if coordinates[1] % 2 == 0 else 1)),
-                                              int(- coordinates[1] + y_offset)))
+    for coordinates in agent_coordinates:
+        agent_coordinates_in_image.append((int(coordinates[0] - x_offset + (0 if coordinates[1] % 2 == 0 else 1)),
+                                           int(- coordinates[1] + y_offset)))
 
     draw_world(
-        tiles=tile_coordinates_in_image,
+        items=item_coordinates_in_image,
         locations=location_coordinates_in_image,
-        particles=particle_coordinates_in_image,
+        agents=agent_coordinates_in_image,
         world_size_x=img_size,
         world_size_y=img_size,
         scale=60,
@@ -193,18 +191,18 @@ def create_svg(world, filename):
         filename=filename)
 
 
-def calculate_bounds(tile_coordinates, particle_coordinates, location_coordinates):
+def calculate_bounds(item_coordinates, agent_coordinates, location_coordinates):
     minx = 0
     miny = 0
     maxx = 0
     maxy = 0
 
-    all = []
-    all.extend(tile_coordinates)
-    all.extend(particle_coordinates)
-    all.extend(location_coordinates)
+    all_coords = []
+    all_coords.extend(item_coordinates)
+    all_coords.extend(agent_coordinates)
+    all_coords.extend(location_coordinates)
 
-    for coords in all:
+    for coords in all_coords:
         if coords[0] < minx:
             minx = coords[0]
         if coords[0] > maxx:

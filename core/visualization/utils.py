@@ -215,9 +215,9 @@ class MatterInfoFrame(QFrame):
             if counter > 0:
                 info_text += "\n\n"
             info_text += str(o.type).upper()
-            if o.type == "particle" and o.get_carried_status():
+            if o.type == "agent" and o.is_carried():
                 info_text += " (carried)"
-            if o.type == "tile" and o.get_tile_status():
+            if o.type == "item" and o.is_carried():
                 info_text += "(carried)"
             info_text += "\nid: %s" % str(o.get_id())
             info_text += "\ncoordinates: %s" % str(o.coordinates)

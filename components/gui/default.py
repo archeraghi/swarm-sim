@@ -2,6 +2,8 @@ from PyQt5.QtGui import QColor, QIntValidator
 from PyQt5.QtWidgets import (QVBoxLayout, QPushButton, QColorDialog, QRadioButton, QLabel, QTabWidget,
                              QSlider, QHBoxLayout, QCheckBox, QTabBar, QLineEdit, QGroupBox, QComboBox, QStyle)
 from PyQt5.QtCore import Qt
+
+from core.matter import MatterType
 from core.vis3d import Visualization
 from core.visualization.utils import show_msg, Level
 from core.world import World
@@ -247,22 +249,22 @@ def get_new_matter_color_picker():
 
 # noinspection PyUnresolvedReferences
 def get_matter_radios():
-    p_radio = QRadioButton("particle")
+    p_radio = QRadioButton("agent")
     p_radio.setChecked(False)
-    t_radio = QRadioButton("tile")
+    t_radio = QRadioButton("item")
     t_radio.setChecked(True)
     l_radio = QRadioButton("location")
     l_radio.setChecked(False)
 
     def on_toggle():
         if p_radio.isChecked():
-            vis.set_on_cursor_click_matter_type("particle")
+            vis.set_on_cursor_click_matter_type(MatterType.AGENT)
 
         if t_radio.isChecked():
-            vis.set_on_cursor_click_matter_type("tile")
+            vis.set_on_cursor_click_matter_type(MatterType.ITEM)
 
         if l_radio.isChecked():
-            vis.set_on_cursor_click_matter_type("location")
+            vis.set_on_cursor_click_matter_type(MatterType.LOCATION)
 
     p_radio.toggled.connect(on_toggle)
     t_radio.toggled.connect(on_toggle)
@@ -388,49 +390,49 @@ def grid_tab():
 def matter_tab():
     tab = QTabBar()
     layout = QVBoxLayout()
-    layout.addLayout(get_scaler("particle"))
-    layout.addLayout(get_scaler("tile"))
-    layout.addLayout(get_scaler("location"))
+    layout.addLayout(get_scaler(MatterType.AGENT))
+    layout.addLayout(get_scaler(MatterType.ITEM))
+    layout.addLayout(get_scaler(MatterType.LOCATION))
     layout.addStretch(1)
     tab.setLayout(layout)
     return tab
 
 
 def get_scaler(mattertype):
-    if mattertype == "particle":
-        current_scaling = vis.get_particle_scaling()
+    if mattertype == MatterType.AGENT:
+        current_scaling = vis.get_agent_scaling()
 
         def x_scaler_change(value):
-            cs = vis.get_particle_scaling()
+            cs = vis.get_agent_scaling()
             new_scaling = (value / 10.0, cs[1], cs[2])
-            vis.set_particle_scaling(new_scaling)
+            vis.set_agent_scaling(new_scaling)
 
         def y_scaler_change(value):
-            cs = vis.get_particle_scaling()
+            cs = vis.get_agent_scaling()
             new_scaling = (cs[0], value / 10.0, cs[2])
-            vis.set_particle_scaling(new_scaling)
+            vis.set_agent_scaling(new_scaling)
 
         def z_scaler_change(value):
-            cs = vis.get_particle_scaling()
+            cs = vis.get_agent_scaling()
             new_scaling = (cs[0], cs[1], value / 10.0)
-            vis.set_particle_scaling(new_scaling)
-    elif mattertype == "tile":
-        current_scaling = vis.get_tile_scaling()
+            vis.set_agent_scaling(new_scaling)
+    elif mattertype == MatterType.ITEM:
+        current_scaling = vis.get_item_scaling()
 
         def x_scaler_change(value):
-            cs = vis.get_tile_scaling()
+            cs = vis.get_item_scaling()
             new_scaling = (value / 10.0, cs[1], cs[2])
-            vis.set_tile_scaling(new_scaling)
+            vis.set_item_scaling(new_scaling)
 
         def y_scaler_change(value):
-            cs = vis.get_tile_scaling()
+            cs = vis.get_item_scaling()
             new_scaling = (cs[0], value / 10.0, cs[2])
-            vis.set_tile_scaling(new_scaling)
+            vis.set_item_scaling(new_scaling)
 
         def z_scaler_change(value):
-            cs = vis.get_tile_scaling()
+            cs = vis.get_item_scaling()
             new_scaling = (cs[0], cs[1], value / 10.0)
-            vis.set_tile_scaling(new_scaling)
+            vis.set_item_scaling(new_scaling)
     else:
         current_scaling = vis.get_location_scaling()
 

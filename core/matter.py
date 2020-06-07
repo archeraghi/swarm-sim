@@ -1,7 +1,15 @@
 import uuid
 from datetime import datetime
+from enum import Enum
 
 from core.visualization.utils import Level, VisualizationError
+
+
+class MatterType(Enum):
+    UNDEFINED = 0
+    AGENT = 1
+    ITEM = 2
+    LOCATION = 3
 
 
 class Matter:

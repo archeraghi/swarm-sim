@@ -6,13 +6,13 @@ def scenario(world):
     center = world.grid.get_center()
     dirs = world.grid.get_directions_list()
 
-    world.add_particle(center)
-    world.add_particle(get_coordinates_in_direction(center, random.choice(dirs)))
+    world.add_agent(center)
+    world.add_agent(get_coordinates_in_direction(center, random.choice(dirs)))
 
     size = 5
 
     ring = world.grid.get_n_sphere_border(center, size)
 
     for c in ring:
-        world.add_tile(c)
+        world.add_item(c)
 

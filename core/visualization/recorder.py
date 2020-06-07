@@ -27,23 +27,23 @@ class Recorder:
 
     def record_round(self):
         r = [[[], [], [], []], [[], [], [], []], [[], []]]
-        for particle in self._world.particles:
-            r[0][0].append(copy.deepcopy(particle.coordinates))
-            r[0][1].append(copy.deepcopy(particle.color))
+        for agent in self._world.agents:
+            r[0][0].append(copy.deepcopy(agent.coordinates))
+            r[0][1].append(copy.deepcopy(agent.color))
             if len(self.records) > 0:
                 r[0][2].append(copy.deepcopy(self.records[-1][0][0]))
             else:
-                r[0][2].append(copy.deepcopy(particle.coordinates))
-            r[0][3].append(copy.deepcopy(particle.get_carried_status()))
+                r[0][2].append(copy.deepcopy(agent.coordinates))
+            r[0][3].append(copy.deepcopy(agent.is_carried()))
 
-        for tile in self._world.tiles:
-            r[1][0].append(copy.deepcopy(tile.coordinates))
-            r[1][1].append(copy.deepcopy(tile.color))
+        for item in self._world.items:
+            r[1][0].append(copy.deepcopy(item.coordinates))
+            r[1][1].append(copy.deepcopy(item.color))
             if len(self.records) > 0:
                 r[1][2].append(copy.deepcopy(self.records[-1][1][0]))
             else:
-                r[1][2].append(copy.deepcopy(tile.coordinates))
-            r[1][3].append(copy.deepcopy(tile.get_tile_status()))
+                r[1][2].append(copy.deepcopy(item.coordinates))
+            r[1][3].append(copy.deepcopy(item.is_carried()))
 
         for location in self._world.locations:
             r[2][0].append(copy.deepcopy(location.coordinates))
@@ -52,17 +52,17 @@ class Recorder:
         self.records.append(r)
 
     @staticmethod
-    def copy_particle(particle):
-        coords = copy.copy(particle.coordinates)
-        color = copy.copy(particle.color)
-        status = copy.copy(particle.get_carried_status())
+    def copy_agent(agent):
+        coords = copy.copy(agent.coordinates)
+        color = copy.copy(agent.color)
+        status = copy.copy(agent.is_carried())
         return coords, color, status
 
     @staticmethod
-    def copy_tile(tile):
-        coords = copy.copy(tile.coordinates)
-        color = copy.copy(tile.color)
-        status = copy.copy(tile.get_tile_status())
+    def copy_item(item):
+        coords = copy.copy(item.coordinates)
+        color = copy.copy(item.color)
+        status = copy.copy(item.is_carried())
         return coords, color, status
 
     @staticmethod

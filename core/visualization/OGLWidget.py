@@ -3,6 +3,7 @@ from PIL import Image
 from PyQt5 import QtOpenGL, QtGui, QtCore
 from PyQt5.QtGui import QOpenGLFramebufferObject, QOpenGLFramebufferObjectFormat
 
+from core.matter import MatterType
 from core.visualization.utils import MatterInfoFrame, TopQFileDialog
 from core.visualization.programs.offset_color_carry_program import OffsetColorCarryProgram
 from core.visualization.programs.offset_color_program import OffsetColorProgram
@@ -49,7 +50,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         self.rotation_sensitivity = 5
         self.zoom_sensitivity = 100
         self.cursor_zoom_sensitivity = 200
-        self.cursor_type = 'tile'
+        self.cursor_type = MatterType.ITEM
         self.added_matter_color = (1.0, 0.0, 0.0, 1.0)
 
         self.camera = camera
@@ -59,10 +60,10 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
         # programs, program flags and dynamic data
         self.programs = {}
-        self.particle_offset_data = {}
-        self.particle_update_flag = False
-        self.tile_offset_data = {}
-        self.tile_update_flag = False
+        self.agent_offset_data = {}
+        self.agent_update_flag = False
+        self.item_offset_data = {}
+        self.item_update_flag = False
         self.location_offset_data = {}
         self.location_update_flag = False
 
@@ -81,51 +82,51 @@ class OGLWidget(QtOpenGL.QGLWidget):
         self.glDraw()
 
     def inject_record_data(self, record):
-        self.programs["particle"].update_offsets(record[0][0])
-        self.programs["particle"].update_colors(record[0][1])
-        self.programs["particle"].update_previous_positions(record[0][2])
-        self.programs["particle"].update_carried(record[0][3])
-        self.programs["tile"].update_offsets(record[1][0])
-        self.programs["tile"].update_colors(record[1][1])
-        self.programs["tile"].update_previous_positions(record[1][2])
-        self.programs["tile"].update_carried(record[1][3])
+        self.programs["agent"].update_offsets(record[0][0])
+        self.programs["agent"].update_colors(record[0][1])
+        self.programs["agent"].update_previous_positions(record[0][2])
+        self.programs["agent"].update_carried(record[0][3])
+        self.programs["item"].update_offsets(record[1][0])
+        self.programs["item"].update_colors(record[1][1])
+        self.programs["item"].update_previous_positions(record[1][2])
+        self.programs["item"].update_carried(record[1][3])
         self.programs["location"].update_offsets(record[2][0])
         self.programs["location"].update_colors(record[2][1])
 
     def update_data(self):
         """
-        updates the offset, color and carry data for particles, tiles and locations.
+        updates the offset, color and carry data for agents, items and locations.
         is called mainly by the run method in Visualization once per round.
         :return:
         """
-        if self.particle_update_flag:
-            self.particle_update_flag = False
-            tmp = np.array(list(self.particle_offset_data.values())).transpose()
+        if self.agent_update_flag:
+            self.agent_update_flag = False
+            tmp = np.array(list(self.agent_offset_data.values())).transpose()
             if len(tmp) == 0:
-                self.programs["particle"].update_offsets([])
-                self.programs["particle"].update_colors([])
-                self.programs["particle"].update_previous_positions([])
-                self.programs["particle"].update_carried([])
+                self.programs["agent"].update_offsets([])
+                self.programs["agent"].update_colors([])
+                self.programs["agent"].update_previous_positions([])
+                self.programs["agent"].update_carried([])
             else:
-                self.programs["particle"].update_offsets(tmp[0].tolist())
-                self.programs["particle"].update_colors(tmp[1].tolist())
-                self.programs["particle"].update_previous_positions(tmp[2].tolist())
-                self.programs["particle"].update_carried(tmp[3].tolist())
+                self.programs["agent"].update_offsets(tmp[0].tolist())
+                self.programs["agent"].update_colors(tmp[1].tolist())
+                self.programs["agent"].update_previous_positions(tmp[2].tolist())
+                self.programs["agent"].update_carried(tmp[3].tolist())
 
-        if self.tile_update_flag:
-            self.tile_update_flag = False
-            tmp = np.array(list(self.tile_offset_data.values())).transpose()
+        if self.item_update_flag:
+            self.item_update_flag = False
+            tmp = np.array(list(self.item_offset_data.values())).transpose()
             if len(tmp) == 0:
-                self.programs["tile"].update_offsets([])
-                self.programs["tile"].update_colors([])
-                self.programs["tile"].update_previous_positions([])
-                self.programs["tile"].update_carried([])
+                self.programs["item"].update_offsets([])
+                self.programs["item"].update_colors([])
+                self.programs["item"].update_previous_positions([])
+                self.programs["item"].update_carried([])
             else:
 
-                self.programs["tile"].update_offsets(tmp[0].tolist())
-                self.programs["tile"].update_colors(tmp[1].tolist())
-                self.programs["tile"].update_previous_positions(tmp[2].tolist())
-                self.programs["tile"].update_carried(tmp[3].tolist())
+                self.programs["item"].update_offsets(tmp[0].tolist())
+                self.programs["item"].update_colors(tmp[1].tolist())
+                self.programs["item"].update_previous_positions(tmp[2].tolist())
+                self.programs["item"].update_carried(tmp[3].tolist())
 
         if self.location_update_flag:
             self.location_update_flag = False
@@ -155,15 +156,15 @@ class OGLWidget(QtOpenGL.QGLWidget):
         GL.glClearColor(*self.background, 1.0)
 
         # initialize the openGL programs
-        self.programs["particle"] = OffsetColorCarryProgram(self.world.config_data.particle_model_file)
-        self.programs["particle"].set_world_scaling(self.world.grid.get_scaling())
-        self.programs["particle"].set_model_scaling(self.world.config_data.particle_scaling)
-        self.programs["particle"].set_animation(True)
+        self.programs["agent"] = OffsetColorCarryProgram(self.world.config_data.agent_model_file)
+        self.programs["agent"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["agent"].set_model_scaling(self.world.config_data.agent_scaling)
+        self.programs["agent"].set_animation(True)
 
-        self.programs["tile"] = OffsetColorCarryProgram(self.world.config_data.tile_model_file)
-        self.programs["tile"].set_world_scaling(self.world.grid.get_scaling())
-        self.programs["tile"].set_model_scaling(self.world.config_data.tile_scaling)
-        self.programs["tile"].set_animation(True)
+        self.programs["item"] = OffsetColorCarryProgram(self.world.config_data.item_model_file)
+        self.programs["item"].set_world_scaling(self.world.grid.get_scaling())
+        self.programs["item"].set_model_scaling(self.world.config_data.item_scaling)
+        self.programs["item"].set_animation(True)
 
         self.programs["location"] = OffsetColorProgram(self.world.config_data.location_model_file)
         self.programs["location"].set_world_scaling(self.world.grid.get_scaling())
@@ -171,7 +172,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
         self.programs["grid"] = GridProgram(self.world.grid, self.world.config_data.line_color,
                                             self.world.config_data.coordinates_color,
-                                            self.world.config_data.tile_model_file,
+                                            self.world.config_data.item_model_file,
                                             (self.world.get_x_size(),
                                              self.world.get_y_size(),
                                              self.world.get_z_size()))
@@ -185,35 +186,38 @@ class OGLWidget(QtOpenGL.QGLWidget):
         self.programs["grid"].set_border_color(self.world.config_data.border_color)
         self.programs["grid"].update_offsets(self.world.grid.get_box(self.world.grid.size))
 
-        self.programs["center"] = OffsetColorProgram(self.world.config_data.particle_model_file)
+        self.programs["center"] = OffsetColorProgram(self.world.config_data.agent_model_file)
         self.programs["center"].set_world_scaling(self.world.grid.get_scaling())
         self.programs["center"].set_model_scaling((0.3, 0.3, 0.3))
         self.programs["center"].update_offsets([self.world.grid.get_center()])
         self.programs["center"].update_colors(self.world.config_data.center_color)
 
-        self.programs["focus"] = OffsetColorProgram(self.world.config_data.particle_model_file)
+        self.programs["focus"] = OffsetColorProgram(self.world.config_data.agent_model_file)
         self.programs["focus"].set_model_scaling((0.3, 0.3, 0.3))
         self.programs["focus"].update_offsets(self.camera.get_look_at())
         self.programs["focus"].update_colors(self.world.config_data.focus_color)
 
         # cursor programs.. loading in the init, so on change it doesnt has to be loaded again
-        self.programs["cursor_tile"] = OffsetColorProgram(self.world.config_data.tile_model_file)
-        self.programs["cursor_tile"].set_world_scaling(self.world.grid.get_scaling())
-        self.programs["cursor_tile"].set_model_scaling((1.1, 1.1, 1.1))
-        self.programs["cursor_tile"].update_offsets([0.0, 0.0, 0.0])
-        self.programs["cursor_tile"].update_colors(self.world.config_data.cursor_color)
+        cursor_item = "cursor_"+str(MatterType.ITEM)
+        self.programs[cursor_item] = OffsetColorProgram(self.world.config_data.item_model_file)
+        self.programs[cursor_item].set_world_scaling(self.world.grid.get_scaling())
+        self.programs[cursor_item].set_model_scaling((1.1, 1.1, 1.1))
+        self.programs[cursor_item].update_offsets([0.0, 0.0, 0.0])
+        self.programs[cursor_item].update_colors(self.world.config_data.cursor_color)
 
-        self.programs["cursor_particle"] = OffsetColorProgram(self.world.config_data.particle_model_file)
-        self.programs["cursor_particle"].set_world_scaling(self.world.grid.get_scaling())
-        self.programs["cursor_particle"].set_model_scaling((1.1, 1.1, 1.1))
-        self.programs["cursor_particle"].update_offsets([0.0, 0.0, 0.0])
-        self.programs["cursor_particle"].update_colors(self.world.config_data.cursor_color)
+        cursor_agent = "cursor_"+str(MatterType.AGENT)
+        self.programs[cursor_agent] = OffsetColorProgram(self.world.config_data.agent_model_file)
+        self.programs[cursor_agent].set_world_scaling(self.world.grid.get_scaling())
+        self.programs[cursor_agent].set_model_scaling((1.1, 1.1, 1.1))
+        self.programs[cursor_agent].update_offsets([0.0, 0.0, 0.0])
+        self.programs[cursor_agent].update_colors(self.world.config_data.cursor_color)
 
-        self.programs["cursor_location"] = OffsetColorProgram(self.world.config_data.location_model_file)
-        self.programs["cursor_location"].set_world_scaling(self.world.grid.get_scaling())
-        self.programs["cursor_location"].set_model_scaling((1.1, 1.1, 1.1))
-        self.programs["cursor_location"].update_offsets([0.0, 0.0, 0.0])
-        self.programs["cursor_location"].update_colors(self.world.config_data.cursor_color)
+        cursor_location = "cursor_"+str(MatterType.LOCATION)
+        self.programs[cursor_location] = OffsetColorProgram(self.world.config_data.location_model_file)
+        self.programs[cursor_location].set_world_scaling(self.world.grid.get_scaling())
+        self.programs[cursor_location].set_model_scaling((1.1, 1.1, 1.1))
+        self.programs[cursor_location].update_offsets([0.0, 0.0, 0.0])
+        self.programs[cursor_location].update_colors(self.world.config_data.cursor_color)
 
     def resizeGL(self, width, height):
         """
@@ -268,7 +272,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
         :return:
         """
         # updating only the current cursor program
-        self.programs["cursor_" + self.cursor_type].update_offsets(
+        self.programs["cursor_" + str(self.cursor_type)].update_offsets(
             self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position))
 
     def rotate_light(self, angle):
@@ -291,9 +295,9 @@ class OGLWidget(QtOpenGL.QGLWidget):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
         # draw
-        self.programs["particle"].draw()
+        self.programs["agent"].draw()
         self.programs["location"].draw()
-        self.programs["tile"].draw()
+        self.programs["item"].draw()
         self.programs["grid"].draw()
 
         # center
@@ -302,7 +306,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
 
         # cursor
         if self.ctrl and self._enable_cursor:
-            self.programs["cursor_" + self.cursor_type].draw()
+            self.programs["cursor_" + str(self.cursor_type)].draw()
 
         if self.show_focus:
             self.programs["focus"].draw()
@@ -310,7 +314,7 @@ class OGLWidget(QtOpenGL.QGLWidget):
     def mousePressEvent(self, a0: QtGui.QMouseEvent):
         """
         Is called by PyQt5 library, when a mouse button is pressed.
-        Is used to set a tile or remove one on current cursers position and to detect dragging
+        Is used to set a item or remove one on current cursers position and to detect dragging
         :param a0: all mouse press event data
         :return:
         """
@@ -318,17 +322,17 @@ class OGLWidget(QtOpenGL.QGLWidget):
         if self.ctrl and self._enable_cursor:
             if int(a0.buttons()) & QtCore.Qt.LeftButton:
                 nl = self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position)
-                if self.cursor_type == 'tile':
-                    if nl in self.world.tile_map_coordinates:
-                        self.world.remove_tile_on(nl)
+                if self.cursor_type == MatterType.ITEM:
+                    if nl in self.world.item_map_coordinates:
+                        self.world.remove_item_on(nl)
                     else:
-                        self.world.add_tile(nl, color=self.added_matter_color)
-                if self.cursor_type == 'particle':
-                    if nl in self.world.particle_map_coordinates:
-                        self.world.remove_particle_on(nl)
+                        self.world.add_item(nl, color=self.added_matter_color)
+                if self.cursor_type == MatterType.AGENT:
+                    if nl in self.world.agent_map_coordinates:
+                        self.world.remove_agent_on(nl)
                     else:
-                        self.world.add_particle(nl, color=self.added_matter_color)
-                if self.cursor_type == 'location':
+                        self.world.add_agent(nl, color=self.added_matter_color)
+                if self.cursor_type == MatterType.LOCATION:
                     if nl in self.world.location_map_coordinates:
                         self.world.remove_location_on(nl)
                     else:
@@ -407,15 +411,15 @@ class OGLWidget(QtOpenGL.QGLWidget):
             return
         vc = self.world.grid.get_nearest_valid_coordinates(self.camera.cursor_position)
         matter = []
-        if vc in self.world.particle_map_coordinates:
-            matter.append(self.world.particle_map_coordinates[vc])
-            if self.world.particle_map_coordinates[vc].carried_tile is not None:
-                matter.append(self.world.particle_map_coordinates[vc].carried_tile)
-            if self.world.particle_map_coordinates[vc].carried_particle is not None:
-                matter.append(self.world.particle_map_coordinates[vc].carried_particle)
+        if vc in self.world.agent_map_coordinates:
+            matter.append(self.world.agent_map_coordinates[vc])
+            if self.world.agent_map_coordinates[vc].carried_item is not None:
+                matter.append(self.world.agent_map_coordinates[vc].carried_item)
+            if self.world.agent_map_coordinates[vc].carried_agent is not None:
+                matter.append(self.world.agent_map_coordinates[vc].carried_agent)
 
-        if vc in self.world.tile_map_coordinates:
-            matter.append(self.world.tile_map_coordinates[vc])
+        if vc in self.world.item_map_coordinates:
+            matter.append(self.world.item_map_coordinates[vc])
 
         if vc in self.world.location_map_coordinates:
             matter.append(self.world.location_map_coordinates[vc])
@@ -575,5 +579,5 @@ class OGLWidget(QtOpenGL.QGLWidget):
         self.fmt.setSamples(value)
 
     def set_animation_percentage(self, animation_percentage):
-        self.programs["particle"].set_animation_percentage(animation_percentage)
-        self.programs["tile"].set_animation_percentage(animation_percentage)
+        self.programs["agent"].set_animation_percentage(animation_percentage)
+        self.programs["item"].set_animation_percentage(animation_percentage)

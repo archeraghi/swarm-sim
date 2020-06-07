@@ -2,7 +2,7 @@
 
 
 def solution(world):
-    for particle in world.get_particle_list():
+    for agent in world.get_agent_list():
         global ttl
         global max
         global direction
@@ -29,6 +29,6 @@ def solution(world):
             elif direction == dirs[2]:
                 direction = dirs[0]
 
-        particle.create_location()
-        particle.move_to(direction)
+        agent.create_location()
+        agent.move_to(direction)
         ttl = ttl - 1

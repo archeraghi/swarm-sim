@@ -12,14 +12,20 @@ from core.vis3d import ResetException
 
 def swarm_sim(argv):
     """In the main function first the config is getting parsed and than
-    the swarm_sim_world and the swarm_sim_world object is created. Afterwards the run method of the swarm_sim_world
+    the swarm_sim_world and the swarm_sim_world item is created. Afterwards the run method of the swarm_sim_world
     is called in which the simlator is going to start to run"""
-    logging.basicConfig(filename='outputs/logs/system.log', filemode='w', level=logging.INFO, format='%(message)s')
+    config_data = config.ConfigData()
+
+    unique_descriptor = "%s_%s_%s" % (config_data.local_time,
+                                      config_data.scenario.rsplit('.', 1)[0],
+                                      config_data.solution.rsplit('.', 1)[0])
+
+    logging.basicConfig(filename="outputs/logs/system_%s.log" % unique_descriptor, filemode='w',
+                        level=logging.INFO, format='%(message)s')
     logging.info('Started')
 
-    config_data = config.ConfigData()
     read_cmd_args(argv, config_data)
-    create_directory_for_data(config_data)
+    create_directory_for_data(config_data, unique_descriptor)
     random.seed(config_data.seed_value)
     swarm_sim_world = world.World(config_data)
     swarm_sim_world.init_scenario(get_scenario(swarm_sim_world.config_data))
@@ -91,26 +97,23 @@ def read_cmd_args(argv, config_data):
             config_data.local_time = str(arg)
 
 
-def create_directory_for_data(config_data):
+def create_directory_for_data(config_data, unique_descriptor):
     if config_data.multiple_sim == 1:
-        config_data.directory_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
-                                     "_" + config_data.solution.rsplit('.', 1)[0] + "/" + \
-                                     str(config_data.seed_value)
+        config_data.directory_name = "%s/%s" % (unique_descriptor, str(config_data.seed_value))
 
         config_data.directory_name = "./outputs/csv/mulitple/" + config_data.directory_name
 
     else:
-        config_data.directory_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
-                                     "_" + config_data.solution.rsplit('.', 1)[0] + "_" + \
-                                     str(config_data.seed_value)
+        config_data.directory_name = "%s_%s" % (unique_descriptor, str(config_data.seed_value))
+
         config_data.directory_name = "./outputs/csv/" + config_data.directory_name
     if not os.path.exists(config_data.directory_name):
         os.makedirs(config_data.directory_name)
 
 
 def run_solution(swarm_sim_world):
-    if swarm_sim_world.config_data.particle_random_order_always:
-        random.shuffle(swarm_sim_world.particles)
+    if swarm_sim_world.config_data.agent_random_order_always:
+        random.shuffle(swarm_sim_world.agents)
     get_solution(swarm_sim_world.config_data).solution(swarm_sim_world)
     swarm_sim_world.csv_round.next_line(swarm_sim_world.get_actual_round())
     swarm_sim_world.inc_round_counter_by(number=1)

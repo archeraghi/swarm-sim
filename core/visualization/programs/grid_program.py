@@ -16,7 +16,7 @@ class GridProgram(Program):
     def __init__(self, grid, line_color, model_color, coordinate_model_file, border_size):
         """
         initializes/loads/creates all necessary data/buffers/shaders for drawing the Grid
-        :param grid: the grid object to be visualized
+        :param grid: the grid item to be visualized
         :param line_color: color of the grid lines
         :param model_color: color of the grid coordinate model
         :param coordinate_model_file: model file of the coordinates
