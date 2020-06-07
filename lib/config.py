@@ -35,7 +35,8 @@ class ConfigData:
         except configparser.NoOptionError:
             raise RuntimeError("Fatal Error: no grid size defined in config.ini!")
 
-        test = getattr(importlib.import_module("grids.%s" % self.grid_class), self.grid_class)
+        grid_module, grid_class = self.grid_class.rsplit(".", 1)
+        test = getattr(importlib.import_module("grids.%s" % grid_module), grid_class)
         self.grid = test(self.grid_size)
 
         self.particle_model_file = config.get("Visualization", "particle_model_file")

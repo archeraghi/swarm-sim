@@ -1,4 +1,4 @@
-from grids.Grid import Grid
+from grids.grid import Grid
 
 
 class CCPGrid(Grid):
