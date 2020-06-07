@@ -6,16 +6,15 @@ import os
 import sys
 import time
 import random
-from lib import world, config
-from lib.plot_generator import plot_generator
-from lib.vis3d import ResetException
+from core import world, config
+from core.vis3d import ResetException
 
 
 def swarm_sim(argv):
     """In the main function first the config is getting parsed and than
     the swarm_sim_world and the swarm_sim_world object is created. Afterwards the run method of the swarm_sim_world
     is called in which the simlator is going to start to run"""
-    logging.basicConfig(filename='system.log', filemode='w', level=logging.INFO, format='%(message)s')
+    logging.basicConfig(filename='outputs/logs/system.log', filemode='w', level=logging.INFO, format='%(message)s')
     logging.info('Started')
 
     config_data = config.ConfigData()
@@ -23,6 +22,7 @@ def swarm_sim(argv):
     create_directory_for_data(config_data)
     random.seed(config_data.seed_value)
     swarm_sim_world = world.World(config_data)
+    swarm_sim_world.init_scenario(get_scenario(swarm_sim_world.config_data))
 
     reset = True
     while reset:
@@ -43,7 +43,7 @@ def main_loop(config_data, swarm_sim_world):
 
             run_solution(swarm_sim_world)
         except ResetException:
-            swarm_sim_world.reset()
+            do_reset(swarm_sim_world)
 
     if config_data.visualization:
         try:
@@ -51,9 +51,18 @@ def main_loop(config_data, swarm_sim_world):
             while not config_data.close_at_end:
                 swarm_sim_world.vis.run(round_start_timestamp)
         except ResetException:
-            swarm_sim_world.reset()
+            do_reset(swarm_sim_world)
             return True
     return False
+
+
+def do_reset(swarm_sim_world):
+    swarm_sim_world.reset()
+    solution = get_solution(swarm_sim_world.config_data)
+    scenario = get_scenario(swarm_sim_world.config_data)
+    importlib.reload(solution)
+    importlib.reload(scenario)
+    swarm_sim_world.init_scenario(scenario)
 
 
 def read_cmd_args(argv, config_data):
@@ -88,13 +97,13 @@ def create_directory_for_data(config_data):
                                      "_" + config_data.solution.rsplit('.', 1)[0] + "/" + \
                                      str(config_data.seed_value)
 
-        config_data.directory_name = "./outputs/mulitple/" + config_data.directory_name
+        config_data.directory_name = "./outputs/csv/mulitple/" + config_data.directory_name
 
     else:
         config_data.directory_name = config_data.local_time + "_" + config_data.scenario.rsplit('.', 1)[0] + \
                                      "_" + config_data.solution.rsplit('.', 1)[0] + "_" + \
                                      str(config_data.seed_value)
-        config_data.directory_name = "./outputs/" + config_data.directory_name
+        config_data.directory_name = "./outputs/csv/" + config_data.directory_name
     if not os.path.exists(config_data.directory_name):
         os.makedirs(config_data.directory_name)
 
@@ -102,15 +111,23 @@ def create_directory_for_data(config_data):
 def run_solution(swarm_sim_world):
     if swarm_sim_world.config_data.particle_random_order_always:
         random.shuffle(swarm_sim_world.particles)
-    mod = importlib.import_module('solution.' + swarm_sim_world.config_data.solution)
-    mod.solution(swarm_sim_world)
+    get_solution(swarm_sim_world.config_data).solution(swarm_sim_world)
     swarm_sim_world.csv_round.next_line(swarm_sim_world.get_actual_round())
     swarm_sim_world.inc_round_counter_by(number=1)
 
 
+def get_solution(config_data):
+    return importlib.import_module('components.solution.' + config_data.solution)
+
+
+def get_scenario(config_data):
+    return importlib.import_module('components.scenario.' + config_data.scenario)
+
+
 def generate_data(config_data, swarm_sim_world):
     swarm_sim_world.csv_aggregator()
-    plot_generator(config_data.directory_name)
+    plt_gnrtr = importlib.import_module('components.generators.plot.%s' % config_data.plot_generator)
+    plt_gnrtr.plot_generator(config_data.directory_name)
 
 
 if __name__ == "__main__":
