@@ -2,7 +2,7 @@ import OpenGL.GL as GL
 from abc import ABC, abstractmethod
 import numpy as np
 
-from lib.visualization.utils import load_obj_file, show_msg, VisualizationError, Level
+from lib.visualization.utils import load_obj_file, VisualizationError, Level
 
 
 class Program(ABC):
@@ -120,9 +120,9 @@ class Program(ABC):
         self.use()
         loc = GL.glGetUniformLocation(self._program, name)
         if loc < 0:
-            show_msg("Uniform \"%s\" doesn't exist!\n"
-                     "(Maybe the compilation optimized the shader by removing the unused uniform?)" % name, 2)
-            exit(1)
+            raise VisualizationError("Uniform \"%s\" doesn't exist!\n"
+                                     "(Maybe the compilation optimized the shader by removing the unused uniform?)" %
+                                     name, Level.WARNING)
         else:
             return loc
 
@@ -134,9 +134,9 @@ class Program(ABC):
         """
         loc = GL.glGetAttribLocation(self._program, name)
         if loc < 0:
-            show_msg("Attribute \"%s\" doesn't exist!\n"
-                     "(Maybe the compilation optimized the shader by removing the unused attribute?)" % name, 2)
-            exit(1)
+            raise VisualizationError("Attribute \"%s\" doesn't exist!\n"
+                                     "(Maybe the compilation optimized the shader by removing the unused attribute?)" %
+                                     name, Level.WARNING)
         else:
             return loc
 

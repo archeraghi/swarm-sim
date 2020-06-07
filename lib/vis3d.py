@@ -220,35 +220,26 @@ class Visualization:
         :param speed: speed of the animation in 1/steps. less or equal zero = automatic mode
         """
         if speed < 0:
-            # measure the drawing of one frame
-            start = time.perf_counter()
-            self._viewer.set_animation_percentage(0)
-            self._viewer.glDraw()
-            GL.glFinish()
-            frametime = time.perf_counter() - start
-
-            # using the rounds_per_second and the
-            # timestamp of the start of the round, calculate the time left for animation
-            timeleft = (1 / self._rounds_per_second) - (time.perf_counter() - round_start_time)
-
-            # calculate the amount of animation steps we can do in the time left
-            steps = int(timeleft / frametime / 1.5)
+            # draw at location according to the passed time and the rps
+            half_round_time = (1.0/self._rounds_per_second)/2.0
+            now = time.perf_counter()
+            while (now - round_start_time) < half_round_time:
+                self._viewer.set_animation_percentage(min(1, (now-round_start_time)/half_round_time))
+                self._process_events()
+                self._viewer.glDraw()
+                now = time.perf_counter()
         else:
-            steps = speed
+            # draw at location according to the selected animation speed
+            for i in range(1, max(1, speed)):
+                self._viewer.set_animation_percentage(float(i / max(1, speed)))
+                self._process_events()
+                self._viewer.glDraw()
 
-        # animate
-        for i in range(1, steps):
-            self._viewer.set_animation_percentage(float(i / steps))
-            self._process_events()
-            self._viewer.glDraw()
-
-        # draw the last frame. its outside of the loop, so that if steps is equal or less then one,
-        # the particles will still be drawn at the correct locations.
-        self._viewer.set_animation_percentage(1.0)
+        self._viewer.set_animation_percentage(1)
         self._viewer.glDraw()
 
         # reset the previous position after animation.
-        # not reseting it causes a small visual bug if the particle didn't move.
+        # not reseting it causes a visual bug if the matter didn't move.
         for particle in self._viewer.particle_offset_data:
             current_data = self._viewer.particle_offset_data[particle]
             self._viewer.particle_offset_data[particle] = (current_data[0], current_data[1], particle.coordinates,

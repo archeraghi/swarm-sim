@@ -101,3 +101,5 @@ class ConfigData:
 
         self.local_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')[:-1]
         self.multiple_sim = 0
+
+
