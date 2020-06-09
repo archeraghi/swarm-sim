@@ -40,14 +40,14 @@ class CsvAgentFile:
                         agent.csv_agent_writer.location_created, agent.csv_agent_writer.location_deleted,
                         agent.csv_agent_writer.location_read, agent.csv_agent_writer.location_write,
                         agent.csv_agent_writer.memory_read, agent.csv_agent_writer.memory_write,
-                        agent.csv_agent_writer.agents_created, agent.csv_agent_writer.agentss_dropped,
+                        agent.csv_agent_writer.agents_created, agent.csv_agent_writer.agents_dropped,
                         agent.csv_agent_writer.agents_deleted, agent.csv_agent_writer.agent_read,
                         agent.csv_agent_writer.steps, agent.csv_agent_writer.agents_taken,
                         agent.csv_agent_writer.agent_write,
-                        agent.csv_agent_writer.items_created, agent.csv_agent_writer.itemss_deleted,
+                        agent.csv_agent_writer.items_created, agent.csv_agent_writer.items_deleted,
                         agent.csv_agent_writer.items_dropped,
-                        agent.csv_agent_writer.items_read, agent.csv_agent_writer.itemss_taken,
-                        agent.csv_agent_writer.items_write, agent.csv_agent_writer.success]
+                        agent.csv_agent_writer.item_read, agent.csv_agent_writer.items_taken,
+                        agent.csv_agent_writer.item_write, agent.csv_agent_writer.success]
         self.writer.writerow(csv_iterator)
 
 

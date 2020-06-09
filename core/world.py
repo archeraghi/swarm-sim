@@ -65,7 +65,7 @@ class World:
         self.csv_round = self.csv_generator_module.CsvRoundData(scenario=config_data.scenario,
                                                                 solution=config_data.solution,
                                                                 seed=config_data.seed_value,
-                                                                directory=config_data.directory_name)
+                                                                directory=config_data.directory_csv)
 
         if config_data.visualization:
             self.vis = vis3d.Visualization(self)
@@ -185,7 +185,7 @@ class World:
 
     def csv_aggregator(self):
         self.csv_round.aggregate_metrics()
-        agent_csv = self.csv_generator_module.CsvAgentFile(self.config_data.directory_name)
+        agent_csv = self.csv_generator_module.CsvAgentFile(self.config_data.directory_csv)
         for a in self.agents:
             agent_csv.write_agent(a)
         agent_csv.csv_file.close()

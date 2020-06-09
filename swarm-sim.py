@@ -102,14 +102,18 @@ def create_directory_for_data(config_data, unique_descriptor):
         config_data.directory_name = "%s/%s" % (unique_descriptor, str(config_data.seed_value))
 
         config_data.directory_name = "./outputs/csv/mulitple/" + config_data.directory_name
+        config_data.directory_plot = "./outputs/plot/mulitple/" + config_data.directory_name
+
 
     else:
         config_data.directory_name = "%s_%s" % (unique_descriptor, str(config_data.seed_value))
 
-        config_data.directory_name = "./outputs/csv/" + config_data.directory_name
-    if not os.path.exists(config_data.directory_name):
-        os.makedirs(config_data.directory_name)
-
+        config_data.directory_csv = "./outputs/csv/" + config_data.directory_name
+        config_data.directory_plot = "./outputs/plot/" + config_data.directory_name
+    if not os.path.exists(config_data.directory_csv):
+        os.makedirs(config_data.directory_csv)
+    if not os.path.exists(config_data.directory_plot):
+        os.makedirs(config_data.directory_plot)
 
 def run_solution(swarm_sim_world):
     if swarm_sim_world.config_data.agent_random_order_always:
@@ -130,7 +134,7 @@ def get_scenario(config_data):
 def generate_data(config_data, swarm_sim_world):
     swarm_sim_world.csv_aggregator()
     plt_gnrtr = importlib.import_module('components.generators.plot.%s' % config_data.plot_generator)
-    plt_gnrtr.plot_generator(config_data.directory_name)
+    plt_gnrtr.plot_generator(config_data.directory_csv, config_data.directory_plot )
 
 
 if __name__ == "__main__":
