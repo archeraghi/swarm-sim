@@ -21,7 +21,7 @@ def main(argv):
     except (configparser.NoOptionError) as noe:
         solution_file = "solution.py"
 
-    n_time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')[:-1]
+    n_time = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')[:-1]
     try:
         opts, args = getopt.getopt(argv, "hs:w:r:n:v:", ["scenaro=", "solution="])
     except getopt.GetoptError:
