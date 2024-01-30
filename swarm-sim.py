@@ -8,12 +8,14 @@ import time
 import random
 from core import world, config
 from core.vis3d import ResetException
-
+from lib.std_lib import *
+# import pdb
 
 def swarm_sim(argv):
     """In the main function first the config is getting parsed and than
     the swarm_sim_world and the swarm_sim_world item is created. Afterwards the run method of the swarm_sim_world
-    is called in which the simlator is going to start to run"""
+    is called in which the simulator is going to start to run"""
+    # pdb.set_trace()
     config_data = config.ConfigData()
 
     unique_descriptor = "%s_%s_%s" % (config_data.local_time,
@@ -115,6 +117,7 @@ def create_directory_for_data(config_data, unique_descriptor):
     if not os.path.exists(config_data.directory_plot):
         os.makedirs(config_data.directory_plot)
 
+
 def run_solution(swarm_sim_world):
     if swarm_sim_world.config_data.agent_random_order_always:
         random.shuffle(swarm_sim_world.agents)
@@ -124,17 +127,19 @@ def run_solution(swarm_sim_world):
 
 
 def get_solution(config_data):
-    return importlib.import_module('components.solution.' + config_data.solution)
+    solution_path = 'usecase.' + config_data.sim_type + '.solution.'
+    return importlib.import_module(solution_path + config_data.solution)
 
 
 def get_scenario(config_data):
-    return importlib.import_module('components.scenario.' + config_data.scenario)
+    scenario_path = 'usecase.' + config_data.sim_type + '.scenario.'
+    return importlib.import_module(scenario_path + config_data.scenario)
 
 
 def generate_data(config_data, swarm_sim_world):
     swarm_sim_world.csv_aggregator()
     plt_gnrtr = importlib.import_module('components.generators.plot.%s' % config_data.plot_generator)
-    plt_gnrtr.plot_generator(config_data.directory_csv, config_data.directory_plot )
+    plt_gnrtr.plot_generator(config_data.directory_csv, config_data.directory_plot)
 
 
 if __name__ == "__main__":
