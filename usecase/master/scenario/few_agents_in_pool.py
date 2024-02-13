@@ -18,17 +18,17 @@ def scenario(world):
 
     # Causes problems:
 
-    # world.add_item(-4, 0)
-    # world.add_item(-4.5, -1)
-    # world.add_item(-5, -2)
-    # world.add_item(-5.5, -3)
-    # world.add_item(-6, -4)
-    #
-    # world.add_item(4, 0)
-    # world.add_item(4.5, -1)
-    # world.add_item(5, -2)
-    # world.add_item(5.5, -3)
-    # world.add_item(6, -4)
+    world.add_item(-4, 0)
+    world.add_item(-4.5, -1)
+    world.add_item(-5, -2)
+    world.add_item(-5.5, -3)
+    world.add_item(-6, -4)
+
+    world.add_item(4, 0)
+    world.add_item(4.5, -1)
+    world.add_item(5, -2)
+    world.add_item(5.5, -3)
+    world.add_item(6, -4)
 
     #
 

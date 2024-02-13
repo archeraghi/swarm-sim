@@ -5,6 +5,8 @@ def solution(world):
 
     if world.get_actual_round() % 1 == 0:
         for agent in world.get_agent_list():
+            print(world.get_actual_round(), " Agent No.", agent.number, "  Coordinates", agent.coordinates, " Height",
+                  agent.coordinates[1], "  Number of Agents", world.get_amount_of_agents())
 
             # Check whether in the direction of SE, SW are agents or items
             # These directions are all relative to the current agent: First value is X coordinate (left right), second is the Y coordinate (up down), the third coordinate is for 3D coordinate systems but not used in 2D-Hex-Grid
@@ -56,48 +58,58 @@ def solution(world):
 
 
 
-            # CASE Begin: Agent is on the floor - Walk Left -Right -  iteminSE and iteminSW  - and nothing is above it
+            # CASE Begin: Agent is alone on the floor - Walk Left - Right -  iteminSE and iteminSW  - and nothing is above it
                 # Walk to left of right if possible, otherwise stand
-            if nextdirection == dirNotSetYet and iteminSE and iteminSW and not agentinW and not agentinE and freeNE and freeNW :
-                # Move left or right
-                randdirection = random.choice((dirW, dirE))
-                nextdirection = dirStand
+            if not agentinW and not agentinE:
 
-                if randdirection == dirW and freeW:
-                    nextdirection = randdirection
-                if randdirection == dirE and freeE:
-                    nextdirection = randdirection
+                if nextdirection == dirNotSetYet and iteminSE and iteminSW :
+                    # Move left or right
+                    randdirection = random.choice((dirW, dirE))
+                    nextdirection = dirStand
 
-            if nextdirection == dirNotSetYet and iteminSE  and not agentinW and not agentinE and freeNW:
-                # Move left or right
-                randdirection = random.choice((dirStand, dirE))
-                nextdirection = dirStand
-                if randdirection == dirE and freeE:
-                    nextdirection = randdirection
+                    if randdirection == dirW and freeW and not agentinNE:
+                        nextdirection = randdirection
+                    if randdirection == dirE and freeE and not agentinNW:
+                        nextdirection = randdirection
 
-            if nextdirection == dirNotSetYet and iteminSW and not agentinW and not agentinE and freeNE:
-                # Move left or right
-                randdirection = random.choice((dirStand, dirW))
-                nextdirection = dirStand
-                if randdirection == dirW and freeW:
-                    nextdirection = randdirection
-            # CASE End: Agent is on the floor - Walk Left -Right - iteminSE and iteminSW  - and nothing is above it
+                if nextdirection == dirNotSetYet and agentinSE and iteminSW and not agentinNW:
+                    # Move left or right
+                    randdirection = random.choice((dirStand, dirE))
+                    nextdirection = dirStand
+                    if randdirection == dirE and freeE:
+                        nextdirection = randdirection
+
+                if nextdirection == dirNotSetYet and agentinSW and iteminSE and not agentinNE:
+                    # Move left or right
+                    randdirection = random.choice((dirStand, dirW))
+                    nextdirection = dirStand
+                    if randdirection == dirW and freeW:
+                        nextdirection = randdirection
+
+                if nextdirection == dirNotSetYet and freeSE and iteminSW and not agentinNE and freeW:
+                    # Move left
+                    nextdirection = dirW
+
+                if nextdirection == dirNotSetYet and freeSW and iteminSE and not agentinNW and freeW:
+                    # Move left
+                    nextdirection = dirE
+                # CASE End: Agent is on the floor - Walk Left -Right - iteminSE and iteminSW  - and nothing is above it
 
 
 
 
 
             # CASE Begin: Agent is on 2 agents - agentinSW and agentinSE - and carries an agent in NE, walk E
-            if nextdirection == dirNotSetYet and agentinSW and agentinSE and freeE and agentinNE:
+            if nextdirection == dirNotSetYet and agentinSW and agentinSE and freeE and agentinNE and not agentinNW :
                 nextdirection = dirE    # freeE is True
             # CASE End: Agent is on 2 agents - agentinSW and agentinSE - and carries an agent in NE, walk E
             # Why not also case for W?
-            if nextdirection == dirNotSetYet and agentinSW and agentinSE and freeW and agentinNW and iteminE:
+            if nextdirection == dirNotSetYet and agentinSW and agentinSE and freeW and agentinNW and not agentinNE:
                 nextdirection = dirW
+            # CASE End: Agent is on 2 agents - agentinSW and agentinSE - and carries an agent in NE, walk E
 
 
-
-            if nextdirection == dirNotSetYet and freeNE and freeE and agentinSE and not agentinNW:
+            if nextdirection == dirNotSetYet and freeNE and freeE and agentinSE and not agentinNW :
                 nextdirection = dirE    # freeE is True
 
 
@@ -122,6 +134,7 @@ def solution(world):
                 yposition = agent.coordinates[1]
                 nextdirection = dirW
             # CASE END: TOWER SHIFT LEFT AND RIGHT
+
 
 
 
