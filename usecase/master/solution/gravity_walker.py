@@ -2,11 +2,20 @@ import random
 
 
 def solution(world):
+    minAgentHeight = 0
+    maxAgentHeight = 0
+    stopiftowerbuilt = False
 
     if world.get_actual_round() % 1 == 0:
+
+
         for agent in world.get_agent_list():
-            print(world.get_actual_round(), " Agent No.", agent.number, "  Coordinates", agent.coordinates, " Height",
-                  agent.coordinates[1], "  Number of Agents", world.get_amount_of_agents())
+            # print(world.get_actual_round(), " Agent No.", agent.number, "  Coordinates", agent.coordinates, " Height", agent.coordinates[1], "  Number of Agents", world.get_amount_of_agents())
+
+            if agent.coordinates[1] > maxAgentHeight:
+                maxAgentHeight = agent.coordinates[1]
+            if agent.coordinates[1] < minAgentHeight:
+                minAgentHeight = agent.coordinates[1]
 
             # Check whether in the direction of SE, SW are agents or items
             # These directions are all relative to the current agent: First value is X coordinate (left right), second is the Y coordinate (up down), the third coordinate is for 3D coordinate systems but not used in 2D-Hex-Grid
@@ -150,9 +159,11 @@ def solution(world):
                 agent.move_to(nextdirection)
 
         # For next step: define the goal of the simulation, e.g. to build a tower of 6 agents and then terminate the simulation
-        print(world.get_actual_round(), " Agent No.", agent.number, "  Coordinates", agent.coordinates, " Height", agent.coordinates[1],  "  Number of Agents", world.get_amount_of_agents())
 
-        TowerOfSixAgentsHasBeenBuilt = (agent.coordinates[1] >= world.get_amount_of_agents())
-        if TowerOfSixAgentsHasBeenBuilt:
+        towerheight = maxAgentHeight - minAgentHeight + 1
+        print("Round: ",world.get_actual_round(), "MaxHeight: ", maxAgentHeight , "Minheight: ", minAgentHeight , "Towerheight: ", towerheight ,"  Agent No.", agent.number, "  Coordinates", agent.coordinates, " Height", agent.coordinates[1],  "  Number of Agents", world.get_amount_of_agents())
+
+        TowerOfSixAgentsHasBeenBuilt = (towerheight == world.get_amount_of_agents())
+        if TowerOfSixAgentsHasBeenBuilt and stopiftowerbuilt:
             # world.csv_round.success()
             world.set_successful_end()

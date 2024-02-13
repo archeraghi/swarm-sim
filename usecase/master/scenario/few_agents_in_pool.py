@@ -13,8 +13,7 @@ def scenario(world):
     for agent in agent_ring:
         world.add_agent(agent)
 
-
-
+    # world.add_agent(-3, 10)
 
     # Causes problems:
 
