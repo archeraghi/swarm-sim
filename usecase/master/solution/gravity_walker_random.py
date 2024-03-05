@@ -7,16 +7,10 @@ def solution(world):
     stopiftowerbuilt = False
 
     if world.get_actual_round() % 1 == 0:
-        # if world.get_actual_round() == 1:
-        #     HashMap<int,String> walkDirectionList = new HashMap<String,String>();
-
-
 
 
         for agent in world.get_agent_list():
             # print(world.get_actual_round(), " Agent No.", agent.number, "  Coordinates", agent.coordinates, " Height", agent.coordinates[1], "  Number of Agents", world.get_amount_of_agents())
-
-            # KG: Correct: set minAgentHeight and maxAgentHeight to height of agent [1]
 
             if agent.coordinates[1] > maxAgentHeight:
                 maxAgentHeight = agent.coordinates[1]
@@ -57,14 +51,6 @@ def solution(world):
             dirNotSetYet = (0,0,1)
             nextdirection = dirNotSetYet # characterizes an invalid state, will be changed later
 
-            if not hasattr(agent, 'planned_direction'):
-                agent.planned_direction = random.choice([(1, 0, 0), (-1, 0, 0)])  # East or West
-                print("Agent", agent.get_id(), "planned direction:", agent.planned_direction)
-            planned_direction = agent.planned_direction
-            # try:
-            #     print("Agent No " + agent.number + "   dirWalkPlan is set to " + str(dirWalkPlan[agent.number]))
-            # except:
-            #     dirWalkPlan[agent.number] = random.choice((dirW, dirE))
 
 
 
@@ -85,58 +71,37 @@ def solution(world):
                 # Walk to left of right if possible, otherwise stand
             if not agentinW and not agentinE:
 
-
-                if nextdirection == dirNotSetYet and iteminSE and iteminSW:
+                if nextdirection == dirNotSetYet and iteminSE and iteminSW :
                     # Move left or right
-                    # randdirection = dirE
-
-                    randdirection = planned_direction # dirWalkPlan
+                    randdirection = random.choice((dirW, dirE))
                     nextdirection = dirStand
 
                     if randdirection == dirW and freeW and not agentinNE:
                         nextdirection = randdirection
-                    if randdirection == dirW and not freeW and agentinNE:
-                        agent.planned_direction = dirE
-                        randdirection = dirE
-                        nextdirection = randdirection
                     if randdirection == dirE and freeE and not agentinNW:
                         nextdirection = randdirection
-                    if randdirection == dirE and not freeE and agentinNW:
-                        agent.planned_direction = dirW
-                        randdirection = dirW
-                        nextdirection = randdirection
-
 
                 if nextdirection == dirNotSetYet and agentinSE and iteminSW and not agentinNW:
-
                     # Move left or right
-                    randdirection = planned_direction
+                    randdirection = random.choice((dirStand, dirE))
                     nextdirection = dirStand
                     if randdirection == dirE and freeE:
                         nextdirection = randdirection
 
-
                 if nextdirection == dirNotSetYet and agentinSW and iteminSE and not agentinNE:
                     # Move left or right
-
-                    randdirection = planned_direction
+                    randdirection = random.choice((dirStand, dirW))
                     nextdirection = dirStand
                     if randdirection == dirW and freeW:
                         nextdirection = randdirection
 
                 if nextdirection == dirNotSetYet and freeSE and iteminSW and not agentinNE and freeW:
                     # Move left
-                    dirWalkPlan = dirW
                     nextdirection = dirW
-                    agent.planned_direction = dirW
-                    # nextdirection = dirStand
-
 
                 if nextdirection == dirNotSetYet and freeSW and iteminSE and not agentinNW and freeE:
                     # Move left
                     nextdirection = dirE
-                    dirWalkPlan = dirE
-                    agent.planned_direction = dirE
                 # CASE End: Agent is on the floor - Walk Left -Right - iteminSE and iteminSW  - and nothing is above it
 
 
@@ -146,18 +111,15 @@ def solution(world):
             # CASE Begin: Agent is on 2 agents - agentinSW and agentinSE - and carries an agent in NE, walk E
             if nextdirection == dirNotSetYet and agentinSW and agentinSE and freeE and agentinNE and not agentinNW :
                 nextdirection = dirE    # freeE is True
-                agent.planned_direction = dirE
             # CASE End: Agent is on 2 agents - agentinSW and agentinSE - and carries an agent in NE, walk E
             # Why not also case for W?
             if nextdirection == dirNotSetYet and agentinSW and agentinSE and freeW and agentinNW and not agentinNE:
                 nextdirection = dirW
-                agent.planned_direction = dirW
             # CASE End: Agent is on 2 agents - agentinSW and agentinSE - and carries an agent in NE, walk E
 
 
             if nextdirection == dirNotSetYet and freeNE and freeE and agentinSE and not agentinNW :
-                nextdirection = dirE
-                agent.planned_direction = dirE# freeE is True
+                nextdirection = dirE    # freeE is True
 
 
 
@@ -174,17 +136,12 @@ def solution(world):
 
             # CASE Begin: TOWER SHIFT LEFT AND RIGHT
             # if standing only on agent in SE, check whether we need to move to E
-            if (nextdirection == dirNotSetYet or nextdirection == dirStand) and agentinSE and not agentinSW and freeE and not agentinNW :
+            if nextdirection == dirNotSetYet and agentinSE and not agentinSW and freeE and not agentinNW :
                 nextdirection = dirE
-                agent.planned_direction = dirE
-                dirWalkPlan = dirE
 
-            if (nextdirection == dirNotSetYet or nextdirection == dirStand) and agentinSW and not agentinSE and freeW and not agentinNE:
+            if nextdirection == dirNotSetYet and agentinSW and not agentinSE and freeW and not agentinNE:
                 yposition = agent.coordinates[1]
                 nextdirection = dirW
-                agent.planned_direction = dirW
-                dirWalkPlan = dirW
-
             # CASE END: TOWER SHIFT LEFT AND RIGHT
 
 
@@ -206,11 +163,7 @@ def solution(world):
         towerheight = maxAgentHeight - minAgentHeight + 1
         print("Round: ",world.get_actual_round(), "MaxHeight: ", maxAgentHeight , "Minheight: ", minAgentHeight , "Towerheight: ", towerheight ,"  Agent No.", agent.number, "  Coordinates", agent.coordinates, " Height", agent.coordinates[1],  "  Number of Agents", world.get_amount_of_agents())
 
-        TowerOfAgentsHasBeenBuilt  = (towerheight == world.get_amount_of_agents())
-        if TowerOfAgentsHasBeenBuilt and stopiftowerbuilt:
+        TowerHasBeenBuilt = (towerheight == world.get_amount_of_agents())
+        if TowerHasBeenBuilt and stopiftowerbuilt:
             # world.csv_round.success()
-            print(" Simulation terminated successfully!!!    Round: ", world.get_actual_round(), "MaxHeight: ", maxAgentHeight, "Minheight: ", minAgentHeight,
-                  "Towerheight: ", towerheight, "  Agent No.", agent.number, "  Coordinates", agent.coordinates,
-                  " Height", agent.coordinates[1], "  Number of Agents", world.get_amount_of_agents())
-
             world.set_successful_end()
