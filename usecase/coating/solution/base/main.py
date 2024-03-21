@@ -1,4 +1,4 @@
-from lib import world, particle as particle_class
+from lib import world, agent as agent_class
 import copy
 from lib.swarm_sim_header import *
 import solution.base.distance_calculation as distance_calc_mod
@@ -15,129 +15,129 @@ def solution(sim: world) -> None:
     Main solution function that is called each round
     @param sim: the current world state
     """
-    # code for deleting particles to test robustness
-    if sim.config_data.particle_fail_quote > 0 and sim.get_actual_round() == 300:
-        for to_delete in list(filter(lambda x: x.willfail, sim.particles)):
-            to_delete.delete_particle()
+    # code for deleting agents to test robustness
+    if sim.config_data.agent_fail_quote > 0 and sim.get_actual_round() == 300:
+        for to_delete in list(filter(lambda x: x.willfail, sim.agents)):
+            to_delete.delete_agent()
 
     if sim.get_actual_round() == 1:
-        initialize_particles(sim)
+        initialize_agents(sim)
 
-    for particle in sim.particles:
-        # resets all particles last movement direction every 10 cycles
+    for agent in sim.agents:
+        # resets all agents last movement direction every 10 cycles
         if sim.get_actual_round() % (cycle_no * 10) == 1:
-            if len(particle.prev_direction) > 0:
-                particle.prev_direction.pop(0)
+            if len(agent.prev_direction) > 0:
+                agent.prev_direction.pop(0)
 
         if sim.get_actual_round() % cycle_no == 1:
-            if particle.wait:
-                particle.wait = False
+            if agent.wait:
+                agent.wait = False
             else:
-                move_cycle(particle)
+                move_cycle(agent)
 
-        elif sim.get_actual_round() % cycle_no == 2 and not particle.wait:
-            read_cycle(particle)
+        elif sim.get_actual_round() % cycle_no == 2 and not agent.wait:
+            read_cycle(agent)
 
-        elif sim.get_actual_round() % cycle_no == 0 and not particle.wait:
-            write_cycle(particle)
+        elif sim.get_actual_round() % cycle_no == 0 and not agent.wait:
+            write_cycle(agent)
 
     goal_test.end_sim(sim)
 
 
-def initialize_particles(sim: world) -> None:
+def initialize_agents(sim: world) -> None:
     """
-    handles initialization for all particles in round 1
+    handles initialization for all agents in round 1
     @param sim: the current world state
     """
-    for particle in sim.particles:
-        coating_mod.initialize_particle(particle)
-        if random.random() < sim.config_data.particle_fail_quote:
-            particle.willfail = True
-        particle.dest_t = random.choice(sim.get_tiles_list()).coordinates
+    for agent in sim.agents:
+        coating_mod.initialize_agent(agent)
+        if random.random() < sim.config_data.agent_fail_quote:
+            agent.willfail = True
+        agent.dest_t = random.choice(sim.get_items_list()).coordinates
 
 
-def write_cycle(particle: particle_class) -> None:
+def write_cycle(agent: agent_class) -> None:
     """
-    lets the current particle send messages to its neighbors
-    @param particle: the particle whose turn it is
+    lets the current agent send messages to its neighbors
+    @param agent: the agent whose turn it is
     """
-    particle.next_direction = coating_mod.coating_alg(particle)
-    if particle.own_dist != math.inf:
-        if len(particle.p_max.ids) > 0 and particle.p_max.dist > 0 and particle.next_direction is False:
-            # particle.p_max_table.update({particle.p_max.id: particle.p_max.dist})
-            read_write_mod.send_p_max_to_neighbors(particle)
+    agent.next_direction = coating_mod.coating_alg(agent)
+    if agent.own_dist != math.inf:
+        if len(agent.p_max.ids) > 0 and agent.p_max.dist > 0 and agent.next_direction is False:
+            # agent.p_max_table.update({agent.p_max.id: agent.p_max.dist})
+            read_write_mod.send_p_max_to_neighbors(agent)
         else:
-            read_write_mod.send_own_dist_to_neighbors(particle)
+            read_write_mod.send_own_dist_to_neighbors(agent)
     else:
-        next_dir = get_next_direction_to(particle.coordinates[0], particle.coordinates[1],
-                                         particle.dest_t[0], particle.dest_t[1])
-        if particle.particle_in(next_dir):
-            read_write_mod.send_target_tile(particle, next_dir)
+        next_dir = get_next_direction_to(agent.coordinates[0], agent.coordinates[1],
+                                         agent.dest_t[0], agent.dest_t[1])
+        if agent.agent_in(next_dir):
+            read_write_mod.send_target_item(agent, next_dir)
 
 
-def read_cycle(particle: particle_class) -> None:
+def read_cycle(agent: agent_class) -> None:
     """
-    Lets the current particle read messages from its neighbors and calculate distances for each neighbor location
-    @param particle: the particle whose turn it is
+    Lets the current agent read messages from its neighbors and calculate distances for each neighbor location
+    @param agent: the agent whose turn it is
     """
     if debug and debug_read:
-        print("reading memory of particle", particle.number)
-    particle.rcv_buf = read_write_mod.read_and_clear(particle.read_whole_memory())
-    particle.nh_list = distance_calc_mod.calculate_distances(particle)
-    p_max_calc_mod.find_p_max(particle)
-    if particle.own_dist is math.inf:
-        read_write_mod.check_for_new_target_tile(particle)
-    particle.rcv_buf_dbg = copy.deepcopy(particle.rcv_buf)
-    particle.rcv_buf.clear()
+        print("reading memory of agent", agent.number)
+    agent.rcv_buf = read_write_mod.read_and_clear(agent.read_whole_memory())
+    agent.nh_list = distance_calc_mod.calculate_distances(agent)
+    p_max_calc_mod.find_p_max(agent)
+    if agent.own_dist is math.inf:
+        read_write_mod.check_for_new_target_item(agent)
+    agent.rcv_buf_dbg = copy.deepcopy(agent.rcv_buf)
+    agent.rcv_buf.clear()
 
 
-def move_cycle(particle: particle_class) -> None:
+def move_cycle(agent: agent_class) -> None:
     """
-    Lets the current particle move
-    @param particle: the particle whose turn it is
+    Lets the current agent move
+    @param agent: the agent whose turn it is
     """
-    if particle.next_direction is False and particle.own_dist > 1:
+    if agent.next_direction is False and agent.own_dist > 1:
         if debug and debug_movement:
-            print("moving closer to target tile")
-        move_to_target_tile(particle)
-    elif particle.next_direction is not False and not particle.particle_in(particle.next_direction) \
-            and not particle.tile_in(particle.next_direction):
-        move_to_next_dir(particle)
-    coating_mod.reset_p_max(particle)
+            print("moving closer to target item")
+        move_to_target_item(agent)
+    elif agent.next_direction is not False and not agent.agent_in(agent.next_direction) \
+            and not agent.item_in(agent.next_direction):
+        move_to_next_dir(agent)
+    coating_mod.reset_p_max(agent)
 
 
-def move_to_next_dir(particle: particle_class) -> None:
+def move_to_next_dir(agent: agent_class) -> None:
     """
-    Moves the particle to the next direction calculated by the algorithm
-    @param particle: the particle whose turn it is
+    Moves the agent to the next direction calculated by the algorithm
+    @param agent: the agent whose turn it is
     """
-    if len(particle.prev_direction) >= particle.max_prev_dirs:
-        particle.prev_direction.pop(0)
-    particle.prev_direction.append(get_the_invert(particle.next_direction))
-    particle.move_to(particle.next_direction)
+    if len(agent.prev_direction) >= agent.max_prev_dirs:
+        agent.prev_direction.pop(0)
+    agent.prev_direction.append(get_the_invert(agent.next_direction))
+    agent.move_to(agent.next_direction)
     if debug:
-        print("dist list before moving", [str(neighbor) for neighbor in particle.nh_list])
-        print("\n P", particle.number, " coates to", direction_number_to_string(particle.next_direction))
-    coating_mod.reset_attributes(particle)
-    coating_mod.reset_p_max(particle)
-    particle.wait = True
+        print("dist list before moving", [str(neighbor) for neighbor in agent.nh_list])
+        print("\n P", agent.number, " coates to", direction_number_to_string(agent.next_direction))
+    coating_mod.reset_attributes(agent)
+    coating_mod.reset_p_max(agent)
+    agent.wait = True
 
 
-def move_to_target_tile(particle: particle_class) -> None:
+def move_to_target_item(agent: agent_class) -> None:
     """
-    Moves the particle in the global direction of it's target tile
+    Moves the agent in the global direction of it's target item
     This method uses information from the world class
-    @param particle: the particle whose turn it is
+    @param agent: the agent whose turn it is
     """
-    hit_a_matter = move_to_dest_step_by_step(particle, particle.dest_t, particle.prev_direction)
+    hit_a_matter = move_to_dest_step_by_step(agent, agent.dest_t, agent.prev_direction)
     if hit_a_matter or hit_a_matter is None:
-        # reset_attributes(particle)
+        # reset_attributes(agent)
         if hit_a_matter is not None:
-            if particle.own_dist > distance_calc_mod.calc_own_dist_t(hit_a_matter):
-                particle.own_dist = distance_calc_mod.calc_own_dist_t(hit_a_matter)
-            if hit_a_matter.type == "tile" and debug:
-                print("got a distance from a tile")
+            if agent.own_dist > distance_calc_mod.calc_own_dist_t(hit_a_matter):
+                agent.own_dist = distance_calc_mod.calc_own_dist_t(hit_a_matter)
+            if hit_a_matter.type == "item" and debug:
+                print("got a distance from a item")
     else:
-        coating_mod.reset_attributes(particle)
-        coating_mod.reset_p_max(particle)
-        particle.wait = True
+        coating_mod.reset_attributes(agent)
+        coating_mod.reset_p_max(agent)
+        agent.wait = True

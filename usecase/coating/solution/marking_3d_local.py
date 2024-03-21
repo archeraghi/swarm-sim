@@ -76,14 +76,14 @@ def valid_sim_coords(world, coords):
 
 # Checks if the location at the given coordinates is a border or not
 def is_border(world, coords):
-    for tile in world.get_tiles_list():
-        if coords == tile.coordinates:
+    for item in world.get_items_list():
+        if coords == item.coordinates:
             return True
     return False
 
 
-# Initializes the new custom particle attributes
-def set_particle_attributes(world, particle, search_alg):
+# Initializes the new custom agent attributes
+def set_agent_attributes(world, agent, search_alg):
     directions = list(range(len(world.grid.get_directions_list())))
     search_algo = []
 
@@ -97,78 +97,78 @@ def set_particle_attributes(world, particle, search_alg):
 
     search_algorithm = random.choice(search_algo)
 
-    setattr(particle, "direction", directions)
-    setattr(particle, "search_algorithm", search_algorithm)
+    setattr(agent, "direction", directions)
+    setattr(agent, "search_algorithm", search_algorithm)
 
-    setattr(particle, "unvisited_queue", [])
-    setattr(particle, "visited", [])
-    setattr(particle, "graph", [])
+    setattr(agent, "unvisited_queue", [])
+    setattr(agent, "visited", [])
+    setattr(agent, "graph", [])
 
-    setattr(particle, "origin_coords", particle.coordinates)
-    setattr(particle, "start_location", Location(particle.origin_coords))
+    setattr(agent, "origin_coords", agent.coordinates)
+    setattr(agent, "start_location", Location(agent.origin_coords))
 
-    setattr(particle, "current_location", None)
-    setattr(particle, "next_location", None)
-    setattr(particle, "target_location", particle.start_location)
-    setattr(particle, "stuck_location", None)
-    setattr(particle, "alternative_location", None)
-    setattr(particle, "bearing", None)
-    setattr(particle, "previous_location", None)
+    setattr(agent, "current_location", None)
+    setattr(agent, "next_location", None)
+    setattr(agent, "target_location", agent.start_location)
+    setattr(agent, "stuck_location", None)
+    setattr(agent, "alternative_location", None)
+    setattr(agent, "bearing", None)
+    setattr(agent, "previous_location", None)
 
-    setattr(particle, "last_visited_locations", [])
-    setattr(particle, "alternative_locations", [])
-    setattr(particle, "reverse_path", [])
+    setattr(agent, "last_visited_locations", [])
+    setattr(agent, "alternative_locations", [])
+    setattr(agent, "reverse_path", [])
 
-    setattr(particle, "stuck", False)
-    setattr(particle, "alternative_reached", True)
-    setattr(particle, "target_reached", True)
-    setattr(particle, "done", False)
+    setattr(agent, "stuck", False)
+    setattr(agent, "alternative_reached", True)
+    setattr(agent, "target_reached", True)
+    setattr(agent, "done", False)
 
 
-# Discovers the adjacent (Neighbour) locations relative to the particle's current location
-def discover_adjacent_locations(world, particle):
-    for direction in particle.direction:
+# Discovers the adjacent (Neighbour) locations relative to the agent's current location
+def discover_adjacent_locations(world, agent):
+    for direction in agent.direction:
 
-        adjacent_location_coords = world.grid.get_coordinates_in_direction(particle.current_location.coords,
+        adjacent_location_coords = world.grid.get_coordinates_in_direction(agent.current_location.coords,
                                                                            world.grid.get_directions_list()[direction])
 
         if not valid_sim_coords(world, adjacent_location_coords):
             continue
 
         if is_border(world, adjacent_location_coords):
-            if particle.current_location.next_to_wall is True:
+            if agent.current_location.next_to_wall is True:
                 continue
-            particle.current_location.next_to_wall = True
+            agent.current_location.next_to_wall = True
             continue
 
-        if location_exists(particle.graph, adjacent_location_coords):
-            if get_location_with_coords(particle.graph,
-                                        adjacent_location_coords) in particle.current_location.adjacent.values():
+        if location_exists(agent.graph, adjacent_location_coords):
+            if get_location_with_coords(agent.graph,
+                                        adjacent_location_coords) in agent.current_location.adjacent.values():
                 continue
-            particle.current_location.adjacent[direction] = get_location_with_coords(particle.graph,
+            agent.current_location.adjacent[direction] = get_location_with_coords(agent.graph,
                                                                                     adjacent_location_coords)
             continue
 
         new_location = Location(adjacent_location_coords)
-        if particle.create_location_on(adjacent_location_coords):
+        if agent.create_location_on(adjacent_location_coords):
             world.new_location.set_color((0.0, 0.0, 1.0, 1.0))
-        particle.current_location.adjacent[direction] = new_location
-        particle.unvisited_queue.append(new_location)
-        add_location_to_graph(world, particle.graph, new_location, particle.direction)
+        agent.current_location.adjacent[direction] = new_location
+        agent.unvisited_queue.append(new_location)
+        add_location_to_graph(world, agent.graph, new_location, agent.direction)
 
 
-# Marks the particle's current location as visited and removes it from the particle's unvisited queue
-def mark_location(world, particle):
-    particle.current_location.visited = True
-    particle.visited.append(particle.current_location)
-    particle.unvisited_queue = [location for location in particle.unvisited_queue if location not in particle.visited]
-    current_location = world.location_map_coordinates[particle.coordinates]
+# Marks the agent's current location as visited and removes it from the agent's unvisited queue
+def mark_location(world, agent):
+    agent.current_location.visited = True
+    agent.visited.append(agent.current_location)
+    agent.unvisited_queue = [location for location in agent.unvisited_queue if location not in agent.visited]
+    current_location = world.location_map_coordinates[agent.coordinates]
 
     if current_location.color == (0.0, 0.8, 0.8, 1.0):
         return
 
-    particle.delete_location()
-    particle.create_location()
+    agent.delete_location()
+    agent.create_location()
     world.new_location.set_color((0.0, 0.8, 0.8, 1.0))
 
 
@@ -186,20 +186,20 @@ def get_distance(location1, location2):
     return abs(math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2) + ((z2 - z1) ** 2)))
 
 
-# Returns the nearest location in the particle's unvisited queue relative to the particle's current location
-def get_nearest_unvisited(particle):
+# Returns the nearest location in the agent's unvisited queue relative to the agent's current location
+def get_nearest_unvisited(agent):
     possible_unvisited_locations = []
-    for location in particle.unvisited_queue:
-        possible_unvisited_locations.append((round(get_distance(particle.current_location, location)), location))
+    for location in agent.unvisited_queue:
+        possible_unvisited_locations.append((round(get_distance(agent.current_location, location)), location))
 
     return min(possible_unvisited_locations, key=lambda t: t[0])[1]
 
 
-# Returns the next best possible move if the particle's target location is not adjacent to it (path generator)
-def get_best_location(particle, target_location):
+# Returns the next best possible move if the agent's target location is not adjacent to it (path generator)
+def get_best_location(agent, target_location):
     possible_moves = []
 
-    for location in particle.current_location.adjacent.values():
+    for location in agent.current_location.adjacent.values():
         possible_moves.append((get_distance(location, target_location), location))
 
     best_location = min(possible_moves, key=lambda t: t[0])[1]
@@ -208,40 +208,40 @@ def get_best_location(particle, target_location):
 
 
 # Follows wall
-def follow_wall(world, particle, target_location):
+def follow_wall(world, agent, target_location):
     possible_moves = []
 
-    for location in particle.current_location.adjacent.values():
+    for location in agent.current_location.adjacent.values():
 
-        if location in particle.last_visited_locations:
+        if location in agent.last_visited_locations:
             continue
 
         if location.next_to_wall or not location.visited:
             possible_moves.append((get_distance(location, target_location), location))
-            particle.alternative_locations.append((get_distance(location, target_location), location))
+            agent.alternative_locations.append((get_distance(location, target_location), location))
 
     if len(possible_moves) == 0:
-        for location in particle.current_location.adjacent.values():
+        for location in agent.current_location.adjacent.values():
 
-            if location in particle.last_visited_locations:
+            if location in agent.last_visited_locations:
                 continue
 
             if not is_border(world, location.coords):
                 possible_moves.append((get_distance(location, target_location), location))
-                particle.alternative_locations.append((get_distance(location, target_location), location))
+                agent.alternative_locations.append((get_distance(location, target_location), location))
 
     best_location = min(possible_moves, key=lambda t: t[0])[1]
 
     return best_location
 
 
-# Returns the next closest unvisited location relative to the particle's current location
-def get_next_unvisited(particle):
-    if particle.unvisited_queue[particle.search_algorithm] not in particle.current_location.adjacent.values():
-        return get_best_location(particle, get_nearest_unvisited(particle))
+# Returns the next closest unvisited location relative to the agent's current location
+def get_next_unvisited(agent):
+    if agent.unvisited_queue[agent.search_algorithm] not in agent.current_location.adjacent.values():
+        return get_best_location(agent, get_nearest_unvisited(agent))
 
     else:
-        return particle.unvisited_queue[particle.search_algorithm]
+        return agent.unvisited_queue[agent.search_algorithm]
 
 # Returns the direction of the target location relative to the current location
 def get_bearing(world, current_location, target_location):
@@ -273,7 +273,7 @@ def path_blocked(world, current_location, target_location):
         return True
 
 
-# Reverses particle bearing. This is used to terminate the wall following algorithm.
+# Reverses agent bearing. This is used to terminate the wall following algorithm.
 def get_opposite_bearing(world, bearing):
 
     direction = world.grid.get_directions_list()[bearing]
@@ -281,66 +281,66 @@ def get_opposite_bearing(world, bearing):
     return get_bearing(world, Location(direction), Location(world.grid.get_center()))
 
 
-# Enables the particles to create packets with their own data and send them to one another if they are within range
-def communicate(particle, communication_range):
-    packet = (particle.graph, particle.visited, particle.unvisited_queue)
-    found_particles = particle.scan_for_particles_within(hop=communication_range)
+# Enables the agents to create packets with their own data and send them to one another if they are within range
+def communicate(agent, communication_range):
+    packet = (agent.graph, agent.visited, agent.unvisited_queue)
+    found_agents = agent.scan_for_agents_within(hop=communication_range)
 
-    if found_particles is None:
+    if found_agents is None:
         return False
 
-    for found_particle in found_particles:
-        particle.write_to_with(found_particle, particle.get_id(), packet)
+    for found_agent in found_agents:
+        agent.write_to_with(found_agent, agent.get_id(), packet)
 
     return True
 
 
-# Enables the particle to extend its own data with the data received from other particles
-def analyse_memory(world, particle):
-    for particle_id in particle.read_from_with(particle):
-        for location in particle.read_whole_memory()[particle_id][0]:
-            if location not in particle.graph:
-                add_location_to_graph(world, particle.graph, location, particle.direction)
-        particle.visited.extend([location for location in particle.read_whole_memory()[particle_id][1] if
-                                 location not in particle.visited])
-    particle.delete_whole_memory()
+# Enables the agent to extend its own data with the data received from other agents
+def analyse_memory(world, agent):
+    for agent_id in agent.read_from_with(agent):
+        for location in agent.read_whole_memory()[agent_id][0]:
+            if location not in agent.graph:
+                add_location_to_graph(world, agent.graph, location, agent.direction)
+        agent.visited.extend([location for location in agent.read_whole_memory()[agent_id][1] if
+                                 location not in agent.visited])
+    agent.delete_whole_memory()
 
 
-# Checks if a particle's way is blocked by a wall or obstacle
-def check_stuck(world, particle, target_location):
-    if path_blocked(world, particle.current_location, target_location):
+# Checks if a agent's way is blocked by a wall or obstacle
+def check_stuck(world, agent, target_location):
+    if path_blocked(world, agent.current_location, target_location):
         return True
 
     return False
 
 
 # Returns the next location to move to
-def get_next_location(world, particle, target_location):
-    if target_location in particle.current_location.adjacent.values():
-        particle.target_reached = True
+def get_next_location(world, agent, target_location):
+    if target_location in agent.current_location.adjacent.values():
+        agent.target_reached = True
         return target_location
 
     else:
-        if check_stuck(world, particle, target_location):
-            particle.stuck = True
-            particle.bearing = get_bearing(world, particle.current_location, particle.target_location)
-            particle.stuck_location = particle.current_location
-            particle.last_visited_locations.append(particle.current_location)
-            return follow_wall(world, particle, target_location)
+        if check_stuck(world, agent, target_location):
+            agent.stuck = True
+            agent.bearing = get_bearing(world, agent.current_location, agent.target_location)
+            agent.stuck_location = agent.current_location
+            agent.last_visited_locations.append(agent.current_location)
+            return follow_wall(world, agent, target_location)
 
         else:
-            return get_best_location(particle, target_location)
+            return get_best_location(agent, target_location)
 
 
-# Handles the movement of the particle through the terrain
-def move(world, particle, next_location):
-    particle.previous_location = particle.current_location
-    next_direction = get_dir(particle.current_location, next_location)
-    particle.current_location = next_location
-    mark_location(world, particle)
-    particle.move_to(next_direction)
-    particle.current_location = get_location_with_coords(particle.graph, particle.coordinates)
-    discover_adjacent_locations(world, particle)
+# Handles the movement of the agent through the terrain
+def move(world, agent, next_location):
+    agent.previous_location = agent.current_location
+    next_direction = get_dir(agent.current_location, next_location)
+    agent.current_location = next_location
+    mark_location(world, agent)
+    agent.move_to(next_direction)
+    agent.current_location = get_location_with_coords(agent.graph, agent.coordinates)
+    discover_adjacent_locations(world, agent)
 
 
 def solution(world):
@@ -356,15 +356,15 @@ def solution(world):
     #0 = BFS, 1 = DFS, 2 = MIXED
     search_algorithm = 2
 
-    for particle in world.get_particle_list():
+    for agent in world.get_agent_list():
 
         if world.get_actual_round() == 1:
-            set_particle_attributes(world, particle, search_algorithm)
-            particle.current_location = particle.start_location
-            if particle.create_location_on(particle.origin_coords):
+            set_agent_attributes(world, agent, search_algorithm)
+            agent.current_location = agent.start_location
+            if agent.create_location_on(agent.origin_coords):
                 world.new_location.set_color((0.0, 0.0, 1.0, 1.0))
-            add_location_to_graph(world, particle.graph, particle.current_location, particle.direction)
-            discover_adjacent_locations(world, particle)
+            add_location_to_graph(world, agent.graph, agent.current_location, agent.direction)
+            discover_adjacent_locations(world, agent)
             continue
 
         else:
@@ -372,104 +372,104 @@ def solution(world):
             if world.get_actual_round() > start_communication_round:
 
                 if (world.get_actual_round() - start_communication_round) % communication_frequency == 0:
-                    communicate(particle, communication_range)
+                    communicate(agent, communication_range)
 
-            if len(particle.read_whole_memory()) > 0:
-                analyse_memory(world, particle)
+            if len(agent.read_whole_memory()) > 0:
+                analyse_memory(world, agent)
 
-            if not particle.alternative_reached:
+            if not agent.alternative_reached:
 
-                if particle.alternative_location in particle.current_location.adjacent.values():
-                    particle.alternative_reached = True
-                    particle.alternative_locations.clear()
-                    particle.reverse_path.clear()
-                    particle.next_location = particle.alternative_location
-                    move(world, particle, particle.next_location)
+                if agent.alternative_location in agent.current_location.adjacent.values():
+                    agent.alternative_reached = True
+                    agent.alternative_locations.clear()
+                    agent.reverse_path.clear()
+                    agent.next_location = agent.alternative_location
+                    move(world, agent, agent.next_location)
                     continue
 
-                particle.next_location = particle.reverse_path.pop()
-                move(world, particle, particle.next_location)
+                agent.next_location = agent.reverse_path.pop()
+                move(world, agent, agent.next_location)
                 continue
 
-            if particle.stuck:
-                particle.alternative_locations = [item for item in particle.alternative_locations
-                                                  if item[1].coords != particle.current_location.coords]
+            if agent.stuck:
+                agent.alternative_locations = [item for item in agent.alternative_locations
+                                                  if item[1].coords != agent.current_location.coords]
 
-                if particle.current_location not in particle.last_visited_locations:
-                    particle.last_visited_locations.append(particle.current_location)
+                if agent.current_location not in agent.last_visited_locations:
+                    agent.last_visited_locations.append(agent.current_location)
 
-                if particle.current_location.coords != particle.stuck_location.coords:
+                if agent.current_location.coords != agent.stuck_location.coords:
 
-                    if get_bearing(world, particle.current_location, particle.stuck_location) == \
-                            get_opposite_bearing(world, particle.bearing):
-                        particle.stuck = False
-                        particle.last_visited_locations.clear()
-                        particle.alternative_locations.clear()
+                    if get_bearing(world, agent.current_location, agent.stuck_location) == \
+                            get_opposite_bearing(world, agent.bearing):
+                        agent.stuck = False
+                        agent.last_visited_locations.clear()
+                        agent.alternative_locations.clear()
                         continue
 
-                if particle.target_location in particle.current_location.adjacent.values():
-                    particle.stuck = False
-                    particle.target_reached = True
-                    particle.last_visited_locations.clear()
-                    particle.alternative_locations.clear()
-                    particle.next_location = particle.target_location
-                    move(world, particle, particle.next_location)
+                if agent.target_location in agent.current_location.adjacent.values():
+                    agent.stuck = False
+                    agent.target_reached = True
+                    agent.last_visited_locations.clear()
+                    agent.alternative_locations.clear()
+                    agent.next_location = agent.target_location
+                    move(world, agent, agent.next_location)
                     continue
 
                 try:
-                    next_location = follow_wall(world, particle, particle.target_location)
-                    particle.next_location = next_location
-                    move(world, particle, particle.next_location)
+                    next_location = follow_wall(world, agent, agent.target_location)
+                    agent.next_location = next_location
+                    move(world, agent, agent.next_location)
                     continue
 
                 except ValueError:
-                    particle.reverse_path = particle.last_visited_locations.copy()
-                    del particle.reverse_path[-1]
-                    particle.alternative_location = min(particle.alternative_locations, key=lambda t: t[0])[1]
-                    particle.alternative_reached = False
+                    agent.reverse_path = agent.last_visited_locations.copy()
+                    del agent.reverse_path[-1]
+                    agent.alternative_location = min(agent.alternative_locations, key=lambda t: t[0])[1]
+                    agent.alternative_reached = False
                     continue
 
-            if not particle.target_reached:
-                particle.next_location = get_next_location(world, particle, particle.target_location)
-                move(world, particle, particle.next_location)
+            if not agent.target_reached:
+                agent.next_location = get_next_location(world, agent, agent.target_location)
+                move(world, agent, agent.next_location)
                 continue
 
-            if len(particle.unvisited_queue) > 0:
-                if particle.unvisited_queue[particle.search_algorithm] in particle.current_location.adjacent.values():
-                    particle.target_reached = True
-                    particle.next_location = particle.unvisited_queue[particle.search_algorithm]
-                    move(world, particle, particle.next_location)
+            if len(agent.unvisited_queue) > 0:
+                if agent.unvisited_queue[agent.search_algorithm] in agent.current_location.adjacent.values():
+                    agent.target_reached = True
+                    agent.next_location = agent.unvisited_queue[agent.search_algorithm]
+                    move(world, agent, agent.next_location)
                     continue
 
                 else:
-                    nearest_unvisited = get_nearest_unvisited(particle)
+                    nearest_unvisited = get_nearest_unvisited(agent)
 
-                    if nearest_unvisited in particle.current_location.adjacent.values():
-                        particle.target_reached = True
-                        particle.next_location = nearest_unvisited
-                        move(world, particle, particle.next_location)
+                    if nearest_unvisited in agent.current_location.adjacent.values():
+                        agent.target_reached = True
+                        agent.next_location = nearest_unvisited
+                        move(world, agent, agent.next_location)
                         continue
 
                     else:
-                        particle.target_reached = False
-                        particle.target_location = nearest_unvisited
-                        particle.next_location = get_next_location(world, particle, particle.target_location)
-                        move(world, particle, particle.next_location)
+                        agent.target_reached = False
+                        agent.target_location = nearest_unvisited
+                        agent.next_location = get_next_location(world, agent, agent.target_location)
+                        move(world, agent, agent.next_location)
                         continue
 
             else:
-                mark_location(world, particle)
+                mark_location(world, agent)
 
-                if particle.current_location.coords == particle.start_location.coords:
-                    particle.target_reached = True
+                if agent.current_location.coords == agent.start_location.coords:
+                    agent.target_reached = True
 
-                    particle.last_visited_locations.clear()
-                    particle.done = True
+                    agent.last_visited_locations.clear()
+                    agent.done = True
                     continue
 
                 else:
-                    particle.target_reached = False
-                    particle.target_location = particle.start_location
-                    particle.next_location = get_next_location(world, particle, particle.target_location)
-                    move(world, particle, particle.next_location)
+                    agent.target_reached = False
+                    agent.target_location = agent.start_location
+                    agent.next_location = get_next_location(world, agent, agent.target_location)
+                    move(world, agent, agent.next_location)
                     continue

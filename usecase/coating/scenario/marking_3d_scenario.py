@@ -14,5 +14,5 @@ def scenario(world):
     ring = world.grid.get_n_sphere_border(center, size)
 
     for c in ring:
-        world.add_tile(c)
+        world.add_item(c)
 

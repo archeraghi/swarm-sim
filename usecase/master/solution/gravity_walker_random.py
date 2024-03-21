@@ -1,3 +1,4 @@
+import math
 import random
 
 
@@ -7,6 +8,106 @@ def solution(world):
     stopiftowerbuilt = False
 
     if world.get_actual_round() % 1 == 0:
+
+        dirNE = (0.5, 1, 0)
+        dirNW = (-0.5, 1, 0)
+        dirSE = (0.5, -1, 0)
+        dirSW = (-0.5, -1, 0)
+        dirW = (-1, 0, 0)
+        dirE = (1, 0, 0)
+        dirStand = (0, 0, 0)
+            #- Label Location of each item as distance = 0
+            #- Label location of each Neighbor Position of Item as Distance = 1
+
+        agents_and_distances = []
+
+
+        # Iterate over each agent: If there is an item in the neighborhood, set the distance of the agent to 1.
+        for agent in world.get_agent_list():
+            print("Iterating of the agents, current agent: ", agent)
+            iteminE = agent.item_in(dirE)
+            iteminW = agent.item_in(dirW)
+            iteminSE = agent.item_in(dirSE)
+            iteminSW = agent.item_in(dirSW)
+            iteminNE = agent.item_in(dirNE)
+            iteminNW = agent.item_in(dirNW)
+
+            #   Check if current agent has an item in the neighborhood
+            if iteminE or iteminW or iteminNE or iteminSW or iteminNW or iteminSE:
+                print("Agent ",agent, " has an item in the near: E",iteminE, ", W", iteminW, ", SE", iteminSE, ", SW", iteminSW, ", NE",iteminNE, ", NW", iteminNW)
+                agents_and_distances.append((agent, 1))
+
+        # Current status: agents_and_distances lists only the agents, that are directly besides an item.
+        # This list is of the form ((agent, 1), ...)
+
+        # Now iterate as long as agents_and_distances is increasing, i.e. new agents are added:
+        # The flag to repeat is set once a new agent has been added to the list.
+        flagrepeatloop = True
+        while flagrepeatloop:
+            flagrepeatloop = False
+
+            # Get length of agents with distances, to compare later whether we added one
+            currentDistanceListLength = len(agents_and_distances)
+
+            # Iterate over each agent, check whether it has a neighbor that is not yet in the list
+            #   if yes: add agent to list with distance: Neighboring node + 1
+            for agent in world.get_agent_list():
+                currentAgendDist = math.inf
+                agent_already_in_list = False
+                for entry in agents_and_distances:
+                    if entry[0] == agent:
+                        agent_already_in_list = True
+                        currentAgentDist = entry[1]
+
+
+                if agent_already_in_list:
+                    # Check whether there is an agent in the near that we can assign a new distance
+
+                    allDirections = []
+                    allDirections.append(dirE)
+                    allDirections.append(dirW)
+                    allDirections.append(dirSE)
+                    allDirections.append(dirSW)
+                    allDirections.append(dirNE)
+                    allDirections.append(dirNW)
+
+                    for selectedDirection in allDirections:
+                        if (agent.agent_in(selectedDirection)):
+                            nbrAgentInDir = agent.get_agent_in(selectedDirection)
+                            print("Current agent: ", agent, " Agent.distance =", currentAgentDist," currentDirection=",selectedDirection, " agentInDir=",nbrAgentInDir)
+
+                            # Check whether neighboring Agent is already in list with distances
+                            for nbrentryindex, nbrentry in enumerate(agents_and_distances):
+                                nbragent_already_in_list = False
+                                # If Nbr is in the list: Check if distance over currentNode is smaller
+                                if nbrentry[0] == nbrAgentInDir:
+                                    nbragent_already_in_list = True
+                                    print("Current Agent: ", agent, " with Dist=", currentAgendDist,"  and KNOWN Nbr-Agent ", nbrentry[0], " comparing nbrentry[1] (Dist) = ", nbrentry[1], " with currentAgentDist+1 = ", currentAgentDist+1)
+                                    if currentAgentDist+1 < nbrentry[1]:
+                                        updated_nbrentry = (nbrentry[0], currentAgentDist + 1)
+                                        agents_and_distances[nbrentryindex] = updated_nbrentry
+
+                           # If Nbr is in the list: append to list, with distance + 1
+                            if nbragent_already_in_list == False:
+                                print("Current Agent: ", agent, " with Dist=", currentAgendDist, "  and  NEW  Nbr-Agent ", nbrentry[0], " comparing nbrentry[1] (Dist) = ", nbrentry[1], " with currentAgentDist+1 = ", currentAgentDist + 1)
+                                #if nbrentry[1] == math.inf:
+                                agents_and_distances.append((nbrentry[0], currentAgentDist + 1))
+
+
+                    afteraddingneighborslistdistances = len(agents_and_distances)
+                    print ("Comparison Previous Length of Distance List=", currentDistanceListLength, "   new list length after adding new agents=", afteraddingneighborslistdistances )
+                    if (afteraddingneighborslistdistances > currentDistanceListLength) :
+                        flagrepeatloop = True
+
+
+
+            # - Create empty list of AgentsThatHaveBeenMarked = {}
+             #   1. Step: Check if Agent is neighboring an item -> Agent.distance = 1
+            # {Loop
+             # Check for all Neighbors of  AgentsThatHaveBeenMarked if they have neighbor unmarked: Add distance + 1
+             # Add that neighbor to the list of AgentsThatHaveBeenMarked
+             # } Repeat if list increased in length
+            # for all remaining agents: assign distance = infinite
 
 
         for agent in world.get_agent_list():

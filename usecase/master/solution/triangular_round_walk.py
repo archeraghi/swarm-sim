@@ -29,6 +29,6 @@ def solution(world):
             elif direction == dirs[2]:
                 direction = dirs[0]
 
-        agent.create_location()
+        # agent.create_location()
         agent.move_to(direction)
         ttl = ttl - 1

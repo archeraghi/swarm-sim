@@ -12,9 +12,9 @@ class PMaxInfo:
     def __init__(self):
         """
         A type for organizing information about the current p_max.
-        ids: all particle ids that are believed to have the maximum distance
-        dist: maximum particle distance known to this particle
-        directions: all directions from where this particle received messages with the current PMax
+        ids: all agent ids that are believed to have the maximum distance
+        dist: maximum agent distance known to this agent
+        directions: all directions from where this agent received messages with the current PMax
         black_list: unused
         """
         self.ids = set()
@@ -38,20 +38,20 @@ class PMaxInfo:
 
 
 class OwnDistance:
-    particle_distance: float
-    particle_id: int
+    agent_distance: float
+    agent_id: int
 
-    def __init__(self, particle_distance: float, particle_id: int) -> None:
+    def __init__(self, agent_distance: float, agent_id: int) -> None:
         """
-        A message package, which contains information about the distance of the sender to the next tile.
-        :param particle_distance: distance of the sender to the next tile
-        :param particle_id: id of the sender particle
+        A message package, which contains information about the distance of the sender to the next item.
+        :param agent_distance: distance of the sender to the next item
+        :param agent_id: id of the sender agent
         """
-        self.particle_distance = particle_distance
-        self.particle_id = particle_id
+        self.agent_distance = agent_distance
+        self.agent_id = agent_id
 
     def __str__(self) -> str:
-        return "id: " + str(self.particle_id) + " | dist: " + str(self.particle_distance)
+        return "id: " + str(self.agent_id) + " | dist: " + str(self.agent_distance)
 
 
 class PMax(OwnDistance):
@@ -60,16 +60,16 @@ class PMax(OwnDistance):
     p_max_dir: int
     p_max_lifetime: int
 
-    def __init__(self, particle_distance: float, particle_id: int, p_max: PMaxInfo) -> None:
+    def __init__(self, agent_distance: float, agent_id: int, p_max: PMaxInfo) -> None:
         """
-        In addition to the information in OwnDistance this package contains information about the maximum particle distance
-        known to this particle.
-        :param particle_distance: distance of the sender to the next tile
-        :param particle_id: id of the sender particle
-        :param p_max: maximum distance of a particle known to this particle
+        In addition to the information in OwnDistance this package contains information about the maximum agent distance
+        known to this agent.
+        :param agent_distance: distance of the sender to the next item
+        :param agent_id: id of the sender agent
+        :param p_max: maximum distance of a agent known to this agent
         :param p_max_table: currently unused
         """
-        OwnDistance.__init__(self, particle_distance, particle_id)
+        OwnDistance.__init__(self, agent_distance, agent_id)
         self.p_max_ids = deepcopy(p_max.ids)
         self.p_max_dist = p_max.dist
         self.p_max_dir = 0
@@ -86,9 +86,9 @@ class Neighbor:
     
     def __init__(self, type: str, dist: float) -> None:
         """
-        A type storing the type and calculated distance for a neighbor of a particle
+        A type storing the type and calculated distance for a neighbor of a agent
         :param type: type of the neighbor (fl, p, t)
-        :param dist: calculated distance of the neighbor to the next tile
+        :param dist: calculated distance of the neighbor to the next item
         """
         self.type = type
         self.dist = dist
@@ -100,7 +100,7 @@ class Neighbor:
         return str(self)
 
 
-class TargetTileInfo:
+class TargetitemInfo:
     target: Tuple[float]
 
     def __init__(self, target):
