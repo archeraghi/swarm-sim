@@ -106,7 +106,7 @@ class Visualization:
                 self._splitter.keyReleaseEvent = self._viewer.keyReleaseEvent
                 self._splitter.addWidget(self._viewer)
                 self._splitter.setSizes(
-                    [self._world.config_data.window_size_x * 0.25, self._world.config_data.window_size_x * 0.75])
+                    [int(self._world.config_data.window_size_x * 0.25), int(self._world.config_data.window_size_x * 0.75)])
             else:
                 # noinspection PyUnresolvedReferences
                 show_msg("The create_gui(world, vis) function in gui module didn't return a QWidget." +
