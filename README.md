@@ -1,62 +1,87 @@
-For Linux:
+Swarm-Sim
 
--unzip the source code:
+Swarm-Sim is a powerful and interactive 2D and 3D simulation platform designed for research, education, and development of swarm robotics and agent-based systems. It allows users to visualize, configure, and control multiple agents in real-time within a customizable environment.
 
-    unzip swarm-world.zip
+Swarm-Sim supports experimentation with behavior algorithms, scaling effects, and visual analytics to understand emergent behaviors of decentralized systems. Whether you’re a student, researcher, or enthusiast in AI, robotics, or distributed systems—Swarm-Sim brings your swarm intelligence ideas to life.
 
+⸻
 
--install the following python packages:
+🚀 Features
+    •    Real-time 2D/3D visualization of swarm behavior
+    •    Agent, item, and location scaling with dynamic sliders
+    •    Scenario saving and replay features
+    •    Screenshots and vector export for publication
+    •    Control over grid, camera, lighting, and projection
+    •    Platform-agnostic: works on Linux, Windows, macOS (including M1/M2 Apple Silicon)
 
-    1. sudo apt-get install python3.6 python3-pip 
+⸻
 
-    2. sudo pip3 install numpy
+🛠 Installation
 
-    3. sudo pip3 install pandas
+Step-by-Step (Linux, macOS, Windows):
+    1.    Clone the repository:
 
-    4. sudo pip3 install PyOpenGL
-    
-    5. sudo pip3 install Pillow
-    
-    6. sudo pip3 install PyQt5
-    
-    7. sudo pip3 install opencv-python
-    
-for older Systems (e.g. Ubuntu 14.04) install the PyQt5 version 5.10.1
+   git clone https://github.com/YOUR_USERNAME/swarmsim.git
+   cd swarmsim
 
-    6. sudo pip3 install PyQt5==5.10.1
+    2.    Create and activate a virtual environment:
 
-- install Gnuplot:
+   python3 -m venv venv
+   source venv/bin/activate       # macOS/Linux
+   .\venv\Scripts\activate       # Windows
 
-    sudo apt-get install gnuplot-x11
+    3.    Install dependencies:
 
-- go to the main folder of the SNS-Folder and start it with:
-
-    python3.6 swarm-sim.py
-
-
-For development the IDE Pycharm is recommended:
-
-https://www.jetbrains.com/help/pycharm/install-and-set-up-pycharm.html
+   pip install -r requirements.txt
 
 
-For Windows/Linux/MacOs:
-- unzip souce code
-- install python3.6
-- install pycharm
-- run pycharm
-- open swarm-world as a project
-- Open File->Settings-"Project-Interpreter"
-- Chose python3.6 as an interpreter
-- Chose the plus sign and install:
-    1. pip3
-    2. numpy
-    3. pandas
-    4. PyOpenGL
-    5. Pillow
-    6. PyQt5 (in version 5.10.1 for older Systems like Ubuntu 14.04)
-    7. opencv-python
-- press OK
-- wait until everything is installed
-- chose Run->swarm-sim.py
-    - If it gives an error that it cannot find the interpretetor
-       Open Run->"Edit Configuration" Chose the python3.6 as an interpretetor
+
+⸻
+
+▶️ Running Swarm-Sim
+
+After installation, run the simulator with:
+
+python3 swarm-sim.py
+
+If you’re using PyCharm or another IDE, make sure to select the correct virtual environment as your interpreter.
+
+⸻
+
+📦 Requirements
+
+The following Python libraries are required and listed in requirements.txt:
+    •    numpy
+    •    pandas
+    •    PyOpenGL
+    •    Pillow
+    •    PyQt5
+    •    opencv-python
+
+These will be installed automatically with:
+
+pip install -r requirements.txt
+
+
+
+⸻
+
+📌 Notes
+
+For legacy systems (e.g., Ubuntu 14.04), you may need:
+
+pip install PyQt5==5.10.1
+
+For OpenGL rendering issues, ensure your system supports OpenGL >= 2.0 and your windowing system is properly initialized.
+
+⸻
+
+📜 License
+
+MIT License
+
+⸻
+
+👩‍💻 Contributors
+    •    Original Author: Dr. Ahmad Reza Cheraghi
+    •    Contributions Welcome!
