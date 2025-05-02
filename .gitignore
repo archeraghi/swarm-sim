@@ -160,3 +160,4 @@ config.ini
 
 .dropbox
 core/__pycache__/*
+system.log
